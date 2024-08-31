@@ -1,0 +1,51 @@
+.loading {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+}
+
+
+.loading .dot-1 {
+  --value: 1;
+}
+
+.loading .dot-2 {
+  --value: 2;
+
+}
+
+.loading .dot-3 {
+  --value: 3;
+
+}
+
+.loading .dot-4 {
+  --value: 4;
+}
+
+
+.loading .dot-1,
+.loading .dot-2,
+.loading .dot-3,
+.loading .dot-4 {
+  @apply bg-blue-500;
+  height: 16px;
+  width: 16px;
+  animation: hidden 1s infinite ease-in-out;
+  border-radius: 100%;
+  animation-delay: calc(var(--value) * 0.125s);
+  filter: hue-rotate(calc(var(--value) * 45deg))
+}
+
+@keyframes hidden {
+  0% {
+  }
+
+  50% {
+    transform: scale(0);
+    filter: hue-rotate(calc(var(--value) * 90deg))
+
+  }
+  
+}

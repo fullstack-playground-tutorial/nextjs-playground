@@ -1,0 +1,5 @@
+.page-transition {
+    opacity: 0;
+    transform: translateY(40px);
+    filter: blur(12px)
+}

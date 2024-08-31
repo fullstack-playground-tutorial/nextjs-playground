@@ -1,0 +1,11 @@
+.btn {
+    @apply rounded-s text-center py-1.5 px-3 text-base font-normal cursor-pointer bg-none mb-0
+}
+
+.btn.btn-sm {
+    @apply rounded-s py-1 px-2 text-sm
+}
+
+.btn.btn-lg {
+    @apply py-2 px-4 text-lg rounded-lg
+}
