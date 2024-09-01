@@ -3,6 +3,8 @@ import { Providers } from "@/app/core/client/store";
 import { Metadata } from "next";
 import "@/app/globals.css";
 import { verifySession } from "@/actions";
+import { Suspense } from "react";
+import Loading from "./loading";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -22,8 +24,9 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning={true}>
       <body>
-        <Providers>{session ? home : auth}</Providers>
-        <AlertModal />
+        <Providers>
+          <Suspense fallback={<Loading/>}>{session ? home : auth}</Suspense>
+        </Providers>
       </body>
     </html>
   );

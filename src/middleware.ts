@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { localeConfig } from "./app/utils/resource/locales";
+import { getLocaleService } from "./app/utils/resource/locales";
 
 const publicRoute: string[] = ["/", "/login", "/sign-up"];
 const protectedRoute: string[] = [];
 
 // This function can be marked `async` if using `await` inside
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const locale = localeConfig.defaultLocale;
+  const locale = getLocaleService().currentLocale;
 
   const appPath = mapPath(request);
 

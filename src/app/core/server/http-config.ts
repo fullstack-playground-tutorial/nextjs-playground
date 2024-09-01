@@ -1,4 +1,3 @@
-"use server";
 import { HttpService } from "../../utils/http/http-default";
 import { useAuthService } from "./context";
 import { getDeviceId } from "@/app/feature/auth/actions";
@@ -6,10 +5,9 @@ import { storeCookies } from "@/app/feature/actions";
 import { cookies } from "next/headers";
 import { IP, userAgent } from "@/actions";
 
-let httpInstance = new HttpService({timeout: 30000});
+let httpService = new HttpService({ timeout: 30000 });
 
-httpInstance.interceptors.response.use(async (response, url, options) => {
-  
+getHttpService().interceptors.response.use(async (response, url, options) => {
   if (response.status == 401) {
     handleStatus401(url, options);
   }
@@ -32,7 +30,7 @@ function handleStatus401(url: string, options: RequestInit) {
       .then((res) => {
         if (res) {
           storeCookies({ accessToken: res });
-          return httpInstance.get(url, options);
+          return getHttpService().get(url, options);
         } else {
           Promise.reject(
             new Response(undefined, {
@@ -45,15 +43,15 @@ function handleStatus401(url: string, options: RequestInit) {
       .catch((e) => {
         throw e;
       })
-      .finally(() => (httpInstance.isRefreshing = false));
+      .finally(() => (getHttpService().isRefreshing = false));
   }
 }
-export const getHTTPService = () => {
-  if (!httpInstance) {
-    httpInstance = new HttpService({
+
+export function getHttpService(): HttpService {
+  if (!httpService) {
+    httpService = new HttpService({
       timeout: 30000,
     });
   }
-  
-  return httpInstance;
-};
+  return httpService;
+}

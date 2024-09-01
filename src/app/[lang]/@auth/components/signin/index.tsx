@@ -14,7 +14,7 @@ interface InternalState {
   password: string;
 }
 
-export interface FormState {
+export interface SigninFormState {
   fieldErrors: ValidateErrors;
 }
 
@@ -25,14 +25,15 @@ const initialState: InternalState = {
   password: "",
 };
 
-const initialFormState: FormState = {
+const initialFormState: SigninFormState = {
   fieldErrors: {},
 };
 
 export interface Props {}
 export const SignInForm = (props: Props) => {
+  
   const [state, setState] = useState(initialState);
-  const [formState, formAction, pending] = useFormState(
+  const [formState, formAction, pending] = useFormState<SigninFormState, FormData>(
     login,
     initialFormState
   );

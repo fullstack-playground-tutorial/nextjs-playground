@@ -1,11 +1,10 @@
-import { Locale, localeConfig, LocaleConfig } from "@/app/utils/resource/locales";
+import { Locale } from "@/app/utils/resource/locales";
 import { createContext } from "react";
 
 /**
  * state interface for internalization context
  */
 export interface InternalizationState {
-    localeConfig: LocaleConfig;
     currentLocale: Locale;
   }
   
@@ -18,7 +17,6 @@ export interface InternalizationState {
   export const InternalizationContext = createContext<
     InternalizationContext | undefined
   >({internalization: {
-    localeConfig: localeConfig,
     currentLocale: 'en-US',
   },
     changeLanguage: (locale: Locale) => {},

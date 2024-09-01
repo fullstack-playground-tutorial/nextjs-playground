@@ -1,7 +1,17 @@
 "use client";
 import TransitionButton from "@/app/components/TransitionButton/TransitionButton";
 import { AlertContext } from "@/app/core/client/store/alert/AlertContext";
-import React, { ChangeEvent, useContext, useRef, useState } from "react";
+import { register } from "@/app/feature/auth/actions";
+import { Account } from "@/app/feature/auth/auth";
+import { ValidateErrors } from "@/app/utils/validate/model";
+import React, {
+  ChangeEvent,
+  useActionState,
+  useContext,
+  useRef,
+  useState,
+} from "react";
+import { useFormState } from "react-dom";
 
 interface Props {
   handleTransition: () => void;
@@ -13,7 +23,6 @@ interface InternalState {
   password: string;
   phone: string;
   confirmPassword: string;
-  // fieldErrors: ValidateErrors;
 }
 
 const initialState: InternalState = {
@@ -22,40 +31,24 @@ const initialState: InternalState = {
   password: "",
   phone: "",
   confirmPassword: "",
-  // fieldErrors: {},
+};
+
+export interface SignUpFormState {
+  fieldErrors: ValidateErrors;
+}
+
+const initialFormState: SignUpFormState = {
+  fieldErrors: {},
 };
 
 export const SignUpForm = (props: Props) => {
   const [state, setState] = useState<InternalState>(initialState);
-
-  const refForm = useRef<HTMLFormElement>();
+  const [formState, formAction, pending] = useActionState<SignUpFormState, FormData>(
+    register,
+    initialFormState
+  );
   const onClickRegister = async (e: React.MouseEvent) => {
     e.preventDefault();
-
-    //   try {
-    //     loadingContext?.setLoading(true)
-    //     const res = await register({
-    //       email: state.email,
-    //       username: state.username,
-    //       password: state.password,
-    //       phone: state.phone,
-    //     });
-    //     if (typeof res === "number") {
-    //       showAlert(alertContext, "Success", "register account success", () =>
-    //         props.onRegisterSuccess()
-    //       );
-    //     } else {
-    //       setState((prevState) => ({
-    //         ...prevState,
-    //         fieldErrors: { ...(res as ValidateErrors) },
-    //       }));
-    //     }
-    //     loadingContext?.setLoading(false)
-    //   } catch (err: unknown) {
-    //     showAlert(alertContext, "Error", (err as ResponseError).body);
-    //     loadingContext?.setLoading(false)
-
-    //   }
   };
 
   const updateState = (e: ChangeEvent<HTMLInputElement>) => {
@@ -67,13 +60,13 @@ export const SignUpForm = (props: Props) => {
   };
 
   return (
-    <form ref={refForm as any} className="pt-12 m-4">
+    <form className="pt-12 m-4" action={formAction}>
       <div className="rounded-xl max-w-md mx-auto bg-white p-4 shadow-lg">
         <h1 className="text-center text-blue-500 text-3xl font-semibold pt-4">
           Sign Up
         </h1>
         <span className={`text-red-500 text-sm h-5 px-2 `}>
-          {/* {state.fieldErrors["common"] ?? ""} */}
+          {formState.fieldErrors["common"] ?? ""}
         </span>
         <div className="flex flex-col pt-4">
           <input
@@ -86,7 +79,7 @@ export const SignUpForm = (props: Props) => {
             onChange={(e) => updateState(e)}
           />
           <span className={`text-red-500 text-sm h-5 px-2 `}>
-            {/* {state.fieldErrors["email"] ?? ""} */}
+            {formState.fieldErrors["email"] ?? ""}
           </span>
         </div>
         <div className="flex flex-col">
@@ -100,7 +93,7 @@ export const SignUpForm = (props: Props) => {
             onChange={(e) => updateState(e)}
           />
           <span className="text-red-500 text-sm h-5 px-2 ">
-            {/* {state.fieldErrors["username"] ?? ""} */}
+            {formState.fieldErrors["username"] ?? ""}
           </span>
         </div>
         <div className="flex flex-col">
@@ -114,7 +107,7 @@ export const SignUpForm = (props: Props) => {
             onChange={(e) => updateState(e)}
           />
           <span className={`text-red-500 text-sm h-5 px-2 `}>
-            {/* {state.fieldErrors["password"] ?? ""} */}
+            {formState.fieldErrors["password"] ?? ""}
           </span>
         </div>
         <div className="flex flex-col">
@@ -128,7 +121,7 @@ export const SignUpForm = (props: Props) => {
             onChange={(e) => updateState(e)}
           />
           <span className={`text-red-500 text-sm h-5 px-2 `}>
-            {/* {state.fieldErrors["confirmPassword"] ?? ""} */}
+            {formState.fieldErrors["confirmPassword"] ?? ""}
           </span>
         </div>
 
@@ -143,15 +136,15 @@ export const SignUpForm = (props: Props) => {
             onChange={(e) => updateState(e)}
           />
           <span className={`text-red-500 text-sm h-5 px-2 `}>
-            {/* {state.fieldErrors["phone"] ?? ""} */}
+            {formState.fieldErrors["phone"] ?? ""}
           </span>
         </div>
 
         <div className="flex flex-col items-center">
           <button
             className=" mx-auto bg-blue-500 text-white font-bold py-2 px-8 hover:bg-blue-700 rounded-full"
-            type="button"
-            onClick={onClickRegister}
+            type="submit"
+            aria-disabled = {pending}
           >
             Register
           </button>

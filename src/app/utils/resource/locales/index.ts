@@ -1,28 +1,52 @@
 import { en } from "./en";
 import { vi } from "./vi";
 
-export interface LocaleConfig {
-  defaultLocale: Locale;
-  locales: string[];
+export type Locale = "en-US" | "vi-VN";
+
+export interface Dictionary {
+  [key: string]: string;
 }
 
-export const locales = ["en-US", "vi-VN"] as const;
-export type Locale = (typeof locales)[number];
-
-export const localeConfig: LocaleConfig = {
-  locales: [...locales],
-  defaultLocale: "en-US",
-} as const;
-
-interface Dictionary {
-  [key: string]: { [key: string]: string }
-}
-
-const dictionaries: Dictionary = {
-  en: en,
-  vi: vi,
+export type Dictionaries = {
+  [key in Locale]: Dictionary;
 };
 
-export function getDictionary(locale: Locale) {
-  return dictionaries[locale];
+class LocaleService {
+  dictionaries: Dictionaries = {
+    "en-US": en,
+    "vi-VN": vi,
+  };
+
+  currentLocale: Locale = "en-US";
+  constructor() {
+    this.getDictionary = this.getDictionary.bind(this);
+    this.changeLanguage = this.changeLanguage.bind(this);
+  }
+
+  getDictionary(locale: Locale) {
+    if (!this.dictionaries) {
+      this.dictionaries = {
+        "en-US": en,
+        "vi-VN": vi,
+      };
+    }
+    return this.dictionaries[locale];
+  }
+
+  changeLanguage(locale: Locale) {
+    this.currentLocale = locale;
+  }
+
+  localize(key: string) {
+    return this.getDictionary(this.currentLocale)[key];
+  }
+}
+
+let localeService = new LocaleService();
+
+export function getLocaleService() {
+  if (!localeService) {
+    localeService = new LocaleService();
+  }
+  return localeService;
 }

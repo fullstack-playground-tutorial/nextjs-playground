@@ -1,0 +1,24 @@
+.message-icon {
+    gap: 4px;
+    display: flex;
+    flex-direction: row;
+    border-width: 1px;
+    border-color: white;
+    border-style:solid;
+    align-items: center;
+    height: 32px;
+    border-radius: 16px;
+    justify-content: center;
+    padding: 12px;
+}
+
+.message-icon:hover {
+    background: gray;
+}
+
+.message-dot {
+    background-color: white;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}

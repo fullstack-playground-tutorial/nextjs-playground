@@ -1,0 +1,9 @@
+::-webkit-scrollbar {
+    width: 0px;
+    background-color: transparent; /* Set scrollbar background color */
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: transparent; /* Set scrollbar thumb color */
+    width: 4px;
+    border-radius: 6px;
+  }
