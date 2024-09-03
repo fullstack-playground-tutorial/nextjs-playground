@@ -1,3 +1,4 @@
+"use client"
 import { Locale } from "@/app/utils/resource/locales";
 import { createContext } from "react";
 

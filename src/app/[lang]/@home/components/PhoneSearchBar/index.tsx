@@ -29,19 +29,18 @@ export default function PhoneSearchBar(props: Props) {
     }));
   };
 
-  const onSearch = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
+  const handleSearch = (term: string) => {
     const searchParams = new URLSearchParams({
       q: state.searchText,
     });
 
     const searchUrl = `/${internalizationContext?.internalization.currentLocale ?? "vi-VN"}/search?${searchParams.toString()}`;
-    if (searchUrl == pathname) {
-      router.refresh();
-      return;
-    }
+    router.replace(searchUrl);
+  }
 
-    router.push(searchUrl);
+  const onSearch = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    handleSearch(state.searchText)
   };
 
   return (

@@ -20,7 +20,7 @@ export default function Error(props: Props) {
 
   return (
     <div className="mt-12 mx-auto">
-      <div className="relative bg-white rounded-2xl shadow-lg dark:bg-gray-700 max-w-sm mx-auto overflow-hidden">
+      <div className="relative bg-white rounded-2xl shadow-lg dark:bg-gray-700 min-w-80 mx-auto overflow-hidden">
           {/* Modal header */}
           <div className="flex bg-red-500 p-4">
             <div className="my-auto mx-auto flex text-center rounded-full w-8 h-8 border-white border-2 text-white items-center justify-center">

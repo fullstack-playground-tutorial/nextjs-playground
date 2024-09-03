@@ -6,6 +6,7 @@ import { SignUpForm } from "../signup";
 import { login } from "@/app/feature/auth/actions";
 import { ValidateErrors } from "@/app/utils/validate/model";
 import { useFormState } from "react-dom";
+import Loading from "../../loading";
 
 interface InternalState {
   showSignUp: boolean;
@@ -33,7 +34,7 @@ export interface Props {}
 export const SignInForm = (props: Props) => {
   
   const [state, setState] = useState(initialState);
-  const [formState, formAction, pending] = useFormState<SigninFormState, FormData>(
+  const [formState, formAction, pending] = useActionState<SigninFormState, FormData>(
     login,
     initialFormState
   );
@@ -58,8 +59,9 @@ export const SignInForm = (props: Props) => {
   }, []);
 
   return (
-    <>
-      {state.showSignUp == false ? (
+    
+    <> {pending ? <Loading/> :
+      state.showSignUp == false ? (
         <form className="pt-12 m-4" action={formAction}>
           <div className="rounded-xl max-w-md mx-auto bg-white p-4 shadow-lg">
             <h1 className="text-center text-blue-500 text-4xl font-semibold pt-4">

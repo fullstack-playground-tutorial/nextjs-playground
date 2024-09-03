@@ -22,5 +22,7 @@ const initialState: InternalState = {
 };
 
 export default function NotificationComponent(props: Props) {
-  return <Suspense fallback={<>Loading</>}></Suspense>;
+  return <Suspense fallback={<>Loading</>}>
+    
+  </Suspense>;
 }

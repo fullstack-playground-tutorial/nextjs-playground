@@ -12,7 +12,6 @@ interface Props {
 }
 
 export default function Error(props: Props) {
-  const internalization = useContext(InternalizationContext);
 
   useEffect(() => {
     console.log(props.error);

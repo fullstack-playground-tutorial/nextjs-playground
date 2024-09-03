@@ -29,7 +29,7 @@ export class HttpService {
     this.sendRequest = this.sendRequest.bind(this);
     this.handleResponse = this.handleResponse.bind(this);
   }
-  
+
   private setRequestTimeout(timeout: number) {
     const abortController = new AbortController();
     this.baseRequestInit.signal = abortController.signal;
@@ -69,35 +69,39 @@ export class HttpService {
     url: string,
     options: RequestInit
   ): Promise<HttpResponse<T>> {
-    if (this.interceptors.response.onIntercepterResponse) {
-      res = await this.interceptors.response.onIntercepterResponse(
-        res,
-        url,
-        options
-      );
-    }
-    let contentType = res.headers.get(HeaderType.contentType);
-    if (contentType == null) {
-      contentType = ContentType.textPlain;
-    }
-
-    if (!res.ok) {
-      // case 422
-      if (ContentType.isJson(contentType)) {
-        let response = await res.json();
-        throw new ResponseError(null, res.status, response);
-      } else {
-        const errMessage = await res.text();
-        throw new ResponseError(errMessage, res.status, null);
+    try {
+      if (this.interceptors.response.onIntercepterResponse) {
+        res = await this.interceptors.response.onIntercepterResponse(
+          res,
+          url,
+          options
+        );
       }
-    } else {
-      let response = await res.json();
-      response = response as T;
-      return {
-        headers: res.headers,
-        body: response,
-        status: res.status,
-      };
+      let contentType = res.headers.get(HeaderType.contentType);
+      if (contentType == null) {
+        contentType = ContentType.textPlain;
+      }
+
+      if (!res.ok) {
+        // case 422
+        if (res.status == 422) {
+          let response = await res.json();
+          throw new ResponseError(null, res.status, response);
+        } else {
+          const errMessage = await res.text();
+          throw new ResponseError(errMessage, res.status, null);
+        }
+      } else {
+        let response = await res.json();
+        response = response as T;
+        return {
+          headers: res.headers,
+          body: response,
+          status: res.status,
+        };
+      }
+    } catch (error) {
+      throw error;
     }
   }
 
@@ -105,7 +109,7 @@ export class HttpService {
     options = { ...this.baseRequestInit, ...options };
     return this.sendRequest<T>(url, { ...options, method: METHOD.GET });
   }
-  
+
   post<T>(
     url: string,
     body: Object,

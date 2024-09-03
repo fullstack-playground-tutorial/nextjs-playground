@@ -9,11 +9,14 @@ import { NotificationService } from "@/app/feature/notification/notification";
 import { NotificationClient } from "@/app/feature/notification/service";
 import { FriendService } from "@/app/feature/friend/friend";
 import { FriendClient } from "@/app/feature/friend/service";
+import { SearchService } from "@/app/feature/search/search";
+import { SearchClient } from "@/app/feature/search/service";
 
 class ApplicationContext {
   private authService?: AuthService;
   private storyService?: StoryService;
   private notificationService?: NotificationService;
+  private searchService?: SearchService;
   private friendService?: FriendService;
   private httpService: HttpService;
 
@@ -58,6 +61,16 @@ class ApplicationContext {
     }
     return this.friendService;
   }
+
+  getSearchService = () => {
+    if (!this.searchService) {
+      this.searchService = new SearchClient(
+        this.httpService,
+        config.search_url
+      );
+    }
+    return this.searchService;
+  };
 }
 
 let context = new ApplicationContext(getHttpService());
@@ -83,4 +96,8 @@ export const useNotificationService = () => {
 
 export const useFriendService = () => {
   return getApplicationContext().getFriendService();
+};
+
+export const useSearchService = () => {
+  return getApplicationContext().getSearchService();
 };

@@ -1,4 +1,4 @@
-"use sever";
+"use server";
 
 import { cookies, headers } from "next/headers";
 import { Base64 } from "./app/utils/crypto/base64";
@@ -70,7 +70,7 @@ function descryptToken(token: string): Token | null {
   };
 }
 
-export function IP() {
+export async function IP() {
   const FALLBACK_IP_ADDRESS = '0.0.0.0'
   const forwardedFor = headers().get('x-forwarded-for')
  
@@ -81,6 +81,6 @@ export function IP() {
   return headers().get('x-real-ip') ?? FALLBACK_IP_ADDRESS
 }
 
-export function userAgent(){
+export async function userAgent(){
   return headers().get(HeaderType.userAgent) ?? "";
 }
