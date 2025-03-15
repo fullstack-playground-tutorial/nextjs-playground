@@ -1,36 +1,36 @@
 import { HttpService } from "../../utils/http/http-default";
-import { useAuthService } from "./context";
 import { getDeviceId } from "@/app/feature/auth/actions";
 import { storeCookies } from "@/app/feature/actions";
 import { cookies } from "next/headers";
-import { IP, userAgent } from "@/actions";
+import { IP, userAgent } from "@/app/dal";
+import appContext from "./context";
 
-let httpService = new HttpService({ timeout: 30000 });
+export const httpServiceInstance = new HttpService({ timeout: 30000 });
 
-getHttpService().interceptors.response.use(async (response, url, options) => {
+httpServiceInstance.interceptors.response.use(async (response, url, options) => {
   if (response.status == 401) {
     handleStatus401(url, options);
   }
   return response;
 });
 
-function handleStatus401(url: string, options: RequestInit) {
+async function handleStatus401(url: string, options: RequestInit) {
   const deviceId = getDeviceId();
   const id = cookies().get("deviceId")?.value;
-  const ip = IP();
-  const ua = userAgent();
+  const ip = await IP();
+  const ua = await userAgent();
 
   if (deviceId.length == 0 || ua.length == 0 || !id) {
     Promise.reject(
       new Response(undefined, { status: 400, statusText: "Bad Request" })
     );
   } else {
-    return useAuthService()
+    return appContext.getAuthService()
       .refresh(deviceId, ip, ua)
       .then((res) => {
         if (res) {
           storeCookies({ accessToken: res });
-          return getHttpService().get(url, options);
+          return httpServiceInstance.get(url, options);
         } else {
           Promise.reject(
             new Response(undefined, {
@@ -43,15 +43,6 @@ function handleStatus401(url: string, options: RequestInit) {
       .catch((e) => {
         throw e;
       })
-      .finally(() => (getHttpService().isRefreshing = false));
+      .finally(() => (httpServiceInstance.isRefreshing = false));
   }
-}
-
-export function getHttpService(): HttpService {
-  if (!httpService) {
-    httpService = new HttpService({
-      timeout: 30000,
-    });
-  }
-  return httpService;
 }

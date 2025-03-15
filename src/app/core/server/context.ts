@@ -3,7 +3,6 @@ import { config } from "../../config";
 import { AuthClient } from "@/app/feature/auth/service";
 import { HttpService } from "@/app/utils/http/http-default";
 
-import { getHttpService } from "./http-config";
 import { StoryClient, StoryService } from "@/app/feature/story";
 import { NotificationService } from "@/app/feature/notification/notification";
 import { NotificationClient } from "@/app/feature/notification/service";
@@ -11,6 +10,7 @@ import { FriendService } from "@/app/feature/friend/friend";
 import { FriendClient } from "@/app/feature/friend/service";
 import { SearchService } from "@/app/feature/search/search";
 import { SearchClient } from "@/app/feature/search/service";
+import { httpServiceInstance } from "./http-config";
 
 class ApplicationContext {
   private authService?: AuthService;
@@ -73,31 +73,5 @@ class ApplicationContext {
   };
 }
 
-let context = new ApplicationContext(getHttpService());
-
-export const getApplicationContext = () => {
-  if (!context) {
-    context = new ApplicationContext(getHttpService());
-  }
-  return context;
-};
-
-export const useAuthService = () => {
-  return getApplicationContext().getAuthService();
-};
-
-export const useStoryService = () => {
-  return getApplicationContext().getStoryService();
-};
-
-export const useNotificationService = () => {
-  return getApplicationContext().getNotificationService();
-};
-
-export const useFriendService = () => {
-  return getApplicationContext().getFriendService();
-};
-
-export const useSearchService = () => {
-  return getApplicationContext().getSearchService();
-};
+const appContext = new ApplicationContext(httpServiceInstance);
+export default appContext;

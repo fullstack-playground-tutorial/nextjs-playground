@@ -1,9 +1,8 @@
 "use server";
 
 import { cookies, headers } from "next/headers";
-import { Base64 } from "./app/utils/crypto/base64";
-import { redirect } from "next/navigation";
-import { HeaderType } from "./app/utils/http/headers";
+import { Base64 } from "./utils/crypto/base64";
+import { HeaderType } from "./utils/http/headers";
 
 export const verifySession = async (): Promise<Session | null> => {
   const accessToken = cookies().get("accessToken");

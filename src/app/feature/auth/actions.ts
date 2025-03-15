@@ -1,6 +1,5 @@
 "use server";
-import { IP, userAgent } from "@/actions";
-import { useAuthService } from "@/app/core/server/context";
+import { IP, userAgent } from "@/app/dal";
 import { ResponseError } from "@/app/utils/exception/model/response-error";
 import { Error422Message } from "@/app/utils/exception/model/response";
 import { uuidv4 } from "@/app/utils/random/random";
@@ -12,6 +11,7 @@ import { Account } from "./auth";
 import { SignUpFormState } from "@/app/[lang]/@auth/components/signup";
 import { SigninFormState } from "@/app/[lang]/@auth/components/signin";
 import { removeCookies } from "../actions";
+import appContext from "@/app/core/server/context";
 
 /**
  * Get Device ID for device. If It hasn't already existed, created new one.
@@ -36,8 +36,8 @@ export async function login(
 ): Promise<SigninFormState> {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
-  const ua = userAgent();
-  const ip = IP();
+  const ua = await userAgent();
+  const ip = await IP();
 
   const errs = InputValidate.object({
     email: useSchemaItem("email").isRequired().email("email is not valid"),
@@ -52,7 +52,7 @@ export async function login(
   }
   const deviceId = getDeviceId();
   try {
-    const res = await useAuthService().login(email, password, ua, ip, deviceId);
+    const res = await appContext.getAuthService().login(email, password, ua, ip, deviceId);
     if (res > 0) {
       redirect("/");
     }
@@ -101,7 +101,7 @@ export async function register(
   }
 
   try {
-    const res = await useAuthService().register(account);
+    const res = await appContext.getAuthService().register(account);
     if (res > 0) {
       redirect("/");
     }
@@ -127,8 +127,8 @@ export async function register(
 export async function logout(): Promise<number> {
   try {
     const deviceId = getDeviceId();
-    const ip = IP();
-    const ua = userAgent();
+    const ip = await IP();
+    const ua = await userAgent();
     if (
       deviceId.length == 0 ||
       ip.length == 0 ||
@@ -138,7 +138,7 @@ export async function logout(): Promise<number> {
       return -1;
     }
 
-    const res = await useAuthService().logout(deviceId, ip, ua);
+    const res = await appContext.getAuthService().logout(deviceId, ip, ua);
     if (res > 0) {
       await removeCookies();
       redirect("/")

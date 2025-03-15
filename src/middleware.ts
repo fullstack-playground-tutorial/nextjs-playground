@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getLocaleService } from "./app/utils/resource/locales";
 
-const publicRoute: string[] = ["/", "/login", "/sign-up"];
+const publicRoute: string[] = ["/", "/login", "/sign-up", "/marketplace"];
 const protectedRoute: string[] = [];
 
 // This function can be marked `async` if using `await` inside
@@ -11,8 +11,20 @@ export async function middleware(request: NextRequest) {
 
   const appPath = mapPath(request);
 
+  // Redirect to default page if URL is invalid and redirect if url uncontained locale in path.
   if (!appPath || !appPath.locale) {
-    request.nextUrl.pathname = `/${locale}${pathname}`;
+    const pathType = pathIdentify(pathname);
+    console.log("path type: ", pathType);
+    
+    switch (pathType) {
+      case "invalid":
+        request.nextUrl.pathname = `/${locale}`;
+        break;
+      case "public":
+      case "protected":
+        request.nextUrl.pathname = `/${locale}${pathname}`;
+        break;
+    }
     return NextResponse.redirect(request.nextUrl);
   }
 
@@ -37,17 +49,17 @@ function mapPath(request: NextRequest): Partial<AppPath> | undefined {
   }
 
   const group = res.groups as Partial<AppPath>;
-  group.page = group.page ?? "/"
-  return group
+  group.page = group.page ?? "/";
+  return group;
 }
 
-function pathIdentify(pathname: string): "public" | "protected"| "invalid" {
+function pathIdentify(pathname: string): "public" | "protected" | "invalid" {
   if (publicRoute.some((path) => pathname.startsWith(path))) {
     return "public";
-  } else if (protectedRoute.some(path => pathname.startsWith(path))){
+  } else if (protectedRoute.some((path) => pathname.startsWith(path))) {
     return "protected";
   }
-  return "invalid"
+  return "invalid";
 }
 
 export const config = {
