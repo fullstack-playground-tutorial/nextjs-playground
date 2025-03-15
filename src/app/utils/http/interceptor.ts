@@ -24,6 +24,7 @@ class InterceptorResponse {
   onIntercepterResponse?: (
     response: Response,
     url: string,
+    isRefreshing: boolean,
     options: RequestInit
   ) => Promise<Response>;
   constructor() {
@@ -34,6 +35,7 @@ class InterceptorResponse {
     callback: (
       response: Response,
       url: string,
+      isRefreshing: boolean,
       options: RequestInit
     ) => Promise<Response>
   ) {

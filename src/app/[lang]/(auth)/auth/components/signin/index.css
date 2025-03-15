@@ -1,0 +1,5 @@
+.auth-page{
+    transition-property: transform, opacity, background, filter;
+    transition-duration: 0.5s;
+    transition-timing-function: ease-in-out;
+}

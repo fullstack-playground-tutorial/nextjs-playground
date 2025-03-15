@@ -1,53 +1,55 @@
+import { HTTPResponse } from "@/app/utils/http/response";
 import { HttpService } from "../../utils/http/http-default";
-import { useAuthService } from "./context";
-import { getDeviceId } from "@/app/feature/auth/actions";
+import { getAuthService } from "./context";
 import { storeCookies } from "@/app/feature/actions";
-import { cookies } from "next/headers";
-import { IP, userAgent } from "@/actions";
+import { getResource } from "@/app/utils/resource";
+import { STATUS_CODES } from "http";
+import { config } from "@/app/config";
 
 let httpService = new HttpService({ timeout: 30000 });
 
-getHttpService().interceptors.response.use(async (response, url, options) => {
-  if (response.status == 401) {
-    handleStatus401(url, options);
+getHttpService().interceptors.response.use(
+  async (response, url, isRefreshing, options) => {
+    if (response.status == 401 && !url.includes(`${config.auth_url}/refresh`)) {
+      isRefreshing = true;
+      console.log("is refreshing ...");
+      return await handleStatus401(url, options);
+    }
+    return response;
   }
-  return response;
-});
+);
 
-function handleStatus401(url: string, options: RequestInit) {
-  const deviceId = getDeviceId();
-  const id = cookies().get("deviceId")?.value;
-  const ip = IP();
-  const ua = userAgent();
+async function handleStatus401(
+  url: string,
+  options: RequestInit
+): Promise<Response> {
+  const { IP, userAgent, deviceId } = getResource().session;
 
-  if (deviceId.length == 0 || ua.length == 0 || !id) {
-    Promise.reject(
-      new Response(undefined, { status: 400, statusText: "Bad Request" })
-    );
+  if (!deviceId || !userAgent || !IP) {
+    return new Response(undefined, { status: 401, statusText: "Unauthorized" });
   } else {
-    return useAuthService()
-      .refresh(deviceId, ip, ua)
+    return getAuthService()
+      .refresh(deviceId, IP, userAgent)
       .then((res) => {
         if (res) {
+          console.log("resfresh successfully");
           storeCookies({ accessToken: res });
-          return getHttpService().get(url, options);
+          return fetch(url, options);
         } else {
-          Promise.reject(
-            new Response(undefined, {
-              status: 400,
-              statusText: "Bad Request",
-            })
-          );
+          console.log("refresh failed!");
+          return new Response(undefined, {
+            status: 401,
+            statusText: "Unauthorized",
+          });
         }
       })
       .catch((e) => {
         throw e;
-      })
-      .finally(() => (getHttpService().isRefreshing = false));
+      });
   }
 }
 
-export function getHttpService(): HttpService {
+export function getHttpService() {
   if (!httpService) {
     httpService = new HttpService({
       timeout: 30000,

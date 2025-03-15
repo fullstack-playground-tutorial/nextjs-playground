@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getLocaleService } from "./app/utils/resource/locales";
+import { verifySession } from "./actions";
 
-const publicRoute: string[] = ["/", "/login", "/sign-up"];
-const protectedRoute: string[] = [];
+const publicRoute: string[] = ["/auth", "/test"];
+const protectedRoute: string[] = ["/", "/search"];
 
 // This function can be marked `async` if using `await` inside
 export async function middleware(request: NextRequest) {
@@ -14,6 +15,16 @@ export async function middleware(request: NextRequest) {
   if (!appPath || !appPath.locale) {
     request.nextUrl.pathname = `/${locale}${pathname}`;
     return NextResponse.redirect(request.nextUrl);
+  }
+
+  const session = await verifySession();
+
+  if (session == null && pathIdentify(appPath?.page ?? "/") == "protected") {    
+    return NextResponse.redirect(new URL(`/${locale}/auth`, request.url));
+  }
+
+  if (session != null && appPath.page == "/auth") {    
+    return NextResponse.redirect(new URL(`/`, request.url));
   }
 
   return NextResponse.next();
@@ -37,17 +48,17 @@ function mapPath(request: NextRequest): Partial<AppPath> | undefined {
   }
 
   const group = res.groups as Partial<AppPath>;
-  group.page = group.page ?? "/"
-  return group
+  group.page = group.page ?? "/";
+  return group;
 }
 
-function pathIdentify(pathname: string): "public" | "protected"| "invalid" {
+function pathIdentify(pathname: string): "public" | "protected" | "invalid" {
   if (publicRoute.some((path) => pathname.startsWith(path))) {
     return "public";
-  } else if (protectedRoute.some(path => pathname.startsWith(path))){
+  } else if (protectedRoute.some((path) => pathname.startsWith(path))) {
     return "protected";
   }
-  return "invalid"
+  return "invalid";
 }
 
 export const config = {

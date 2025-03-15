@@ -1,6 +1,6 @@
 "use server";
 
-import { useSearchService } from "@/app/core/server/context";
+import { getSearchService } from "@/app/core/server/context";
 import { SearchResult, SearchItem } from "./search";
 import { cookies } from "next/headers";
 
@@ -10,7 +10,7 @@ export interface SearchActionState {
 }
 
 export async function search(q: string): Promise<SearchActionState> {
-  return useSearchService()
+  return getSearchService()
     .search(q)
     .then((res) => {
       const userId = cookies().get("userId")?.value;

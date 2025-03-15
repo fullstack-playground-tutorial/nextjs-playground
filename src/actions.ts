@@ -4,6 +4,7 @@ import { cookies, headers } from "next/headers";
 import { Base64 } from "./app/utils/crypto/base64";
 import { redirect } from "next/navigation";
 import { HeaderType } from "./app/utils/http/headers";
+import { getResource } from "./app/utils/resource";
 
 export const verifySession = async (): Promise<Session | null> => {
   const accessToken = cookies().get("accessToken");
@@ -14,19 +15,25 @@ export const verifySession = async (): Promise<Session | null> => {
     return null;
   }
 
-  if (accessToken != undefined && refreshToken != undefined) {
+  if (accessToken && refreshToken) {
     const token = descryptToken(accessToken.value);
     if (!token) {
       return null;
-    }
+    }    
 
     if (verifyToken(token)) {
+      getResource().session = {
+        ...getResource, 
+        userId: token.payload?.userId,
+        username: token.payload?.username
+      }
       return {
         isAuth: true,
         payload: token.payload,
       } as Session;
     }
   }
+
   return null;
 };
 
@@ -71,16 +78,26 @@ function descryptToken(token: string): Token | null {
 }
 
 export async function IP() {
-  const FALLBACK_IP_ADDRESS = '0.0.0.0'
-  const forwardedFor = headers().get('x-forwarded-for')
- 
-  if (forwardedFor) {
-    return forwardedFor.split(',')[0] ?? FALLBACK_IP_ADDRESS
+  let IP = getResource().session.IP ?? "";
+  if (IP.length == 0) {
+    const FALLBACK_IP_ADDRESS = "0.0.0.0";
+    const forwardedFor = headers().get("x-forwarded-for");
+
+    if (forwardedFor) {
+      IP = forwardedFor.split(",")[0] ?? FALLBACK_IP_ADDRESS;
+    } else {
+      IP = headers().get("x-real-ip") ?? FALLBACK_IP_ADDRESS;
+    }
+    getResource().setIP(IP);
   }
- 
-  return headers().get('x-real-ip') ?? FALLBACK_IP_ADDRESS
+  return IP;
 }
 
-export async function userAgent(){
-  return headers().get(HeaderType.userAgent) ?? "";
+export async function userAgent() {
+  let ua = getResource().session.userAgent;
+  if (!ua) {
+    ua = headers().get(HeaderType.userAgent) ?? "";
+    getResource().setUserAgent(ua);
+  }
+  return ua;
 }

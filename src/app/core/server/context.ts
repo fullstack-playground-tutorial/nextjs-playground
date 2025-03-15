@@ -82,22 +82,22 @@ export const getApplicationContext = () => {
   return context;
 };
 
-export const useAuthService = () => {
+export const getAuthService = () => {
   return getApplicationContext().getAuthService();
 };
 
-export const useStoryService = () => {
+export const getStoryService = () => {
   return getApplicationContext().getStoryService();
 };
 
-export const useNotificationService = () => {
+export const getNotificationService = () => {
   return getApplicationContext().getNotificationService();
 };
 
-export const useFriendService = () => {
+export const getFriendService = () => {
   return getApplicationContext().getFriendService();
 };
 
-export const useSearchService = () => {
+export const getSearchService = () => {
   return getApplicationContext().getSearchService();
 };

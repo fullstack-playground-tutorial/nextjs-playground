@@ -24,7 +24,7 @@ export class NotificationClient implements NotificationService {
         }
       );
       return res.body;
-    } catch (e) {
+    } catch (e) {      
       throw e;
     }
   }

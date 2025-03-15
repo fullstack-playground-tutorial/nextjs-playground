@@ -1,4 +1,4 @@
-import { HttpResponse } from "@/app/utils/http/response";
+import { HTTPResponse } from "@/app/utils/http/response";
 import { Cookie } from "../../utils/http/headers";
 
 export interface AuthService {

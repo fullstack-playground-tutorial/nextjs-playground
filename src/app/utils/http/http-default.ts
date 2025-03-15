@@ -1,7 +1,7 @@
 import { METHOD } from "./method";
 import { Interceptors } from "./interceptor";
 import { ContentType, HeaderType } from "./headers";
-import { HttpResponse } from "./response";
+import { HTTPResponse } from "./response";
 import { ResponseError } from "../exception/model/response-error";
 
 interface HttpDefault {
@@ -38,10 +38,10 @@ export class HttpService {
     }, timeout);
   }
 
-  private async sendRequest<T>(
+  async sendRequest<T>(
     url: string,
     options: RequestInit
-  ): Promise<HttpResponse<T>> {
+  ): Promise<HTTPResponse<T>> {
     let mergeOptions = { ...this.baseRequestInit, ...options };
     if (this.interceptors.request.config) {
       const configInterceptor = this.interceptors.request.config(options);
@@ -53,7 +53,7 @@ export class HttpService {
       //     return fetch(url, mergeOptions)
       // })
       console.log("refreshing ...");
-      return new Promise<HttpResponse<T>>((_, reject) => {
+      return new Promise<HTTPResponse<T>>((_, reject) => {
         reject("token is refreshing");
       }).finally(() => clearTimeout(this.requestTimeout));
     } else {
@@ -68,14 +68,15 @@ export class HttpService {
     res: Response,
     url: string,
     options: RequestInit
-  ): Promise<HttpResponse<T>> {
+  ): Promise<HTTPResponse<T>> {
     try {
       if (this.interceptors.response.onIntercepterResponse) {
         res = await this.interceptors.response.onIntercepterResponse(
           res,
           url,
+          this.isRefreshing,
           options
-        );
+        );        
       }
       let contentType = res.headers.get(HeaderType.contentType);
       if (contentType == null) {
@@ -100,12 +101,12 @@ export class HttpService {
           status: res.status,
         };
       }
-    } catch (error) {
+    } catch (error) {      
       throw error;
     }
   }
 
-  get<T>(url: string, options?: RequestInit): Promise<HttpResponse<T>> {
+  get<T>(url: string, options?: RequestInit): Promise<HTTPResponse<T>> {
     options = { ...this.baseRequestInit, ...options };
     return this.sendRequest<T>(url, { ...options, method: METHOD.GET });
   }
@@ -114,7 +115,7 @@ export class HttpService {
     url: string,
     body: Object,
     options?: RequestInit
-  ): Promise<HttpResponse<T>> {
+  ): Promise<HTTPResponse<T>> {
     options = {
       ...this.baseRequestInit,
       ...options,
@@ -127,7 +128,7 @@ export class HttpService {
     url: string,
     body: Object,
     options?: RequestInit
-  ): Promise<HttpResponse<T>> {
+  ): Promise<HTTPResponse<T>> {
     options = {
       ...this.baseRequestInit,
       ...options,
@@ -139,7 +140,7 @@ export class HttpService {
     url: string,
     body: Object,
     options?: RequestInit
-  ): Promise<HttpResponse<T>> {
+  ): Promise<HTTPResponse<T>> {
     options = {
       ...this.baseRequestInit,
       ...options,
@@ -147,7 +148,7 @@ export class HttpService {
     };
     return this.sendRequest<T>(url, { ...options, method: METHOD.PATCH });
   }
-  delete<T>(url: string, options?: RequestInit): Promise<HttpResponse<T>> {
+  delete<T>(url: string, options?: RequestInit): Promise<HTTPResponse<T>> {
     options = { ...this.baseRequestInit, ...options };
     return this.sendRequest<T>(url, { ...options, method: METHOD.DELETE });
   }

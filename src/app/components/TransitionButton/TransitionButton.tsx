@@ -1,7 +1,10 @@
 "use client";
+
+import { MutableRefObject } from "react";
+
 interface Props {
-  transitionElement: Element|null;
-  transitionName: "page-transition";
+  refElement: MutableRefObject<any>;
+  effectTransition: "page-transition";
   children: Readonly<React.ReactNode>;
   handleTransition: () => void;
 }
@@ -14,15 +17,14 @@ function TransitionButton(props: Props) {
   const handleTransitionClick = async (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
-    e.preventDefault();
-    
-    props.transitionElement?.classList.add(props.transitionName);
+    e.preventDefault()
+    props.refElement?.current.classList.add(props.effectTransition);
     await sleep(500);
-    props.transitionElement?.classList.remove(props.transitionName);
+    props.refElement?.current.classList.remove(props.effectTransition);
     props.handleTransition()
   };
   return (
-    <button onClick={(e) => handleTransitionClick(e)}>{props.children}</button>
+    <button type="button" onClick={(e) => handleTransitionClick(e)}>{props.children}</button>
   );
 }
 

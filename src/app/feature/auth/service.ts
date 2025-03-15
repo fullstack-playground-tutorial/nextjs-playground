@@ -44,14 +44,16 @@ export class AuthClient implements AuthService {
       )
       .then((res) => {
         const setCookies = getSetCookieFromResponse(res.headers);
+        console.log("cookies: ", setCookies);
+        
         storeCookies({
-          accessToken: setCookies["accessToken"],
-          refreshToken: setCookies["refreshToken"],
-          userId: setCookies["userId"],
+          accessToken: setCookies.accessToken,
+          refreshToken: setCookies.refreshToken,
+          userId: setCookies.userId,
         });
         return res.body
       })
-      .catch((e) => {
+      .catch((e) => {        
         throw e;
       });
   }
@@ -106,6 +108,7 @@ export class AuthClient implements AuthService {
     userAgent: string
   ): Promise<Cookie | undefined> {
     try {
+      
       const res = await this.httpInstance.get<number>(
         `${this.auth_url}/refresh`,
         {

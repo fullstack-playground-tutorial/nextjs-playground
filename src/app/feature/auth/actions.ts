@@ -1,43 +1,48 @@
 "use server";
 import { IP, userAgent } from "@/actions";
-import { useAuthService } from "@/app/core/server/context";
+import { getAuthService } from "@/app/core/server/context";
 import { ResponseError } from "@/app/utils/exception/model/response-error";
 import { Error422Message } from "@/app/utils/exception/model/response";
 import { uuidv4 } from "@/app/utils/random/random";
 import { ValidateErrors } from "@/app/utils/validate/model";
 import { InputValidate, useSchemaItem } from "@/app/utils/validate/validate";
 import { cookies, headers } from "next/headers";
-import { redirect } from "next/navigation";
+import { redirect, RedirectType } from "next/navigation";
 import { Account } from "./auth";
-import { SignUpFormState } from "@/app/[lang]/@auth/components/signup";
-import { SigninFormState } from "@/app/[lang]/@auth/components/signin";
+import { SignUpFormState } from "@/app/[lang]/(auth)/auth/components/signup";
 import { removeCookies } from "../actions";
+import { getResource } from "@/app/utils/resource";
+import { SigninFormState } from "@/app/[lang]/(auth)/auth/components/signin";
 
 /**
  * Get Device ID for device. If It hasn't already existed, created new one.
  */
-export const getDeviceId = (): string => {
-  let deviceId = cookies().get("deviceId")?.value;
+export const getDeviceId = async (): Promise<string> => {
+  let deviceId = getResource().session.deviceId;
   if (!deviceId) {
-    deviceId = uuidv4();
-    cookies().set("deviceId", deviceId, {
-      httpOnly: true,
-      sameSite: "strict",
-      secure: true,
-    });
+    deviceId = cookies().get("deviceId")?.value;
+    if (!deviceId) {
+      deviceId = uuidv4();
+      cookies().set("deviceId", deviceId, {
+        httpOnly: true,
+        sameSite: "strict",
+        secure: true,
+      });
+      getResource().setDeviceId(deviceId);
+    }
   }
 
   return deviceId;
 };
 
 export async function login(
-  _: SigninFormState,
+  prevState: SigninFormState,
   formData: FormData
 ): Promise<SigninFormState> {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
-  const ua = userAgent();
-  const ip = IP();
+  const ua = await userAgent();
+  const ip = await IP();
 
   const errs = InputValidate.object({
     email: useSchemaItem("email").isRequired().email("email is not valid"),
@@ -50,15 +55,11 @@ export async function login(
   if (JSON.stringify(errs) != "{}") {
     return { fieldErrors: errs };
   }
-  const deviceId = getDeviceId();
+  const deviceId = await getDeviceId();
+
+  let res;
   try {
-    const res = await useAuthService().login(email, password, ua, ip, deviceId);
-    if (res > 0) {
-      redirect("/");
-    }
-    return {
-      fieldErrors: {},
-    };
+    res = await getAuthService().login(email, password, ua, ip, deviceId);
   } catch (e: any) {
     const err = e as ResponseError<Error422Message[]>;
     if (err.status == 422) {
@@ -71,6 +72,12 @@ export async function login(
     } else {
       throw err;
     }
+  }
+
+  if (res > 0) {
+    redirect("/", RedirectType.push);
+  } else {
+    return { fieldErrors: {} };
   }
 }
 
@@ -101,7 +108,7 @@ export async function register(
   }
 
   try {
-    const res = await useAuthService().register(account);
+    const res = await getAuthService().register(account);
     if (res > 0) {
       redirect("/");
     }
@@ -126,26 +133,23 @@ export async function register(
 
 export async function logout(): Promise<number> {
   try {
-    const deviceId = getDeviceId();
-    const ip = IP();
-    const ua = userAgent();
-    if (
-      deviceId.length == 0 ||
-      ip.length == 0 ||
-      userAgent.length == 0 ||
-      ip.length == 0
-    ) {
+    const deviceId = await getDeviceId();
+    const ip = await IP();
+    const ua = await userAgent();
+    if (deviceId.length == 0 || ip.length == 0 || userAgent.length == 0) {
       return -1;
     }
 
-    const res = await useAuthService().logout(deviceId, ip, ua);
+    const res = await getAuthService().logout(deviceId, ip, ua);
     if (res > 0) {
       await removeCookies();
-      redirect("/")
+      getResource().session = {};
+      redirect("/");
     }
     return res;
   } catch (e) {
     await removeCookies();
+    getResource().session = {};
     throw e;
   }
 }

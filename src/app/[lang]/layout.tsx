@@ -13,19 +13,14 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({
   children,
-  home,
-  auth,
 }: {
   children: React.ReactNode;
-  auth: React.ReactNode;
-  home: React.ReactNode;
 }) {
-  const session = await verifySession();
   return (
     <html lang="en" suppressHydrationWarning={true}>
       <body>
         <Providers>
-          <Suspense fallback={<Loading/>}>{session ? home : auth}</Suspense>
+          <Suspense fallback={<Loading/>}>{children}</Suspense>
         </Providers>
       </body>
     </html>

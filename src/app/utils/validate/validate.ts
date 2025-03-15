@@ -93,8 +93,9 @@ export class SchemaItem {
         if (value === undefined || value === null) {
             return this.fieldName + 'is undefined'
         }
-        this.value = value
+        this.value = value.trim()
         let errorMsg: string = ""
+        
         if (this.required && value.length == 0) {
             errorMsg = this.requiredError
         } else if (this.minLength && value.length < this.minLength) {
