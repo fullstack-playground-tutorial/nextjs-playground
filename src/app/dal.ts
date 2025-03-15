@@ -1,10 +1,11 @@
 "use server";
 
 import { cookies, headers } from "next/headers";
-import { Base64 } from "./app/utils/crypto/base64";
 import { redirect } from "next/navigation";
-import { HeaderType } from "./app/utils/http/headers";
-import { getResource } from "./app/utils/resource";
+import { Base64 } from "./utils/crypto/base64";
+import { HeaderType } from "./utils/http/headers";
+import { resource } from "./utils/resource";
+
 
 export const verifySession = async (): Promise<Session | null> => {
   const accessToken = cookies().get("accessToken");
@@ -22,8 +23,8 @@ export const verifySession = async (): Promise<Session | null> => {
     }    
 
     if (verifyToken(token)) {
-      getResource().session = {
-        ...getResource, 
+      resource.session = {
+        ...resource, 
         userId: token.payload?.userId,
         username: token.payload?.username
       }
@@ -78,7 +79,7 @@ function descryptToken(token: string): Token | null {
 }
 
 export async function IP() {
-  let IP = getResource().session.IP ?? "";
+  let IP = resource.session.IP ?? "";
   if (IP.length == 0) {
     const FALLBACK_IP_ADDRESS = "0.0.0.0";
     const forwardedFor = headers().get("x-forwarded-for");
@@ -88,16 +89,16 @@ export async function IP() {
     } else {
       IP = headers().get("x-real-ip") ?? FALLBACK_IP_ADDRESS;
     }
-    getResource().setIP(IP);
+    resource.setIP(IP);
   }
   return IP;
 }
 
 export async function userAgent() {
-  let ua = getResource().session.userAgent;
+  let ua = resource.session.userAgent;
   if (!ua) {
     ua = headers().get(HeaderType.userAgent) ?? "";
-    getResource().setUserAgent(ua);
+    resource.setUserAgent(ua);
   }
   return ua;
 }

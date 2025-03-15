@@ -1,6 +1,5 @@
 "use server";
-import { IP, userAgent } from "@/actions";
-import { getAuthService } from "@/app/core/server/context";
+import { IP, userAgent } from "@/app/dal";
 import { ResponseError } from "@/app/utils/exception/model/response-error";
 import { Error422Message } from "@/app/utils/exception/model/response";
 import { uuidv4 } from "@/app/utils/random/random";
@@ -11,14 +10,15 @@ import { redirect, RedirectType } from "next/navigation";
 import { Account } from "./auth";
 import { SignUpFormState } from "@/app/[lang]/(auth)/auth/components/signup";
 import { removeCookies } from "../actions";
-import { getResource } from "@/app/utils/resource";
+import appContext from "@/app/core/server/context";
 import { SigninFormState } from "@/app/[lang]/(auth)/auth/components/signin";
+import { resource } from "@/app/utils/resource";
 
 /**
  * Get Device ID for device. If It hasn't already existed, created new one.
  */
 export const getDeviceId = async (): Promise<string> => {
-  let deviceId = getResource().session.deviceId;
+  let deviceId = resource.session.deviceId;
   if (!deviceId) {
     deviceId = cookies().get("deviceId")?.value;
     if (!deviceId) {
@@ -28,7 +28,7 @@ export const getDeviceId = async (): Promise<string> => {
         sameSite: "strict",
         secure: true,
       });
-      getResource().setDeviceId(deviceId);
+      resource.setDeviceId(deviceId);
     }
   }
 
@@ -59,7 +59,15 @@ export async function login(
 
   let res;
   try {
-    res = await getAuthService().login(email, password, ua, ip, deviceId);
+    const res = await appContext
+      .getAuthService()
+      .login(email, password, ua, ip, deviceId);
+    if (res > 0) {
+      redirect("/");
+    }
+    return {
+      fieldErrors: {},
+    };
   } catch (e: any) {
     const err = e as ResponseError<Error422Message[]>;
     if (err.status == 422) {
@@ -108,7 +116,7 @@ export async function register(
   }
 
   try {
-    const res = await getAuthService().register(account);
+    const res = await appContext.getAuthService().register(account);
     if (res > 0) {
       redirect("/");
     }
@@ -136,20 +144,20 @@ export async function logout(): Promise<number> {
     const deviceId = await getDeviceId();
     const ip = await IP();
     const ua = await userAgent();
-    if (deviceId.length == 0 || ip.length == 0 || userAgent.length == 0) {
+    if (deviceId.length == 0 || userAgent.length == 0 || ip.length == 0) {
       return -1;
     }
 
-    const res = await getAuthService().logout(deviceId, ip, ua);
+    const res = await appContext.getAuthService().logout(deviceId, ip, ua);
     if (res > 0) {
       await removeCookies();
-      getResource().session = {};
+      resource.session = {};
       redirect("/");
     }
     return res;
   } catch (e) {
     await removeCookies();
-    getResource().session = {};
+    resource.session = {};
     throw e;
   }
 }

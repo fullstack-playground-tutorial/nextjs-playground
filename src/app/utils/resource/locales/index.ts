@@ -42,11 +42,6 @@ class LocaleService {
   }
 }
 
-let localeService = new LocaleService();
+export const localeService = new LocaleService();
 
-export function getLocaleService() {
-  if (!localeService) {
-    localeService = new LocaleService();
-  }
-  return localeService;
-}
+

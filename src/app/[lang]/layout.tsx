@@ -2,7 +2,7 @@ import AlertModal from "@/app/components/Toast/Toast";
 import { Providers } from "@/app/core/client/store";
 import { Metadata } from "next";
 import "@/app/globals.css";
-import { verifySession } from "@/actions";
+import { verifySession } from "@/app/dal";
 import { Suspense } from "react";
 import Loading from "./loading";
 

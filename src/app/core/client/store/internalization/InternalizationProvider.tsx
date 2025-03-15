@@ -1,8 +1,8 @@
 import { ReactNode, useState } from "react";
 
 import { InternalizationContext, InternalizationState } from "./InternalizationContext";
-import {getLocaleService, Locale } from "@/app/utils/resource/locales";
 import { Sprintf } from "@/app/utils/string";
+import { Locale, localeService } from "@/app/utils/resource/locales";
 
 export interface Props {
   children: ReactNode;
@@ -11,7 +11,7 @@ export interface Props {
 
 export default function InternalizationProvider(props: Props) {
   const [internalization, setInternalization] = useState<InternalizationState>({
-    currentLocale: getLocaleService().currentLocale,
+    currentLocale: localeService.currentLocale,
   });
 
   const changeLanguage = (locale: Locale) => {
@@ -20,7 +20,7 @@ export default function InternalizationProvider(props: Props) {
   };
 
   const localize = (key: string, ...val: string[]) => {
-    return Sprintf(getLocaleService().localize(key), ...val);
+    return Sprintf(localeService.localize(key), ...val);
   };
 
   return (

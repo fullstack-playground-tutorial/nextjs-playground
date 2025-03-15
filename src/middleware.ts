@@ -1,33 +1,54 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getLocaleService } from "./app/utils/resource/locales";
-import { verifySession } from "./actions";
+import {  localeService } from "./app/utils/resource/locales";
+import { verifySession } from "./app/dal";
 
 const publicRoute: string[] = ["/auth", "/test"];
-const protectedRoute: string[] = ["/", "/search"];
+const protectedRoute: string[] = [
+  "/chat",
+  "/profile",
+  "/search",
+  "marketplace",
+  "",
+];
 
-// This function can be marked `async` if using `await` inside
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const locale = getLocaleService().currentLocale;
+  const locale = localeService.currentLocale;
 
-  const appPath = mapPath(request);
-
+  let appPath = mapPath(request);
   if (!appPath || !appPath.locale) {
+    // const locale = getBrowserLanguage(request) ?? Resource.getLocale();
     request.nextUrl.pathname = `/${locale}${pathname}`;
     return NextResponse.redirect(request.nextUrl);
   }
 
+  
+
   const session = await verifySession();
+  const pathType = pathIdentify(appPath?.page ?? "/");
 
-  if (session == null && pathIdentify(appPath?.page ?? "/") == "protected") {    
-    return NextResponse.redirect(new URL(`/${locale}/auth`, request.url));
+  if (session) {
+    switch (pathType) {
+      case "public":
+        // Handle if user already login, redirect to home page.
+        if (pathname.startsWith("/auth")) {
+          return NextResponse.redirect(new URL(`/${locale}`, request.url));
+        }
+        return NextResponse.next();
+      case "protected":
+        return NextResponse.next();
+      default:
+
+        return NextResponse.redirect(new URL(`/${locale}`, request.url));
+    }
+  } else {
+    if (pathType == "public") {
+      return NextResponse.next();
+    } else {
+      // Protected cannot access if not login.
+      return NextResponse.redirect(new URL(`/${locale}/auth`, request.url));
+    }
   }
-
-  if (session != null && appPath.page == "/auth") {    
-    return NextResponse.redirect(new URL(`/`, request.url));
-  }
-
-  return NextResponse.next();
 }
 
 interface AppPath {

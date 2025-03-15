@@ -24,11 +24,5 @@ export class Resource {
     
 }
 
-let resource = new Resource()
+export const resource = new Resource()
 
-export function getResource(){
-    if(!resource){
-        resource = new Resource()
-    }
-    return resource
-}

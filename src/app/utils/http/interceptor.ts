@@ -1,3 +1,5 @@
+import { HTTPResponse } from "./response";
+
 export class Interceptors {
   request: InterceptorRequest;
   response: InterceptorResponse;
@@ -32,7 +34,7 @@ class InterceptorResponse {
   }
 
   async use(
-    callback: (
+    callback: <T>(
       response: Response,
       url: string,
       isRefreshing: boolean,
