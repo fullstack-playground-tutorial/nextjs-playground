@@ -60,7 +60,7 @@ export const SignInForm = (props: Props) => {
       {pending ? (
         <Loading />
       ) : (
-        <div className="auth-page" ref={ref as any}>
+        <div className="auth-page w-[460px]" ref={ref as any}>
           {state.showSignUp == false ? (
             <form className="pt-12 m-4" action={formAction}>
               <div className="rounded-xl max-w-md mx-auto bg-white p-4 shadow-lg">

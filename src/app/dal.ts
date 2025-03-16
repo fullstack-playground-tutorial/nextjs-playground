@@ -1,7 +1,6 @@
 "use server";
 
 import { cookies, headers } from "next/headers";
-import { redirect } from "next/navigation";
 import { Base64 } from "./utils/crypto/base64";
 import { HeaderType } from "./utils/http/headers";
 import { resource } from "./utils/resource";

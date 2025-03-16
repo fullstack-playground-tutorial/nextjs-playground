@@ -1,15 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import {  localeService } from "./app/utils/resource/locales";
+import { localeService } from "./app/utils/resource/locales";
 import { verifySession } from "./app/dal";
 
-const publicRoute: string[] = ["/auth", "/test"];
-const protectedRoute: string[] = [
-  "/chat",
-  "/profile",
-  "/search",
-  "marketplace",
-  "",
-];
+const publicRoute: string[] = ["/auth", "/test", "/marketplace"];
+const protectedRoute: string[] = ["/chat", "/profile", "/search", "/"];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -21,8 +15,6 @@ export async function middleware(request: NextRequest) {
     request.nextUrl.pathname = `/${locale}${pathname}`;
     return NextResponse.redirect(request.nextUrl);
   }
-
-  
 
   const session = await verifySession();
   const pathType = pathIdentify(appPath?.page ?? "/");
@@ -38,7 +30,6 @@ export async function middleware(request: NextRequest) {
       case "protected":
         return NextResponse.next();
       default:
-
         return NextResponse.redirect(new URL(`/${locale}`, request.url));
     }
   } else {
