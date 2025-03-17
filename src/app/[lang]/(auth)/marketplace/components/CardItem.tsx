@@ -11,10 +11,10 @@ export default function CardItem({
   price,
 }: Props) {
   return (
-    <div className="flex flex-col rounded-[24px] shadow-md bg-white max-h-[480px] max-w-[400px] gap-2">
+    <div className="flex flex-col rounded-lg shadow-lg bg-white max-h-[480px] max-w-[400px] gap-2 border-2">
       <div className="flex gap-4 basis-3/4 flex-row p-2">
         <img
-          className="rounded-[16px] object-cover shadow-md"
+          className="rounded object-cover shadow-md"
           src={imageURL}
           alt={name}
         />
@@ -23,8 +23,8 @@ export default function CardItem({
             <p className="font-semibold">{name}</p>
             <span className="line-clamp-3">{description}</span>
           </div>
-          <p className="basis-1/4 text-center font-semibold">{price}</p>
-          <button className="m-auto btn btn-lg btn-outline-primary">
+          <p className="basis-1/4 flex items-center justify-center text-lg text-[--green-primary-bg]">{price}</p>
+          <button className="m-auto btn btn-md btn-outline-primary">
             Add To Cart
           </button>
         </div>

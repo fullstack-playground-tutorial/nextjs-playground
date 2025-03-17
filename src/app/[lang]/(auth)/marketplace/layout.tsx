@@ -1,7 +1,7 @@
-export default function searchLayout({
+export default function MarketLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <div className="flex flex-col p-4">{children}</div>;
+  return <div className="p-4">{children}</div>;
 }

@@ -24,17 +24,13 @@ body {
   margin: 0;
   box-sizing: border-box;
   font-family: "Poppins", sans-serif;
-  color: rgb(var(--foreground-rgb));
+  color: var(--primary-text);
   transition-property: transform, opacity, background, filter;
   transition-duration: 0.5s;
   transition-timing-function: ease-in-out;
   /* background: to left linear-gradient(rgba(11,30,63,255), rgba(2, 11, 26, 255)); */
 
-  background: linear-gradient(
-    to bottom,
-    rgb(70, 214, 126),
-    rgba(1, 81, 176, 1)
-  );
+  background: linear-gradient(to bottom, rgb(70, 214, 126), rgba(1, 81, 176));
   /* background: linear-gradient(
     to bottom,
     #ff359b,
@@ -53,5 +49,15 @@ body {
     --color-glass-300: rgba(255, 255, 255, 0.3);
     --color-glass-200: rgba(255, 255, 255, 0.2);
     --color-glass-100: rgba(255, 255, 255, 0.1);
+
+    --background-black-500: rgb(0, 0, 0);
+    --background-black-400: rgb(28, 28, 28);
+    --background-black-300: rgb(56, 56, 56);
+    --background-black-200: rgb(85, 85, 85);
+    --background-black-100: rgb(113, 113, 113);
+
+    --primary-text: rgb(8, 8, 9);
+    --green-primary-bg: rgb(70, 214, 126);
+    --blue-primary-bg: rgb(1, 81, 176);
   }
 }

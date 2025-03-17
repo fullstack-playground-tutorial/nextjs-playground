@@ -67,14 +67,22 @@ export const SignInForm = (props: Props) => {
                 <h1 className="text-center text-blue-500 text-4xl font-semibold pt-4">
                   Sign In
                 </h1>
-                <div className="flex flex-col pt-4">
-                  <span className={`text-red-500 text-sm h-5 px-2 `}>
-                    {/* {formState.fieldErrors["common"]?? ""} */}
-                  </span>
+                <div
+                  className={`pt-4 ${
+                    !formState.fieldErrors["common"] ? "h-5" : ""
+                  }`}
+                >
+                  {formState.fieldErrors["common"] && (
+                    <span className={`text-red-500 text-sm h-5 px-2`}>
+                      {formState.fieldErrors["common"]}
+                    </span>
+                  )}
                 </div>
                 <div className="flex flex-col pt-2">
                   <input
-                    className="border px-4 rounded-md w-full h-8 text-base"
+                    className={`border rounded-md px-4 w-full h-8 text-base ${
+                      formState.fieldErrors["email"] ? "" : "mb-5"
+                    }`}
                     type="text"
                     placeholder="Email"
                     name="email"
@@ -82,13 +90,17 @@ export const SignInForm = (props: Props) => {
                     value={state.email}
                     onChange={(e) => onFieldChange(e)}
                   />
-                  <span className={`text-red-500 text-sm h-5 px-2`}>
-                    {/* {formState.fieldErrors["email"] ?? ""} */}
-                  </span>
+                  {formState.fieldErrors["email"] && (
+                    <span className={`text-red-500 text-sm h-5 px-2`}>
+                      {formState.fieldErrors["email"]}
+                    </span>
+                  )}
                 </div>
                 <div className="flex flex-col">
                   <input
-                    className="border rounded-md px-4 w-full h-8 text-base"
+                    className={`border rounded-md px-4 w-full h-8 text-base ${
+                      formState.fieldErrors["password"] ? "" : "mb-5"
+                    }`}
                     type="password"
                     placeholder="Password"
                     name="password"
@@ -96,9 +108,11 @@ export const SignInForm = (props: Props) => {
                     value={state.password}
                     onChange={(e) => onFieldChange(e)}
                   />
-                  <span className={`text-red-500 text-sm h-5 px-2 `}>
-                    {/* {formState.fieldErrors["password"] ?? ""} */}
-                  </span>
+                  {formState.fieldErrors["password"] && (
+                    <span className={`text-red-500 text-sm h-5 px-2`}>
+                      {formState.fieldErrors["password"]}
+                    </span>
+                  )}
                 </div>
                 <div className="flex flex-col pt-4">
                   <button

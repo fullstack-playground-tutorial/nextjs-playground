@@ -1,10 +1,6 @@
 "use client";
 
-import { showAlert } from "@/app/components/Toast/Toast";
-import { AlertContext } from "@/app/core/client/store/alert/AlertContext";
-import { InternalizationContext } from "@/app/core/client/store/internalization/InternalizationContext";
-import { error } from "console";
-import { useContext, useEffect } from "react";
+import { useEffect } from "react";
 
 interface Props {
   error: Error & { digest?: string };
