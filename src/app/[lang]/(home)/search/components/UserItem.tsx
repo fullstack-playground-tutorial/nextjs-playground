@@ -1,11 +1,8 @@
 "use client";
-import { InternalizationContext } from "@/app/core/client/store/internalization/InternalizationContext";
-import { addFriend, cancel, unfriend } from "@/app/feature/friend/actions";
+import { InternalizationContext } from "@/app/core/client/context/internalization/InternalizationContext";
 import { FriendStatus, SearchItem } from "@/app/feature/search/search";
-import { getLocaleService } from "@/app/utils/resource/locales";
 import React, {
   TransitionStartFunction,
-  useActionState,
   useContext,
 } from "react";
 
@@ -74,7 +71,7 @@ export const UserItem = (props: Props) => {
     return (
       <button
         type="button"
-        className="ml-auto rounded-full shadow-lg block text-sm h-8 bg-[--color-glass-200] px-2 border border-t-[--color-glass-500] border-l-[--color-glass-500] border-r-[--color-glass-200] border-b-[--color-glass-200]"
+        className="ml-auto rounded-full shadow-lg block text-sm h-8 bg-glass-200 px-2 border border-t-glass-500 border-l-glass-500 border-r-glass-200 border-b-glass-200"
         onClick={(e) => action(e)}
       >
         {content}
@@ -84,10 +81,10 @@ export const UserItem = (props: Props) => {
 
   return (
     <div
-      className="flex flex-row gap-2 text-white rounded-lg items-center shadow-lg p-2 bg-[--color-glass-100]  border border-l-[--color-glass-500] backdrop-blur-md border-t-[--color-glass-500] border-r-[--color-glass-200] border-b-[--color-glass-200]"
+      className="flex flex-row gap-2 text-white rounded-lg items-center shadow-lg p-2 bg-glass-100  border border-l-glass-500 backdrop-blur-md border-t-glass-500 border-r-glass-200 border-b-glass-200"
       key={props.item.id}
     >
-      <div className="flex shadow-md items-center justify-center h-12 w-12 rounded-full bg-[--color-glass-200] border border-t-[--color-glass-500] border-l-[--color-glass-500] border-r-[--color-glass-200] border-b-[--color-glass-200]">
+      <div className="flex shadow-md items-center justify-center h-12 w-12 rounded-full bg-glass-200 border border-t-glass-500 border-l-glass-500 border-r-glass-200 border-b-glass-200">
         <img
           className="h-full w-full rounded-full border-2 border-white"
           src="https://i.pinimg.com/736x/c6/e5/65/c6e56503cfdd87da299f72dc416023d4.jpg"

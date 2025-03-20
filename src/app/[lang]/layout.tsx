@@ -1,10 +1,9 @@
-import AlertModal from "@/app/components/Toast/Toast";
-import { Providers } from "@/app/core/client/store";
+import { Providers } from "@/app/core/client/context";
 import { Metadata } from "next";
 import "@/app/globals.css";
-import { verifySession } from "@/app/dal";
 import { Suspense } from "react";
 import Loading from "./loading";
+import GlobalTheme from "../components/GlobalTheme";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -17,10 +16,12 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning={true}>
+    <html lang="en" suppressHydrationWarning>
       <body>
         <Providers>
-          <Suspense fallback={<Loading/>}>{children}</Suspense>
+          <Suspense fallback={<Loading />}>
+            <GlobalTheme>{children}</GlobalTheme>
+          </Suspense>
         </Providers>
       </body>
     </html>

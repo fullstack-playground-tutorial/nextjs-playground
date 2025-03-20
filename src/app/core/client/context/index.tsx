@@ -2,10 +2,10 @@
 
 // import { SessionProvider } from "next-auth/react";
 import { ReactNode } from "react";
-// import AlertProvider from "./alert/AlertProvider";
 // import LoadingProvider from "./loading/LoadingProvider";
 import InternalizationProvider from "./internalization/InternalizationProvider";
-import AlertContextProvider from "./alert/AlertProvider";
+import AlertProvider from "./alert/AlertProvider";
+import ThemeProvider from "./theme/ThemeProvider";
 // import AuthProvider from "./auth/AuthProvider";
 // import SearchProvider from "./search/SearchProvider";
 // export * from "./alert/AlertProvider";
@@ -19,7 +19,9 @@ export interface Props {
 export const Providers = (props: Props) => {
   return (
     <InternalizationProvider>
-      <AlertContextProvider>{props.children}</AlertContextProvider>
+      <ThemeProvider>
+        <AlertProvider>{props.children}</AlertProvider>
+      </ThemeProvider>
     </InternalizationProvider>
   );
 };

@@ -1,5 +1,4 @@
 import { DotLoading } from "@/app/components/DotLoading/DotLoading";
-
 export default function Loading(){
     return <div className="fixed inset-0 z-50">
     <div className="absolute h-full w-full bg-black opacity-50"></div>

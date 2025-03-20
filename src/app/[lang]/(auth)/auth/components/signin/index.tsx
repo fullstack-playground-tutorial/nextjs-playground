@@ -1,12 +1,13 @@
 "use client";
 
 import TransitionButton from "@/app/components/TransitionButton/TransitionButton";
-import { useActionState, useRef, useState } from "react";
+import { useActionState, useContext, useRef, useState } from "react";
 import { SignUpForm } from "../signup";
 import { login } from "@/app/feature/auth/actions";
 import { ValidateErrors } from "@/app/utils/validate/model";
 import "../signin/index.css";
 import Loading from "@/app/[lang]/loading";
+import { ThemeContext } from "@/app/core/client/context/theme/ThemeContext";
 interface InternalState {
   showSignUp: boolean;
   body: HTMLElement | null;
@@ -34,7 +35,8 @@ export interface Props {
 }
 export const SignInForm = (props: Props) => {
   const [state, setState] = useState(initialState);
-  const ref = useRef<HTMLDivElement>();
+  const {theme} = useContext(ThemeContext);
+  const ref = useRef<HTMLDivElement>(undefined);
   const [formState, formAction, pending] = useActionState<
     SigninFormState,
     FormData
@@ -52,7 +54,7 @@ export const SignInForm = (props: Props) => {
   const onFieldChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
     updateState(e);
-    formState.fieldErrors = {};
+    // formState.fieldErrors = {};
   };
 
   return (

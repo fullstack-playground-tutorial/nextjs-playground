@@ -2,7 +2,6 @@ import { Suspense } from "react";
 import Header from "./components/Header";
 import Sidebar from "./components/Sidebar";
 import BottomBar from "./components/BottomBar";
-import { Metadata } from "next";
 import Loading from "../loading";
 import NotificationComponent from "./components/Notification/Notification";
 import { search } from "@/app/feature/notification/actions";
@@ -15,7 +14,6 @@ export  default async function HomeLayout({
 }) {
   const notifications = await search()
   return (
-   
         <div>
           <Header />
           <div className="w-full flex flex-row justify-between gap-4 p-4 h-[calc(100%-56px)]">

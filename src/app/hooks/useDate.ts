@@ -1,9 +1,6 @@
 "use client";
-import { use, useEffect, useState } from "react";
+import { useState } from "react";
 import { Sprintf } from "../utils/string";
-import { usePathname } from "next/navigation";
-import { Dictionary, Locale } from "../utils/resource/locales";
-import { InternalizationContext } from "../core/client/store/internalization/InternalizationContext";
 
 
 export function useDate(localize: (key: string, ...params: string[])=> string) {

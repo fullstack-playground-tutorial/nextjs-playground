@@ -1,63 +1,60 @@
 @import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto:wght@100;300;400;500;700;900&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap");
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 @import "./assets/styles/styles.css";
 
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
+@theme inline {
+  --color-primary-white: #eeeeee;
+  --color-glass-700: rgba(255, 255, 255, 0.7);
+  --color-glass-600: rgba(255, 255, 255, 0.6);
+  --color-glass-500: rgba(255, 255, 255, 0.5);
+  --color-glass-400: rgba(255, 255, 255, 0.4);
+  --color-glass-300: rgba(255, 255, 255, 0.3);
+  --color-glass-200: rgba(255, 255, 255, 0.2);
+  --color-glass-100: rgba(255, 255, 255, 0.1);
+  --color-black-500: rgb(0, 0, 0);
+  --color-black-400: rgb(28, 28, 28);
+  --color-black-300: rgb(56, 56, 56);
+  --color-black-200: rgb(85, 85, 85);
+  --color-black-100: rgb(113, 113, 113);
+  --color-primary: rgb(8, 8, 9);
+
+  --color-standard-theme: linear-gradient(
+    to bottom,
+    rgb(70, 214, 126),
+    rgba(1, 81, 176)
+  );
+  --color-light-theme: var(--color-primary-white);
+  --color-dark-theme: var(--color-black-400);
 }
 
 body {
+  color: var(--color-primary-white);
   padding: 0;
   margin: 0;
   box-sizing: border-box;
   font-family: "Poppins", sans-serif;
-  color: var(--primary-text);
   transition-property: transform, opacity, background, filter;
   transition-duration: 0.5s;
   transition-timing-function: ease-in-out;
-  /* background: to left linear-gradient(rgba(11,30,63,255), rgba(2, 11, 26, 255)); */
-
   background: linear-gradient(to bottom, rgb(70, 214, 126), rgba(1, 81, 176));
-  /* background: linear-gradient(
-    to bottom,
-    #ff359b,
-    #fffd87
-  ); */
   min-height: 100vh;
   overflow: auto;
 }
 
-@layer base {
-  :root {
-    --color-glass-700: rgba(255, 255, 255, 0.7);
-    --color-glass-600: rgba(255, 255, 255, 0.6);
-    --color-glass-500: rgba(255, 255, 255, 0.5);
-    --color-glass-400: rgba(255, 255, 255, 0.4);
-    --color-glass-300: rgba(255, 255, 255, 0.3);
-    --color-glass-200: rgba(255, 255, 255, 0.2);
-    --color-glass-100: rgba(255, 255, 255, 0.1);
-
-    --background-black-500: rgb(0, 0, 0);
-    --background-black-400: rgb(28, 28, 28);
-    --background-black-300: rgb(56, 56, 56);
-    --background-black-200: rgb(85, 85, 85);
-    --background-black-100: rgb(113, 113, 113);
-
-    --primary-text: rgb(8, 8, 9);
-    --green-primary-bg: rgb(70, 214, 126);
-    --blue-primary-bg: rgb(1, 81, 176);
-  }
+body[data-theme="dark-theme"] {
+  --bg-color-app: var(--color-black-400);
+  --component-color-app: var(--color-black-300);
+  --color-app-3: var(--color-black-200);
+  background: var(--bg-color-app);
 }
+
+/* body[data-theme] > .bg-color-app {
+}
+
+body [data-theme] > .component-color-app {
+  background: var(--component-color-app);
+} */

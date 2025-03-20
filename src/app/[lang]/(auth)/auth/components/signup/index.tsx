@@ -1,18 +1,13 @@
 "use client";
 import TransitionButton from "@/app/components/TransitionButton/TransitionButton";
-import { AlertContext } from "@/app/core/client/store/alert/AlertContext";
 import { register } from "@/app/feature/auth/actions";
-import { Account } from "@/app/feature/auth/auth";
 import { ValidateErrors } from "@/app/utils/validate/model";
 import React, {
   ChangeEvent,
   MutableRefObject,
   useActionState,
-  useContext,
-  useRef,
   useState,
 } from "react";
-import { useFormState } from "react-dom";
 
 interface Props {
   handleTransition: () => void;

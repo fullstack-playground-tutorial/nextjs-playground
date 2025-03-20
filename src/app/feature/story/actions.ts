@@ -1,7 +1,7 @@
 "use server";
 
 import { StoryFilter } from "./story";
-import { InputValidate, useSchemaItem } from "@/app/utils/validate/validate";
+import { InputValidate, createSchemaItem } from "@/app/utils/validate/validate";
 import { ValidateErrors } from "@/app/utils/validate/model";
 import { redirect } from "next/navigation";
 import { ResponseError } from "@/app/utils/exception/model/response-error";
@@ -25,7 +25,7 @@ export const create = async (
   const ua = await userAgent();
   const ip = await IP();
   const errs = InputValidate.object({
-    text: useSchemaItem("text").hasMaxLength(6000).isRequired(),
+    text: createSchemaItem("text").hasMaxLength(6000).isRequired(),
   }).validate({ text: text });
   if (JSON.stringify(errs) !== "{}") {
     return { ...prevState, fieldErrors: errs };

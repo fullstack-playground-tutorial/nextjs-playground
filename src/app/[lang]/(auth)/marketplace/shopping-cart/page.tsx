@@ -27,47 +27,47 @@ export default function ShoppingCartPage(props: Props) {
       <table className="mt-4 w-1/2 rounded-lg text-center overflow-hidden table-auto">
         <caption>YOUR SHOPPING CART</caption>
 
-        <thead className="bg-[--background-black-400]">
+        <thead className="bg-background-black-400">
           <tr>
-            <th className="border border-[--background-black-200] p-2">#</th>
-            <th className="border border-[--background-black-200] p-2">
+            <th className="border border-background-black-200 p-2">#</th>
+            <th className="border border-background-black-200 p-2">
               image
             </th>
-            <th className="border border-[--background-black-200] p-2">name</th>
-            <th className="border border-[--background-black-200] p-2">
+            <th className="border border-background-black-200 p-2">name</th>
+            <th className="border border-background-black-200 p-2">
               price
             </th>
-            <th className="border border-[--background-black-200] p-2">
+            <th className="border border-background-black-200 p-2">
               quantity
             </th>
           </tr>
         </thead>
-        <tbody className="bg-[--background-black-300] ">
+        <tbody className="bg-background-black-300">
           {products.map(({ id, imgURL, name, price, quantity }) => (
             <tr key={id}>
-              <td className="border-b border-[--background-black-200] p-2">
+              <td className="border-b border-background-black-200 p-2">
                 {id}
               </td>
-              <td className="border-b border-[--background-black-200] p-2">
+              <td className="border-b border-background-black-200 p-2">
                 <img
                   className="rounded-[16px] object-cover shadow-md size-[160px] mx-auto"
                   src={imgURL}
                   alt={name}
                 />
               </td>
-              <td className="border-b border-[--background-black-200] p-2">
+              <td className="border-b border-background-black-200 p-2">
                 <p>{name}</p>
               </td>
-              <td className="border-b border-[--background-black-200] p-2">
+              <td className="border-b border-background-black-200 p-2">
                 <p>{price}</p>
               </td>
-              <td className="border-b border-[--background-black-200] p-2">
+              <td className="border-b border-background-black-200 p-2">
                 {quantity}
               </td>
             </tr>
           ))}
         </tbody>
-        <tfoot className="bg-[--background-black-300] ">
+        <tfoot className="bg-background-black-300">
           <tr>
             <td colSpan={6}>
               <div className="flex justify-between p-2 w-full">

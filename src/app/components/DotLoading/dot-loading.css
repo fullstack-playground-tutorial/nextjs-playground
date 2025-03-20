@@ -1,3 +1,5 @@
+@reference "../../globals.css"
+
 .loading {
   position: relative;
   display: flex;

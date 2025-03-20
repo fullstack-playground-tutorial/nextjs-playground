@@ -23,7 +23,7 @@ export default function CardItem({
             <p className="font-semibold">{name}</p>
             <span className="line-clamp-3">{description}</span>
           </div>
-          <p className="basis-1/4 flex items-center justify-center text-lg text-[--green-primary-bg]">{price}</p>
+          <p className="basis-1/4 flex items-center justify-center text-lg text-green-primary-bg">{price}</p>
           <button className="m-auto btn btn-md btn-outline-primary">
             Add To Cart
           </button>

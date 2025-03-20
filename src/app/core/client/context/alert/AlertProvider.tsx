@@ -4,14 +4,11 @@ import {
 } from "react";
 import { AlertContext, AlertState,  } from "./AlertContext";
 
-
-
-
 interface Props {
   children: ReactNode;
 }
 
-export default function AlertContextProvider(props: Props) {
+export default function AlertProvider(props: Props) {
   const [alertState, setAlertState] = useState<AlertState>({
     
   });

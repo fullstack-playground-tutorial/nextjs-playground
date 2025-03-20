@@ -1,5 +1,3 @@
-import { rejects } from "assert"
-import { resolve } from "path"
 import { Schema, ValidateErrors } from "./model"
 
 
@@ -44,7 +42,7 @@ class ObjectValidate {
 
 }
 
-export const useSchemaItem = (field?: string) => {
+export const createSchemaItem = (field?: string) => {
     return new SchemaItem(field)
 }
 

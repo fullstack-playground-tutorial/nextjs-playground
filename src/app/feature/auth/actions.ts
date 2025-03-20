@@ -1,12 +1,13 @@
-"use server";
+ "use server"
+
 import { IP, userAgent } from "@/app/dal";
 import { ResponseError } from "@/app/utils/exception/model/response-error";
 import { Error422Message } from "@/app/utils/exception/model/response";
 import { uuidv4 } from "@/app/utils/random/random";
 import { ValidateErrors } from "@/app/utils/validate/model";
-import { InputValidate, useSchemaItem } from "@/app/utils/validate/validate";
-import { cookies, headers } from "next/headers";
-import { redirect, RedirectType } from "next/navigation";
+import { InputValidate, createSchemaItem } from "@/app/utils/validate/validate";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { Account } from "./auth";
 import { SignUpFormState } from "@/app/[lang]/(auth)/auth/components/signup";
 import { removeCookies } from "../actions";
@@ -18,12 +19,13 @@ import { resource } from "@/app/utils/resource";
  * Get Device ID for device. If It hasn't already existed, created new one.
  */
 export const getDeviceId = async (): Promise<string> => {
+  const cookieStore = await cookies();
   let deviceId = resource.session.deviceId;
   if (!deviceId) {
-    deviceId = cookies().get("deviceId")?.value;
+    deviceId = cookieStore.get("deviceId")?.value;
     if (!deviceId) {
       deviceId = uuidv4();
-      cookies().set("deviceId", deviceId, {
+      cookieStore.set("deviceId", deviceId, {
         httpOnly: true,
         sameSite: "strict",
         secure: true,
@@ -45,8 +47,8 @@ export async function login(
   const ip = await IP();
 
   const errs = InputValidate.object({
-    email: useSchemaItem("email").isRequired().email("email is not valid"),
-    password: useSchemaItem("password").isRequired(),
+    email: createSchemaItem("email").isRequired().email("email is not valid"),
+    password: createSchemaItem("password").isRequired(),
   }).validate({
     email: email,
     password: password,
@@ -81,12 +83,6 @@ export async function login(
       throw err;
     }
   }
-
-  if (res > 0) {
-    redirect("/", RedirectType.push);
-  } else {
-    return { fieldErrors: {} };
-  }
 }
 
 export async function register(
@@ -96,19 +92,19 @@ export async function register(
   const account = Object.fromEntries(formData) as Account;
 
   const errs = InputValidate.object({
-    email: useSchemaItem("email").isRequired().email("email is not valid"),
-    username: useSchemaItem("username")
+    email: createSchemaItem("email").isRequired().email("email is not valid"),
+    username: createSchemaItem("username")
       .isRequired()
       .hasMaxLength(12)
       .hasMinLength(3),
-    password: useSchemaItem("password")
+    password: createSchemaItem("password")
       .isRequired()
       .hasMaxLength(256)
       .hasMinLength(12),
-    confirmPassword: useSchemaItem("confirm password")
+    confirmPassword: createSchemaItem("confirm password")
       .isRequired()
       .match("password", "email or password is incorrect"),
-    phone: useSchemaItem("phone").isRequired().phone("phone is not valid"),
+    phone: createSchemaItem("phone").isRequired().phone("phone is not valid"),
   }).validate<Account>(account);
 
   if (JSON.stringify(errs) !== "{}") {

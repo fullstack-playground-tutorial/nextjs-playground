@@ -26,7 +26,8 @@ async function handleStatus401<T>(
 ): Promise<Response | HTTPResponse<T>> {
   return new Promise(async (resolve, reject) => {
     const deviceId = await getDeviceId();
-    const id = cookies().get("deviceId")?.value;
+    const cookieStore = await cookies();
+    const id = cookieStore.get("deviceId")?.value;
     const ip = await IP();
     const ua = await userAgent();
 

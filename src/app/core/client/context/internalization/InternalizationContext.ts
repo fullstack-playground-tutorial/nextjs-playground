@@ -16,7 +16,7 @@ export interface InternalizationState {
   }
   
   export const InternalizationContext = createContext<
-    InternalizationContext | undefined
+    InternalizationContext 
   >({internalization: {
     currentLocale: 'en-US',
   },

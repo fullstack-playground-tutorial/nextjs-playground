@@ -5,10 +5,10 @@ import { Base64 } from "./utils/crypto/base64";
 import { HeaderType } from "./utils/http/headers";
 import { resource } from "./utils/resource";
 
-
 export const verifySession = async (): Promise<Session | null> => {
-  const accessToken = cookies().get("accessToken");
-  const refreshToken = cookies().get("refreshToken");
+  const cookiesStore = await cookies();
+  const accessToken = cookiesStore.get("accessToken");
+  const refreshToken = cookiesStore.get("refreshToken");
 
   if (refreshToken && accessToken == undefined) {
     // return "refresh_access_token";
@@ -19,14 +19,14 @@ export const verifySession = async (): Promise<Session | null> => {
     const token = descryptToken(accessToken.value);
     if (!token) {
       return null;
-    }    
+    }
 
     if (verifyToken(token)) {
       resource.session = {
-        ...resource, 
+        ...resource,
         userId: token.payload?.userId,
-        username: token.payload?.username
-      }
+        username: token.payload?.username,
+      };
       return {
         isAuth: true,
         payload: token.payload,
@@ -78,15 +78,17 @@ function descryptToken(token: string): Token | null {
 }
 
 export async function IP() {
+  const headersList = await headers();
+
   let IP = resource.session.IP ?? "";
   if (IP.length == 0) {
     const FALLBACK_IP_ADDRESS = "0.0.0.0";
-    const forwardedFor = headers().get("x-forwarded-for");
+    const forwardedFor = headersList.get("x-forwarded-for");
 
     if (forwardedFor) {
       IP = forwardedFor.split(",")[0] ?? FALLBACK_IP_ADDRESS;
     } else {
-      IP = headers().get("x-real-ip") ?? FALLBACK_IP_ADDRESS;
+      IP = headersList.get("x-real-ip") ?? FALLBACK_IP_ADDRESS;
     }
     resource.setIP(IP);
   }
@@ -94,9 +96,10 @@ export async function IP() {
 }
 
 export async function userAgent() {
+  const headersList = await headers();
   let ua = resource.session.userAgent;
   if (!ua) {
-    ua = headers().get(HeaderType.userAgent) ?? "";
+    ua = headersList.get(HeaderType.userAgent) ?? "";
     resource.setUserAgent(ua);
   }
   return ua;

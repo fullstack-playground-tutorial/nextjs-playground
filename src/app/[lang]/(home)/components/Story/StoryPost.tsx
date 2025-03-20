@@ -15,7 +15,7 @@ import {
 import "./StoryPost.css";
 import Uploader from "@/app/components/Upload";
 import { useDate } from "@/app/hooks/useDate";
-import { InternalizationContext } from "@/app/core/client/store/internalization/InternalizationContext";
+import { InternalizationContext } from "@/app/core/client/context/internalization/InternalizationContext";
 import FileStack from "@/app/components/FileStack";
 
 interface Props {}

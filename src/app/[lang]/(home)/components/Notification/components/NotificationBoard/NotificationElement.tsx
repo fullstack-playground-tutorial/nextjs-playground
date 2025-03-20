@@ -1,5 +1,5 @@
 "use server"
-import { InternalizationContext } from "@/app/core/client/store/internalization/InternalizationContext";
+import { InternalizationContext } from "@/app/core/client/context/internalization/InternalizationContext";
 import { accept, reject } from "@/app/feature/friend/actions";
 import { Notification } from "@/app/feature/notification/notification";
 import { cookies } from "next/headers";
@@ -88,7 +88,7 @@ export async function NotificationElement({ noti }: Props) {
     <div
       className={`flex flex-row gap-2 items-center rounded-lg  ${renderColor()} p-2 border hover:border-black`}
     >
-      <div className="flex-initial shadow-md items-center justify-center h-8 w-8 rounded-full bg-[--color-glass-200] border border-t-[--color-glass-500] border-l-[--color-glass-500] border-r-[--color-glass-200] border-b-[--color-glass-200]">
+      <div className="flex-initial shadow-md items-center justify-center h-8 w-8 rounded-full bg-glass-200 border border-t-glass-500 border-l-glass-500 border-r-glass-200 border-b-glass-200">
         <img
           className="h-full w-full rounded-full border-2 border-white"
           src="https://i.pinimg.com/736x/c6/e5/65/c6e56503cfdd87da299f72dc416023d4.jpg"
@@ -97,7 +97,7 @@ export async function NotificationElement({ noti }: Props) {
         />
       </div>
       <div
-        className={`flex flex-1 flex-col gap-2 p-2 border border-l-[--color-glass-600] bg-scroll border-t-[--color-glass-600] border-r-[--color-glass-300] border-b-[--color-glass-300] backdrop-blur-md rounded-lg shadow-xl`}
+        className={`flex flex-1 flex-col gap-2 p-2 border border-l-glass-600 bg-scroll border-t-glass-600 border-r-glass-300 border-b-glass-300 backdrop-blur-md rounded-lg shadow-xl`}
         key={noti.id}
       >
         <p className="text-sm">{renderContent()}</p>

@@ -20,8 +20,7 @@ export class Resource {
     }
     setUsername = (username:string) => {
         this.session.username = username
-    }
-    
+    }    
 }
 
 export const resource = new Resource()
