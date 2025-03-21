@@ -3,11 +3,10 @@
 @import "tailwindcss";
 @import "./assets/styles/styles.css";
 
-:root {
-}
-
 @theme inline {
   --color-primary-white: #eeeeee;
+  --color-primary-black: rgb(8, 8, 9);
+
   --color-glass-700: rgba(255, 255, 255, 0.7);
   --color-glass-600: rgba(255, 255, 255, 0.6);
   --color-glass-500: rgba(255, 255, 255, 0.5);
@@ -20,41 +19,98 @@
   --color-black-300: rgb(56, 56, 56);
   --color-black-200: rgb(85, 85, 85);
   --color-black-100: rgb(113, 113, 113);
-  --color-primary: rgb(8, 8, 9);
 
   --color-standard-theme: linear-gradient(
     to bottom,
     rgb(70, 214, 126),
     rgba(1, 81, 176)
   );
+
   --color-light-theme: var(--color-primary-white);
   --color-dark-theme: var(--color-black-400);
+
+  --color-field-light: #f0f2f5;
 }
 
 body {
-  color: var(--color-primary-white);
   padding: 0;
   margin: 0;
   box-sizing: border-box;
   font-family: "Poppins", sans-serif;
-  transition-property: transform, opacity, background, filter;
-  transition-duration: 0.5s;
+  transition: transform 0.5s, opacity 0.5s, filter 0.5sm, background;
   transition-timing-function: ease-in-out;
-  background: linear-gradient(to bottom, rgb(70, 214, 126), rgba(1, 81, 176));
   min-height: 100vh;
   overflow: auto;
 }
 
 body[data-theme="dark-theme"] {
   --bg-color-app: var(--color-black-400);
-  --component-color-app: var(--color-black-300);
-  --color-app-3: var(--color-black-200);
+  --bg-color-app-2: var(--color-black-300);
+  --bg-color-app-3: var(--color-black-200);
+  --field-color-app: var(--color-black-200);
+  --text-color-app: var(--color-primary-white);
+  --border-color-app: var(--color-black-100);
+  --h1-color-app: var(--color-primary-white);
+
   background: var(--bg-color-app);
+  color: var(--text-color-app);
 }
 
-/* body[data-theme] > .bg-color-app {
+body[data-theme="standard-theme"] {
+  --bg-color-app: var(--color-standard-theme);
+  --bg-color-app-2: var(--color-primary-white);
+  --bg-color-app-3: var(--color-black-200);
+  --field-color-app: var(--color-field-light);
+  --text-color-app: var(--color-primary-dark);
+  --border-color-app: var(--color-black-100);
+  --h1-color-app: var(--color-blue-500);
+
+  background: var(--bg-color-app);
+  color: var(--text-color-app);
 }
 
-body [data-theme] > .component-color-app {
-  background: var(--component-color-app);
-} */
+body[data-theme] .bg-color-app {
+  @apply bg-[var(--bg-color-app)];
+}
+
+body input:focus {
+  outline: none;
+}
+
+body[data-theme] .bg-color-app-2 {
+  @apply bg-[var(--bg-color-app-2)];
+}
+
+body[data-theme] .bg-color-app-3 {
+  @apply bg-[var(--bg-color-app-3)];
+}
+
+body[data-theme] .border-app {
+  @apply border border-solid border-[var(--border-color-app)];
+}
+
+body[data-theme="standard-theme"] .border-app {
+  @apply border-none;
+}
+
+body[data-theme] .field-color-app {
+  @apply bg-[var(--field-color-app)] shadow;
+}
+
+body[data-theme] h1 {
+  @apply text-[var(--h1-color-app)];
+}
+
+body[data-theme] table,
+body[data-theme] th,
+body[data-theme] td {
+  @apply border border-[var(--border-color-app)];
+}
+
+body[data-theme] table thead {  
+  @apply bg-[var(--bg-color-app-2)];
+}
+body[data-theme] table tbody,
+body[data-theme] table tfoot {  
+  @apply bg-[var(--bg-color-app-3)];
+}

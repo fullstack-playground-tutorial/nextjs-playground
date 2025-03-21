@@ -2,17 +2,13 @@
 
 import { create, StoryActionState } from "@/app/feature/story/actions";
 import {
-  ChangeEvent,
   FocusEvent,
-  FormEvent,
   use,
   useActionState,
   useEffect,
-  useLayoutEffect,
   useRef,
   useState,
 } from "react";
-import "./StoryPost.css";
 import Uploader from "@/app/components/Upload";
 import { useDate } from "@/app/hooks/useDate";
 import { InternalizationContext } from "@/app/core/client/context/internalization/InternalizationContext";
@@ -32,121 +28,7 @@ interface InternalState {
 const initialState: InternalState = {
   text: "",
   droppedfiles: [
-    {
-      lastModified: 0,
-      name: "",
-      webkitRelativePath: "",
-      size: 0,
-      type: "image/jpeg",
-      arrayBuffer: function (): Promise<ArrayBuffer> {
-        throw new Error("Function not implemented.");
-      },
-      slice: function (
-        start?: number,
-        end?: number,
-        contentType?: string
-      ): Blob {
-        throw new Error("Function not implemented.");
-      },
-      stream: function (): ReadableStream<Uint8Array> {
-        throw new Error("Function not implemented.");
-      },
-      text: function (): Promise<string> {
-        throw new Error("Function not implemented.");
-      },
-    },
-    {
-      lastModified: 0,
-      name: "",
-      webkitRelativePath: "",
-      size: 0,
-      type: "image/jpeg",
-      arrayBuffer: function (): Promise<ArrayBuffer> {
-        throw new Error("Function not implemented.");
-      },
-      slice: function (
-        start?: number,
-        end?: number,
-        contentType?: string
-      ): Blob {
-        throw new Error("Function not implemented.");
-      },
-      stream: function (): ReadableStream<Uint8Array> {
-        throw new Error("Function not implemented.");
-      },
-      text: function (): Promise<string> {
-        throw new Error("Function not implemented.");
-      },
-    },
-    {
-      lastModified: 0,
-      name: "",
-      webkitRelativePath: "",
-      size: 0,
-      type: "image/jpeg",
-      arrayBuffer: function (): Promise<ArrayBuffer> {
-        throw new Error("Function not implemented.");
-      },
-      slice: function (
-        start?: number,
-        end?: number,
-        contentType?: string
-      ): Blob {
-        throw new Error("Function not implemented.");
-      },
-      stream: function (): ReadableStream<Uint8Array> {
-        throw new Error("Function not implemented.");
-      },
-      text: function (): Promise<string> {
-        throw new Error("Function not implemented.");
-      },
-    },
-    {
-      lastModified: 0,
-      name: "",
-      webkitRelativePath: "",
-      size: 0,
-      type: "image/jpeg",
-      arrayBuffer: function (): Promise<ArrayBuffer> {
-        throw new Error("Function not implemented.");
-      },
-      slice: function (
-        start?: number,
-        end?: number,
-        contentType?: string
-      ): Blob {
-        throw new Error("Function not implemented.");
-      },
-      stream: function (): ReadableStream<Uint8Array> {
-        throw new Error("Function not implemented.");
-      },
-      text: function (): Promise<string> {
-        throw new Error("Function not implemented.");
-      },
-    },
-    {
-      lastModified: 0,
-      name: "",
-      webkitRelativePath: "",
-      size: 0,
-      type: "image/jpeg",
-      arrayBuffer: function (): Promise<ArrayBuffer> {
-        throw new Error("Function not implemented.");
-      },
-      slice: function (
-        start?: number,
-        end?: number,
-        contentType?: string
-      ): Blob {
-        throw new Error("Function not implemented.");
-      },
-      stream: function (): ReadableStream<Uint8Array> {
-        throw new Error("Function not implemented.");
-      },
-      text: function (): Promise<string> {
-        throw new Error("Function not implemented.");
-      },
-    },
+    
   ],
 };
 

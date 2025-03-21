@@ -1,7 +1,6 @@
 "use client";
 import { createContext } from "react";
-
-export type Theme = "dark-theme" | "light-theme" | "standard-theme";
+import { Theme } from "./theme";
 
 export interface ThemeContext {
   theme: Theme;
@@ -9,7 +8,7 @@ export interface ThemeContext {
 }
 
 export const ThemeContext = createContext<ThemeContext>({
-  theme: "dark-theme",
+  theme: "standard-theme",
   changeTheme: () => {
     return;
   },

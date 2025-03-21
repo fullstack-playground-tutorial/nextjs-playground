@@ -8,6 +8,7 @@ import { ValidateErrors } from "@/app/utils/validate/model";
 import "../signin/index.css";
 import Loading from "@/app/[lang]/loading";
 import { ThemeContext } from "@/app/core/client/context/theme/ThemeContext";
+import CustomSwitch from "@/app/components/ThemeToggle";
 interface InternalState {
   showSignUp: boolean;
   body: HTMLElement | null;
@@ -35,7 +36,7 @@ export interface Props {
 }
 export const SignInForm = (props: Props) => {
   const [state, setState] = useState(initialState);
-  const {theme} = useContext(ThemeContext);
+  const { theme, changeTheme } = useContext(ThemeContext);
   const ref = useRef<HTMLDivElement>(undefined);
   const [formState, formAction, pending] = useActionState<
     SigninFormState,
@@ -65,10 +66,20 @@ export const SignInForm = (props: Props) => {
         <div className="auth-page w-[460px]" ref={ref as any}>
           {state.showSignUp == false ? (
             <form className="pt-12 m-4" action={formAction}>
-              <div className="rounded-xl max-w-md mx-auto bg-white p-4 shadow-lg">
-                <h1 className="text-center text-blue-500 text-4xl font-semibold pt-4">
+              <div className="rounded-xl max-w-md mx-auto bg-color-app-2 p-4 shadow-lg">
+                <h1 className="text-center text-4xl font-semibold pt-4">
                   Sign In
                 </h1>
+                <div>
+                  <CustomSwitch
+                    onToggle={() => {
+                      changeTheme(
+                        theme === "dark-theme" ? "standard-theme" : "dark-theme"
+                      );
+                    }}
+                    checked={theme !== "dark-theme"}
+                  />
+                </div>
                 <div
                   className={`pt-4 ${
                     !formState.fieldErrors["common"] ? "h-5" : ""
@@ -84,7 +95,7 @@ export const SignInForm = (props: Props) => {
                   <input
                     className={`border rounded-md px-4 w-full h-8 text-base ${
                       formState.fieldErrors["email"] ? "" : "mb-5"
-                    }`}
+                    } border-app field-color-app`}
                     type="text"
                     placeholder="Email"
                     name="email"
@@ -102,7 +113,7 @@ export const SignInForm = (props: Props) => {
                   <input
                     className={`border rounded-md px-4 w-full h-8 text-base ${
                       formState.fieldErrors["password"] ? "" : "mb-5"
-                    }`}
+                    } border-app field-color-app`}
                     type="password"
                     placeholder="Password"
                     name="password"

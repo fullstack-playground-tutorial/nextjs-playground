@@ -54,8 +54,8 @@ export const SignUpForm = (props: Props) => {
 
   return (
     <form className="pt-12 m-4" action={formAction}>
-      <div className="rounded-xl max-w-md mx-auto bg-white p-4 shadow-lg">
-        <h1 className="text-center text-blue-500 text-3xl font-semibold pt-4">
+      <div className="rounded-xl max-w-md mx-auto bg-color-app-2 p-4 shadow-lg">
+        <h1 className="text-center text-3xl font-semibold pt-4">
           Sign Up
         </h1>
         <span className={`text-red-500 text-sm h-5 px-2 `}>
@@ -63,7 +63,7 @@ export const SignUpForm = (props: Props) => {
         </span>
         <div className="flex flex-col pt-4">
           <input
-            className="border px-2 rounded-md h-9 text-base"
+            className="border-app field-color-app px-2 rounded-md h-9 text-base"
             type="text"
             placeholder="Email"
             name="email"
@@ -77,7 +77,7 @@ export const SignUpForm = (props: Props) => {
         </div>
         <div className="flex flex-col">
           <input
-            className="border px-2 rounded-md h-9 text-base"
+            className="border-app field-color-app px-2 rounded-md h-9 text-base"
             type="text"
             placeholder="Username"
             name="username"
@@ -85,13 +85,13 @@ export const SignUpForm = (props: Props) => {
             value={state.username}
             onChange={(e) => updateState(e)}
           />
-          <span className="text-red-500 text-sm h-5 px-2 ">
+          <span className="text-red-500 text-sm h-5 px-2">
             {formState.fieldErrors["username"] ?? ""}
           </span>
         </div>
         <div className="flex flex-col">
           <input
-            className="border px-2 rounded-md h-9 text-base"
+            className="border-app px-2 rounded-md h-9 text-base field-color-app"
             type="password"
             placeholder="Password"
             name="password"
@@ -105,7 +105,7 @@ export const SignUpForm = (props: Props) => {
         </div>
         <div className="flex flex-col">
           <input
-            className="border px-2 rounded-md h-9 text-base"
+            className="border-app field-color-app px-2 rounded-md h-9 text-base"
             type="password"
             placeholder="Confirm Password"
             name="confirmPassword"
@@ -120,7 +120,7 @@ export const SignUpForm = (props: Props) => {
 
         <div className="flex flex-col">
           <input
-            className="border px-2 rounded-md h-9 text-base"
+            className="border-app px-2 rounded-md h-9 text-base field-color-app"
             type="tel"
             placeholder="Phone number"
             name="phone"
