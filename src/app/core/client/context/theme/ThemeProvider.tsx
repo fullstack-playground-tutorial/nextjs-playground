@@ -7,7 +7,7 @@ export interface Props {
 }
 
 export default function ThemeProvider(props: Props) {
-  const [theme, setTheme] = useState<Theme>("standard-theme");
+  const [theme, setTheme] = useState<Theme>("light-theme");
 
   const changeTheme = (newTheme: Theme) => {
     document.body.setAttribute("data-theme", newTheme);

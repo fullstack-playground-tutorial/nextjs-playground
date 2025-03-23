@@ -9,7 +9,7 @@ interface Props {
 
 export default function MarketPlacePage(props: Props) {
   return (
-    <>
+    <div>
       <h1 className="text-center">MarketPlace</h1>
       <div className="flex flex-row justify-normal items-start">
         <Link
@@ -61,6 +61,6 @@ export default function MarketPlacePage(props: Props) {
           }
         />
       </div>
-    </>
+    </div>
   );
 }

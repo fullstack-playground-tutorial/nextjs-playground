@@ -74,7 +74,7 @@ export const SignInForm = (props: Props) => {
                   <CustomSwitch
                     onToggle={() => {
                       changeTheme(
-                        theme === "dark-theme" ? "standard-theme" : "dark-theme"
+                        theme === "dark-theme" ? "light-theme" : "dark-theme"
                       );
                     }}
                     checked={theme !== "dark-theme"}

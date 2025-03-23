@@ -25,8 +25,6 @@ export  default async function HomeLayout({
           <div className="fixed md:hidden bottom-20 right-4 flex flex-col items-end">
             <NotificationComponent notifications={notifications} />
           </div>
-          <div id="portal-modal"></div>
-          <div id="portal-loading"></div>
         </div>
 
   );

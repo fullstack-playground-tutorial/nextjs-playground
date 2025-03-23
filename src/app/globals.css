@@ -56,7 +56,7 @@ body[data-theme="dark-theme"] {
   color: var(--text-color-app);
 }
 
-body[data-theme="standard-theme"] {
+body[data-theme="light-theme"] {
   --bg-color-app: var(--color-standard-theme);
   --bg-color-app-2: var(--color-primary-white);
   --bg-color-app-3: var(--color-black-200);
@@ -89,7 +89,7 @@ body[data-theme] .border-app {
   @apply border border-solid border-[var(--border-color-app)];
 }
 
-body[data-theme="standard-theme"] .border-app {
+body[data-theme="light-theme"] .border-app {
   @apply border-none;
 }
 
