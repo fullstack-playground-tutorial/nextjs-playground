@@ -25,10 +25,8 @@
     rgb(70, 214, 126),
     rgba(1, 81, 176)
   );
-
-  --color-light-theme: var(--color-primary-white);
+  --color-light-theme: #fff
   --color-dark-theme: var(--color-black-400);
-
   --color-field-light: #f0f2f5;
 }
 
@@ -56,8 +54,21 @@ body[data-theme="dark-theme"] {
   color: var(--text-color-app);
 }
 
+body[data-theme="standard-theme"] {
+  --bg-color-app: var(--color-light-theme);
+  --bg-color-app-2: var(--color-primary-white);
+  --bg-color-app-3: var(--color-black-200);
+  --field-color-app: var(--color-field-light);
+  --text-color-app: var(--color-primary-dark);
+  --border-color-app: var(--color-black-100);
+  --h1-color-app: var(--color-blue-500);
+
+  background: var(--bg-color-app);
+  color: var(--text-color-app);
+}
+
 body[data-theme="light-theme"] {
-  --bg-color-app: var(--color-standard-theme);
+  --bg-color-app: var(--color-light-theme);
   --bg-color-app-2: var(--color-primary-white);
   --bg-color-app-3: var(--color-black-200);
   --field-color-app: var(--color-field-light);

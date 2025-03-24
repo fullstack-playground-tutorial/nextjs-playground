@@ -11,10 +11,11 @@ export default function MarketLayout({
   return (
     <>
       <Header />
-      <div className="w-full flex flex-row justify-between gap-4 p-4 h-[calc(100%-56px)]">
-        <Sidebar />
-        <Suspense fallback={<Loading />}>{children}</Suspense>
-        <div className="right-0 top-0"></div>
+      <div className="w-full flex flex-row justify-start gap-4 p-4 h-[calc(100%-56px)]">
+        <div className="basis-1/5"><Sidebar/></div>
+        <Suspense fallback={<Loading />}>
+          <div className="basis-3/5 flex justify-between">{children}</div>
+        </Suspense>
       </div>
     </>
   );
