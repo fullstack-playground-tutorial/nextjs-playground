@@ -10,6 +10,7 @@ import {
 } from "react";
 import { ImageCarousel } from "./img-carousel";
 import { start } from "repl";
+import { Modal } from "@/app/components/Modal";
 
 export interface ImageInfo {
   id: string;
@@ -119,7 +120,7 @@ export default function ProductDetailPage(props: Props) {
   };
 
   return (
-    <div className="flex flex-col w-full">
+    <div className="flex flex-col w-full h-screen">
       <div>breadcrumb</div>
       <div className="flex flex-row gap-4">
         <div className=" flex flex-col rounded-2xl w-full items-center basis-3/4 gap-3">
@@ -147,16 +148,38 @@ export default function ProductDetailPage(props: Props) {
             )}
           </div>
 
-          <ImageCarousel
-            targetId={state.targetImg?.id}
-            imageList={state.images}
-            onItemClick={onItemClick}
-            onItemMouseEnter={onItemMouseEnter}
-            ontItemMouseLeave={onItemMouseLeave}
-          />
+          <div className="basis-1/5 rounded-xl h-full w-full overflow-hidden bg-color-app-2">
+            <ImageCarousel
+              targetId={state.targetImg?.id}
+              imageList={state.images}
+              onItemClick={onItemClick}
+              onItemMouseEnter={onItemMouseEnter}
+              ontItemMouseLeave={onItemMouseLeave}
+            />
+          </div>
         </div>
         <div className="basis-1/3 bg-color-app-2 rounded-2xl shadow-sm"></div>
       </div>
+      <Modal
+        isVisible={false}
+        backdropColor="bg-color-app"
+        contentColor="bg-transparent"
+      >
+        <div className="flex flex-col gap-2 m-4 overflow-auto justify-between h-180">
+          <div className="basis-3/4 w-full flex items-center justify-center max-h-full">
+            <img src={state.targetImg?.src} className="object-cover w-auto max-h-140" alt="" />
+          </div>
+          <div className="basis-1/4 rounded-md overflow-hidden w-full min-w-160">
+            <ImageCarousel
+              targetId={state.targetImg?.id}
+              imageList={state.images}
+              onItemClick={onItemClick}
+              onItemMouseEnter={onItemMouseEnter}
+              ontItemMouseLeave={onItemMouseLeave}
+            />
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

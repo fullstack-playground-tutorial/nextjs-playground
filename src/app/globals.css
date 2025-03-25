@@ -49,7 +49,7 @@ body[data-theme="dark-theme"] {
   --text-color-app: var(--color-primary-white);
   --border-color-app: var(--color-black-100);
   --h1-color-app: var(--color-primary-white);
-
+  --backdrop-modal-color: var(--color-black-400);
   background: var(--bg-color-app);
   color: var(--text-color-app);
 }
@@ -112,6 +112,7 @@ body[data-theme] h1 {
   @apply text-[var(--h1-color-app)];
 }
 
+/* table */
 body[data-theme] table,
 body[data-theme] th,
 body[data-theme] td {

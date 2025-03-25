@@ -45,14 +45,14 @@ export const ImageCarousel = (props: Props) => {
   
   return (
     <>
-      <div className="h-full basis-1/5 rounded-2xl bg-color-app-2 w-full p-2 shadow group relative overflow-hidden">
+      <div className="h-full w-full p-2 shadow-sm group relative overflow-hidden">
         <div className="h-full w-full gap-2 items-center flex flex-row">
           {renderImageItems()}
         </div>
-        <span className=" left-0 top-0 bottom-0 w-12 absolute bg-transparent transition group-hover:bg-black-200/30 flex items-center justify-end">
-          <button className="rounded-full size-8 bg-white/25 group-hover:bg-white shadow transition ease-in-out cursor-pointer  group-hover:-translate-x-2"></button>
+        <span className=" left-0 top-0 bottom-0 w-12 absolute transition group-hover:bg-white/5 flex items-center justify-end">
+          <button className="rounded-full size-8 bg-white/25 group-hover:bg-white shadow transition ease-in-out cursor-pointer group-hover:-translate-x-2"></button>
         </span>
-        <span className=" right-0 top-0 bottom-0 w-12 absolute bg-transparent transition group-hover:bg-black-200/30 flex items-center justify-start">
+        <span className=" right-0 top-0 bottom-0 w-12 absolute transition group-hover:bg-white/5 flex items-center justify-start">
           <button className="rounded-full size-8 bg-white/25 group-hover:bg-white shadow transition ease-in-out cursor-pointer group-hover:translate-x-2"></button>
         </span>
       </div>
