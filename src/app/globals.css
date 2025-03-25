@@ -4,7 +4,7 @@
 @import "./assets/styles/styles.css";
 
 @theme inline {
-  --color-primary-white: #eeeeee;
+  --color-primary-white: #FBFBFB;
   --color-primary-black: rgb(8, 8, 9);
 
   --color-glass-700: rgba(255, 255, 255, 0.7);
@@ -25,7 +25,7 @@
     rgb(70, 214, 126),
     rgba(1, 81, 176)
   );
-  --color-light-theme: #fff
+  --color-light-theme: #eeeeee;
   --color-dark-theme: var(--color-black-400);
   --color-field-light: #f0f2f5;
 }
