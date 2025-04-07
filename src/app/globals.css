@@ -4,7 +4,7 @@
 @import "./assets/styles/styles.css";
 
 @theme inline {
-  --color-primary-white: #FBFBFB;
+  --color-primary-white: #fbfbfb;
   --color-primary-black: rgb(8, 8, 9);
 
   --color-glass-700: rgba(255, 255, 255, 0.7);
@@ -14,19 +14,25 @@
   --color-glass-300: rgba(255, 255, 255, 0.3);
   --color-glass-200: rgba(255, 255, 255, 0.2);
   --color-glass-100: rgba(255, 255, 255, 0.1);
+
   --color-black-500: rgb(0, 0, 0);
   --color-black-400: rgb(28, 28, 28);
   --color-black-300: rgb(56, 56, 56);
   --color-black-200: rgb(85, 85, 85);
   --color-black-100: rgb(113, 113, 113);
 
+  --color-white-500: #fff;
+  --color-white-400: #f0f1f5;
+  --color-white-300: #e0e4eb;
+  --color-white-200: #d1d6e0;
+  --color-white-100: #bfc6d4;
+
   --color-standard-theme: linear-gradient(
     to bottom,
     rgb(70, 214, 126),
     rgba(1, 81, 176)
   );
-  --color-light-theme: #eeeeee;
-  --color-dark-theme: var(--color-black-400);
+
   --color-field-light: #f0f2f5;
 }
 
@@ -42,62 +48,66 @@ body {
 }
 
 body[data-theme="dark-theme"] {
-  --bg-color-app: var(--color-black-400);
-  --bg-color-app-2: var(--color-black-300);
-  --bg-color-app-3: var(--color-black-200);
-  --field-color-app: var(--color-black-200);
-  --text-color-app: var(--color-primary-white);
-  --border-color-app: var(--color-black-100);
-  --h1-color-app: var(--color-primary-white);
+  --bg-layer-1: var(--color-black-400);
+  --bg-layer-2: var(--color-black-300);
+  --bg-layer-3: var(--color-black-200);
+  --bg-layer-4: var(--color-black-100);
+  --field-color: var(--color-black-200);
+  --text-color: var(--color-primary-white);
+  --border-color: var(--color-black-100);
+  --h1-color: var(--color-primary-white);
   --backdrop-modal-color: var(--color-black-400);
-  background: var(--bg-color-app);
-  color: var(--text-color-app);
+
+  background: var(--bg-layer-1);
+  color: var(--text-color);
 }
 
 body[data-theme="standard-theme"] {
-  --bg-color-app: var(--color-light-theme);
-  --bg-color-app-2: var(--color-primary-white);
-  --bg-color-app-3: var(--color-black-200);
-  --field-color-app: var(--color-field-light);
-  --text-color-app: var(--color-primary-dark);
-  --border-color-app: var(--color-black-100);
-  --h1-color-app: var(--color-blue-500);
+  --bg-layer-1: var(--color-white-500);
+  --bg-layer-2: var(--color-white-400);
+  --bg-layer-3: var(--color-white-300);
+  --bg-layer-4: var(--color-white-200);
+  --field-color: var(--color-field-light);
+  --text-color: var(--color-primary-dark);
+  --border-color: var(--color-black-100);
+  --h1-color: var(--color-blue-500);
 
-  background: var(--bg-color-app);
-  color: var(--text-color-app);
+  background: var(--bg-layer-1);
+  color: var(--text-color);
 }
 
 body[data-theme="light-theme"] {
-  --bg-color-app: var(--color-light-theme);
-  --bg-color-app-2: var(--color-primary-white);
-  --bg-color-app-3: var(--color-black-200);
-  --field-color-app: var(--color-field-light);
-  --text-color-app: var(--color-primary-dark);
-  --border-color-app: var(--color-black-100);
-  --h1-color-app: var(--color-blue-500);
+  --bg-layer-1: var(--color-white-300);
+  --bg-layer-2: var(--color-white-500);
+  --bg-layer-3: var(--color-white-400);
+  --bg-layer-4: var(--color-white-200);
+  --field-color: var(--color-field-light);
+  --text-color: var(--color-primary-dark);
+  --border-color: var(--color-black-100);
+  --h1-color: var(--color-blue-500);
 
-  background: var(--bg-color-app);
-  color: var(--text-color-app);
+  background: var(--bg-layer-1);
+  color: var(--text-color);
 }
 
-body[data-theme] .bg-color-app {
-  @apply bg-[var(--bg-color-app)];
+body[data-theme] .bg-layer-1 {
+  @apply bg-[var(--bg-layer-1)];
 }
 
 body input:focus {
   outline: none;
 }
 
-body[data-theme] .bg-color-app-2 {
-  @apply bg-[var(--bg-color-app-2)];
+body[data-theme] .bg-layer-2 {
+  @apply bg-[var(--bg-layer-2)];
 }
 
-body[data-theme] .bg-color-app-3 {
-  @apply bg-[var(--bg-color-app-3)];
+body[data-theme] .bg-layer-3 {
+  @apply bg-[var(--bg-layer-3)];
 }
 
 body[data-theme] .border-app {
-  @apply border border-solid border-[var(--border-color-app)];
+  @apply border border-solid border-[var(--border-color)];
 }
 
 body[data-theme="light-theme"] .border-app {
@@ -105,24 +115,24 @@ body[data-theme="light-theme"] .border-app {
 }
 
 body[data-theme] .field-color-app {
-  @apply bg-[var(--field-color-app)] shadow;
+  @apply bg-[var(--field-color)] shadow;
 }
 
 body[data-theme] h1 {
-  @apply text-[var(--h1-color-app)];
+  @apply text-[var(--h1-color)];
 }
 
 /* table */
 body[data-theme] table,
 body[data-theme] th,
 body[data-theme] td {
-  @apply border border-[var(--border-color-app)];
+  @apply border border-[var(--border-color)];
 }
 
-body[data-theme] table thead {  
-  @apply bg-[var(--bg-color-app-2)];
+body[data-theme] table thead {
+  @apply bg-[var(--bg-layer-3)];
 }
 body[data-theme] table tbody,
-body[data-theme] table tfoot {  
-  @apply bg-[var(--bg-color-app-3)];
+body[data-theme] table tfoot {
+  @apply bg-[var(--bg-layer-2)];
 }

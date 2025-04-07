@@ -15,7 +15,7 @@ export default function CardItem({
   price,
 }: Props) {
   return (
-    <div className="flex flex-col shadow-lg bg-color-app-2 max-h-[480px] max-w-[400px] gap-2">
+    <div className="flex flex-col shadow-lg bg-layer-2 max-h-[480px] max-w-[400px] gap-2">
       <div className="flex gap-4 basis-3/4 flex-col">
         <Link
           className="relative group overflow-hidden"

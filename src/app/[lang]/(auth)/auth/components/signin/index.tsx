@@ -66,7 +66,7 @@ export const SignInForm = (props: Props) => {
         <div className="auth-page w-[460px]" ref={ref as any}>
           {state.showSignUp == false ? (
             <form className="pt-12 m-4" action={formAction}>
-              <div className="rounded-xl max-w-md mx-auto bg-color-app-2 p-4 shadow-lg">
+              <div className="rounded-xl max-w-md mx-auto bg-layer-2 p-4 shadow-lg">
                 <h1 className="text-center text-4xl font-semibold pt-4">
                   Sign In
                 </h1>

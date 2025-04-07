@@ -1,8 +1,6 @@
-'use client'
+"use client";
 import { MouseEvent } from "react";
 import { ImageInfo } from "../page";
-
-
 
 interface Props {
   targetId?: string;
@@ -29,8 +27,10 @@ export const ImageCarousel = (props: Props) => {
         {props.imageList.map((image) => (
           <img
             key={image.id}
-            className={`size-28 rounded-xl shadow-sm ${
-              props.targetId === image.id ? `border-8 border-blue-600` : ""
+            className={`size-20 rounded-md shadow-sm  ${
+              props.targetId === image.id
+                ? `ring-blue-500 ring-6 inset-0`
+                : ""
             }`}
             onMouseEnter={(e) => handleMouseEnter(e, image.id)}
             onMouseLeave={(e) => handleMouseLeave(e, image.id)}
@@ -42,10 +42,10 @@ export const ImageCarousel = (props: Props) => {
       </div>
     );
   };
-  
+
   return (
     <>
-      <div className="h-full w-full p-2 shadow-sm group relative overflow-hidden">
+      <div className="h-full w-full p-2  group relative overflow-hidden">
         <div className="h-full w-full gap-2 items-center flex flex-row">
           {renderImageItems()}
         </div>

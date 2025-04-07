@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { localeService } from "./app/utils/resource/locales";
 import { verifySession } from "./app/dal";
 
-const publicRoute: string[] = ["/auth", "/test", "/marketplace","/engnote"];
+const publicRoute: string[] = ["/auth", "/test", "/marketplace","/eng-note"];
 const protectedRoute: string[] = ["/chat", "/profile", "/search", "/"];
 
 export async function middleware(request: NextRequest) {
