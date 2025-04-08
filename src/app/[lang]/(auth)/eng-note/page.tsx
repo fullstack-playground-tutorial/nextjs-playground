@@ -30,6 +30,7 @@ export default function EngNotePage(props: Props) {
   const [words, setWords] = useState<Word[]>([]);
   const [addFormVisible, setAddFormVisible] = useState<boolean>(false);
   const [searchedWord, setSearchedWord] = useState<Word>();
+  
   const handleShowAddWordClick = (e: MouseEvent) => {
     e.preventDefault();
     setWord((prev) => ({ ...prev, text: debouncedKeyword }));
