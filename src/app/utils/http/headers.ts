@@ -104,9 +104,10 @@ export const getSetCookieFromResponse = (headers: Headers) => {
     return tokenObject
 }
 
-export const getCookieHeader = () => {
+export const getCookieHeader = async () => {
     let cookieHeader = ""
-    cookies().getAll().filter(item => item.name == PassportKeys.accessToken || item.name == PassportKeys.userId).forEach(item => {
+    const cookieService = await cookies() 
+    cookieService.getAll().filter(item => item.name == PassportKeys.accessToken || item.name == PassportKeys.userId).forEach(item => {
         cookieHeader += parseCookieToString(item)
     })
     return cookieHeader

@@ -1,75 +1,77 @@
-import { MongoClient } from "mongodb";
+import { Db, MongoClient } from "mongodb";
 
-let client;
+let mongoClient: MongoClient;
+let mongoDB: Db;
 
-if (!client) {
-  client = new MongoClient(process.env.MONGODB_URI ?? "");
-  await client.connect();
+mongoClient = new MongoClient(process.env.MONGODB_URI ?? "");
+await mongoClient.connect();
 
-  const db = client.db("english-note");
-  await db.createCollection("users", {
-    validator: {
-      $jsonSchema: {
-        bsonType: "object",
-        required: ["username"],
-        properties: {
-          username: {
-            bsonType: "string",
-            description: "Phải là chuỗi và không được bỏ trống.",
-          },
+mongoDB = mongoClient.db("english-note");
+await mongoDB.createCollection("users", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["userId"],
+      additionalProperties: false,
+      properties: {
+        userId: {
+          bsonType: "string",
+          description: "Phải là chuỗi và không được bỏ trống.",
+        },
+      },
+    },
+  },
+  validationLevel: "strict", // Bật chế độ strict từ khi tạo collection
+  validationAction: "error", // Mặc định từ chối dữ liệu không hợp lệ
+});
+
+mongoDB.createCollection("words", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: [, "word", "definition"],
+      additionalProperties: false,
+      properties: {
+        word: {
+          bsonType: "string",
+          description: "Phải là chuỗi và không được bỏ trống.",
+        },
+        definition: {
+          bsonType: "string",
+          description: "Phải là chuỗi và không được bỏ trống.",
         },
       },
     },
     validationLevel: "strict", // Bật chế độ strict từ khi tạo collection
     validationAction: "error", // Mặc định từ chối dữ liệu không hợp lệ
-  });
+  },
+});
 
-  db.createCollection("words", {
-    validator: {
-      $jsonSchema: {
-        bsonType: "object",
-        required: ["text", "definition"],
-        properties: {
-          text: {
-            bsonType: "string",
-            description: "Phải là chuỗi và không được bỏ trống.",
-          },
-          definition: {
-            bsonType: "string",
-            description: "Phải là chuỗi và không được bỏ trống.",
-          },
+await mongoDB.createCollection("searches", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["userId", "word", "searchCount"],
+      additionalProperties: false,
+      properties: {
+        userId: {
+          bsonType: "string",
+          description: "tham chiếu đến user.",
         },
-      },
-      validationLevel: "strict", // Bật chế độ strict từ khi tạo collection
-      validationAction: "error", // Mặc định từ chối dữ liệu không hợp lệ
-    },
-  });
-
-  await db.createCollection("searches", {
-    validator: {
-      $jsonSchema: {
-        bsonType: "object",
-        required: ["userId", "wordId", "searchCount"],
-        properties: {
-          userId: {
-            bsonType: "objectId",
-            description: "Phải là ObjectId và tham chiếu đến user.",
-          },
-          wordId: {
-            bsonType: "objectId",
-            description: "Phải là ObjectId và tham chiếu đến word.",
-          },
-          searchCount: {
-            bsonType: "int",
-            minimum: 0,
-            description: "Phải là số nguyên không âm.",
-          },
+        word: {
+          bsonType: "string",
+          description: "tham chiếu đến word.",
+        },
+        searchCount: {
+          bsonType: "int",
+          minimum: 0,
+          description: "Phải là số nguyên không âm.",
         },
       },
     },
-    validationLevel: "strict", // Bật chế độ strict từ khi tạo collection
-    validationAction: "error", // Mặc định từ chối dữ liệu không hợp lệ
-  });
-}
+  },
+  validationLevel: "strict", // Bật chế độ strict từ khi tạo collection
+  validationAction: "error", // Mặc định từ chối dữ liệu không hợp lệ
+});
 
-export default client;
+export default mongoDB;
