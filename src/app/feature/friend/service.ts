@@ -17,7 +17,7 @@ export class FriendClient implements FriendService {
       {
         headers: {
           [HeaderType.contentType]: ContentType.applicationJson,
-          [HeaderType.cookie]: getCookieHeader(),
+          [HeaderType.cookie]: await getCookieHeader(),
         },
         cache: "no-cache",
       }
@@ -31,7 +31,7 @@ export class FriendClient implements FriendService {
       {
         headers: {
           [HeaderType.contentType]: ContentType.applicationJson,
-          [HeaderType.cookie]: getCookieHeader(),
+          [HeaderType.cookie]: await getCookieHeader(),
         },
         cache: "no-cache",
       }
@@ -40,13 +40,13 @@ export class FriendClient implements FriendService {
   }
 
   async addFriend(friendId: string): Promise<number> {
-    const res = await this.httpInstance.post<number>(
+    const res = await this.httpInstance.post<number, Object>(
       `${this.friend_url}/${friendId}`,
       {},
       {
         headers: {
           [HeaderType.contentType]: ContentType.applicationJson,
-          [HeaderType.cookie]: getCookieHeader(),
+          [HeaderType.cookie]: await getCookieHeader(),
         },
         cache: "no-cache",
       }
@@ -61,7 +61,7 @@ export class FriendClient implements FriendService {
       {
         headers: {
           [HeaderType.contentType]: ContentType.applicationJson,
-          [HeaderType.cookie]: getCookieHeader(),
+          [HeaderType.cookie]: await getCookieHeader(),
         },
         cache: "no-cache",
       }
@@ -76,7 +76,7 @@ export class FriendClient implements FriendService {
       {
         headers: {
           [HeaderType.contentType]: ContentType.applicationJson,
-          [HeaderType.cookie]: getCookieHeader(),
+          [HeaderType.cookie]: await getCookieHeader(),
         },
         cache: "no-cache",
       }

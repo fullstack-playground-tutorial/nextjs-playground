@@ -1,25 +1,24 @@
 "use server";
 
-import { getFriendService } from "@/app/core/server/context";
-import { redirect } from "next/navigation";
+import appContext from "@/app/core/server/context";
 
 export async function addFriend(friendId: string) {
-  return getFriendService().addFriend(friendId);
+  return appContext.getFriendService().addFriend(friendId);
 }
 
 export async function accept(friendId: string): Promise<number> {
-  return getFriendService().accept(friendId);
+  return appContext.getFriendService().accept(friendId);
 }
 
 export async function reject(friendId: string): Promise<number> {
-  return getFriendService().reject(friendId);
+  return appContext.getFriendService().reject(friendId);
 }
 
 // cancel request
 export async function cancel(friendId: string): Promise<number> {
-  return getFriendService().cancel(friendId);
+  return appContext.getFriendService().cancel(friendId);
 }
 
 export async function unfriend(friendId: string): Promise<number> {
-  return getFriendService().unfriend(friendId);
+  return appContext.getFriendService().unfriend(friendId);
 }

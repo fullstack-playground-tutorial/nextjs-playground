@@ -1,9 +1,13 @@
 "use client";
 import CustomSwitch from "@/app/components/ThemeToggle";
 import { ThemeContext } from "@/app/core/client/context/theme/ThemeContext";
+import { createWord } from "@/app/feature/english-note/actions";
+import { Word } from "@/app/feature/english-note/english-note";
+import { ValidateErrors } from "@/app/utils/validate/model";
 import {
   ChangeEvent,
   MouseEvent,
+  useActionState,
   useContext,
   useEffect,
   useState,
@@ -13,80 +17,112 @@ interface Props {
   params: { lang: string };
 }
 
-type Word = {
-  text: string;
-  definition: string;
-  searchCount: number;
-};
-export default function EngNotePage(props: Props) {
-  const { theme, changeTheme } = useContext(ThemeContext);
-  const [keyword, setKeyword] = useState<string>("");
-  const [debouncedKeyword, setDebouncedKeyword] = useState<string>("");
-  const [word, setWord] = useState<Word>({
+interface InternalState {
+  keyword: string;
+  debouncedKeyword: string;
+  addFormVisible: boolean;
+  searchedWord?: Word;
+  newWord: Word;
+}
+
+const initialState: InternalState = {
+  keyword: "",
+  debouncedKeyword: "",
+  addFormVisible: false,
+  newWord: {
     definition: "",
     text: "",
     searchCount: 0,
-  });
+  },
+};
+
+export type EnglishNoteActionState = {
+  text?: string;
+  definition?: string;
+  fieldErrs: ValidateErrors;
+};
+
+const initialActionState: EnglishNoteActionState = {
+  fieldErrs: {},
+};
+
+export default function EngNotePage(props: Props) {
+  const { theme, changeTheme } = useContext(ThemeContext);
+  const [state, setState] = useState<InternalState>(initialState);
   const [words, setWords] = useState<Word[]>([]);
-  const [addFormVisible, setAddFormVisible] = useState<boolean>(false);
-  const [searchedWord, setSearchedWord] = useState<Word>();
-  
+  const [actionState, formAction, isPending] = useActionState<
+    EnglishNoteActionState,
+    FormData
+  >(createWord, initialActionState);
   const handleShowAddWordClick = (e: MouseEvent) => {
     e.preventDefault();
-    setWord((prev) => ({ ...prev, text: debouncedKeyword }));
-    setAddFormVisible(true);
+    setState((prev) => ({
+      ...prev,
+      addFormVisible: true,
+      newWord: { ...prev.newWord, text: state.debouncedKeyword },
+    }));
   };
 
   const handleCancelClick = (e: MouseEvent) => {
     e.preventDefault();
-    setAddFormVisible(false);
+    setState((prev) => ({ ...prev, addFormVisible: false }));
   };
 
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
-    setKeyword(e.target.value);
+    setState((prev) => ({ ...prev, keyword: e.target.value }));
   };
 
   const handleOnWordChange = (e: ChangeEvent<HTMLInputElement>) => {
-    e.preventDefault();
-    setWord((prev) => ({ ...prev, text: e.target.value.trim() }));
+    setState((prev) => ({
+      ...prev,
+      newWord: { ...prev.newWord, text: e.target.value.trim() },
+    }));
   };
 
   const handleOnDefinitionChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     e.preventDefault();
-    setWord((prev) => ({ ...prev, definition: e.target.value.trim() }));
+    setState((prev) => ({
+      ...prev,
+      newWord: { ...prev.newWord, definition: e.target.value.trim() },
+    }));
   };
 
   const handleAddClick = (e: MouseEvent) => {
     e.preventDefault();
-    if (word.text.length > 0 && word.definition.length > 0) {
-      setWords([...words, word]);
+    if (state.newWord.text.length > 0 && state.newWord.definition.length > 0) {
+      setWords([...words, state.newWord]);
     }
     clear();
   };
 
   const clear = () => {
-    setWord({ definition: "", text: "", searchCount: 0 });
-    setAddFormVisible(false);
-    setDebouncedKeyword("");
-    setKeyword("");
+    setState({
+      ...state,
+      newWord: { definition: "", text: "", searchCount: 0 },
+      addFormVisible: false,
+      debouncedKeyword: "",
+      keyword: "",
+    });
   };
 
   const renderSearchResult = () => {
     const handleItemClick = (e: MouseEvent, word: Word) => {
       e.preventDefault();
-      if (searchedWord && searchedWord.text == word.text) return;
+      if (state.searchedWord && state.searchedWord.text == word.text) return;
       const idx = words.findIndex((i) => word.text == i.text);
-      if (idx >= 0) {
+      if (idx >= 0 && words[idx].searchCount) {
         words[idx].searchCount += 1;
         setWords(words);
-        setSearchedWord(words[idx]);
+        setState({ ...state, searchedWord: words[idx] });
       } else {
         alert("Không tìm thấy từ " + word.text);
       }
     };
 
-    const res = words.filter((item) => item.text.startsWith(debouncedKeyword));
+    const res = words.filter((item) =>
+      item.text.startsWith(state.debouncedKeyword)
+    );
     if (res.length > 0) {
       return res.map((i) => (
         <li
@@ -104,7 +140,7 @@ export default function EngNotePage(props: Props) {
           <i className="cursor-none">0 results</i>
           <span
             className={`underline cursor-pointer italic text-sm ${
-              debouncedKeyword.length > 0 ? "visible" : "invisible"
+              state.debouncedKeyword.length > 0 ? "visible" : "invisible"
             }`}
             onClick={(e) => handleShowAddWordClick(e)}
           >
@@ -117,12 +153,12 @@ export default function EngNotePage(props: Props) {
 
   useEffect(() => {
     const handler = setTimeout(() => {
-      setDebouncedKeyword(keyword);
+      setState({ ...state, debouncedKeyword: state.keyword });
     }, 500);
     return () => {
       clearTimeout(handler);
     };
-  }, [keyword]);
+  }, [state.keyword]);
 
   return (
     <div className="p-4 flex flex-col items-center gap-6">
@@ -142,37 +178,46 @@ export default function EngNotePage(props: Props) {
             name="search"
             className="p-1 field-color-app placeholder:italic"
             placeholder="input text ..."
-            value={keyword}
+            value={state.keyword}
             onChange={(e) => handleSearchChange(e)}
           />
-          {debouncedKeyword.length > 0 && (
+          {state.debouncedKeyword.length > 0 && (
             <ul className="flex flex-col gap-2 field-color-app bg-layer-1">
               {renderSearchResult()}
             </ul>
           )}
         </div>
       </div>
-      <div
+      <form
+        action={formAction}
         className={`flex flex-col gap-2 w-[600px] bg-layer-2 shadow rounded-md p-4 ${
-          addFormVisible ? "" : "hidden"
+          state.addFormVisible ? "" : "hidden"
         }`}
       >
         <h1 className="self-center font-semibold text-2xl text-center">
           Define New Word
         </h1>
-        <div className="flex flex-row gap-2 items-center w-0.5 text-sm">
-          <label htmlFor="word" className="font-semibold">
-            Word:
-          </label>
-          <input
-            type="text"
-            name="word"
-            className="field-color-app border-app flex-auto rounded-md p-1"
-            placeholder="Word"
-            value={word.text}
-            onChange={(e) => handleOnWordChange(e)}
-          />
+        <div className="flex flex-col gap-2">
+          <div className="flex flex-row gap-2 items-center w-0.5 text-sm">
+            <label htmlFor="text" className="font-semibold">
+              Word:
+            </label>
+            <input
+              type="text"
+              name="text"
+              className="field-color-app border-app flex-auto rounded-md p-1"
+              placeholder="Word"
+              value={state.newWord.text}
+              onChange={(e) => handleOnWordChange(e)}
+            />
+          </div>
+          {actionState.fieldErrs["text"] && (
+            <span className={`text-red-500 text-sm h-5 px-2`}>
+              {actionState.fieldErrs["text"]}
+            </span>
+          )}
         </div>
+
         <div className="flex flex-col gap-2 text-sm">
           <label htmlFor="definition" className="font-semibold">
             Definition:
@@ -180,36 +225,41 @@ export default function EngNotePage(props: Props) {
           <textarea
             name="definition"
             className="field-color-app border-app rounded-md p-2 resize-none h-[200px]"
-            value={word.definition}
+            value={state.newWord.definition}
             placeholder="Define something here ..."
             onChange={(e) => handleOnDefinitionChange(e)}
           />
-          <div className="flex flex-row justify-end gap-2">
-            <button
-              className="btn btn-sm btn-primary flex-1/2"
-              onClick={(e) => handleAddClick(e)}
-            >
-              Add
-            </button>
-            <button
-              className="btn btn-sm btn-outline-primary flex-1/2"
-              onClick={(e) => handleCancelClick(e)}
-            >
-              Cancel
-            </button>
-          </div>
+          {actionState.fieldErrs["definition"] && (
+            <span className={`text-red-500 text-sm h-5 px-2`}>
+              {actionState.fieldErrs["definition"]}
+            </span>
+          )}
         </div>
-      </div>
-      {searchedWord && (
+        <div className="flex flex-row justify-end gap-2">
+          <button
+            className="btn btn-sm btn-primary flex-1/2"
+            onClick={(e) => handleAddClick(e)}
+          >
+            Add
+          </button>
+          <button
+            className="btn btn-sm btn-outline-primary flex-1/2"
+            onClick={(e) => handleCancelClick(e)}
+          >
+            Cancel
+          </button>
+        </div>
+      </form>
+      {state.searchedWord && (
         <div className="w-[800px] bg-layer-2 shadow rounded-md p-4">
           <h1 className="self-center font-semibold text-2xl text-center">
-            {searchedWord.text}
+            {state.searchedWord.text}
           </h1>
           <div>
-            <p className="text-sm">{searchedWord.definition}</p>
+            <p className="text-sm">{state.searchedWord.definition}</p>
             <br />
             <span className="italic text-sm">
-              {`Bạn đã search từ này ${searchedWord.searchCount} lần!`}{" "}
+              {`Bạn đã search từ này ${state.searchedWord.searchCount} lần!`}{" "}
             </span>
           </div>
         </div>

@@ -8,7 +8,8 @@ import { cookies } from "next/headers";
  * */
 export async function search(): Promise<Notification[]> {
   try {
-    const userId = cookies().get("userId")?.value;
+    const cookieList = await cookies();
+    const userId = cookieList.get("userId")?.value;
     const res = await appContext.getNotificationService().Search({
       subscriberId: userId ?? "",
     });

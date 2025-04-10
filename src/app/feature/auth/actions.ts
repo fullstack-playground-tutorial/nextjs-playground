@@ -59,7 +59,6 @@ export async function login(
   }
   const deviceId = await getDeviceId();
 
-  let res;
   try {
     const res = await appContext
       .getAuthService()

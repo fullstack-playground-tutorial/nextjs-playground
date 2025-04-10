@@ -111,9 +111,9 @@ export class HttpService {
     return this.sendRequest<T>(url, { ...options, method: METHOD.GET });
   }
 
-  post<T>(
+  post<T, B extends Object>(
     url: string,
-    body: Object,
+    body: B,
     options?: RequestInit
   ): Promise<HTTPResponse<T>> {
     options = {

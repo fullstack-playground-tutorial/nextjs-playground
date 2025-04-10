@@ -1,77 +1,22 @@
 import { Db, MongoClient } from "mongodb";
 
-let mongoClient: MongoClient;
-let mongoDB: Db;
+export class MongoDBClient {
+  constructor(private mongoClient: MongoClient) {
+    this.init = this.init.bind(this);
+  }
 
-mongoClient = new MongoClient(process.env.MONGODB_URI ?? "");
-await mongoClient.connect();
+  async init(callback: () => void) {
+    await this.mongoClient.connect();
+    callback();
+  }
 
-mongoDB = mongoClient.db("english-note");
-await mongoDB.createCollection("users", {
-  validator: {
-    $jsonSchema: {
-      bsonType: "object",
-      required: ["userId"],
-      additionalProperties: false,
-      properties: {
-        userId: {
-          bsonType: "string",
-          description: "Phải là chuỗi và không được bỏ trống.",
-        },
-      },
-    },
-  },
-  validationLevel: "strict", // Bật chế độ strict từ khi tạo collection
-  validationAction: "error", // Mặc định từ chối dữ liệu không hợp lệ
-});
+  db(dbName: string): Db {
+    return this.mongoClient.db(dbName);
+  }
+}
 
-mongoDB.createCollection("words", {
-  validator: {
-    $jsonSchema: {
-      bsonType: "object",
-      required: [, "word", "definition"],
-      additionalProperties: false,
-      properties: {
-        word: {
-          bsonType: "string",
-          description: "Phải là chuỗi và không được bỏ trống.",
-        },
-        definition: {
-          bsonType: "string",
-          description: "Phải là chuỗi và không được bỏ trống.",
-        },
-      },
-    },
-    validationLevel: "strict", // Bật chế độ strict từ khi tạo collection
-    validationAction: "error", // Mặc định từ chối dữ liệu không hợp lệ
-  },
-});
+const mongoClient = new MongoDBClient(
+  new MongoClient(process.env.MONGODB_URI ?? "")
+);
 
-await mongoDB.createCollection("searches", {
-  validator: {
-    $jsonSchema: {
-      bsonType: "object",
-      required: ["userId", "word", "searchCount"],
-      additionalProperties: false,
-      properties: {
-        userId: {
-          bsonType: "string",
-          description: "tham chiếu đến user.",
-        },
-        word: {
-          bsonType: "string",
-          description: "tham chiếu đến word.",
-        },
-        searchCount: {
-          bsonType: "int",
-          minimum: 0,
-          description: "Phải là số nguyên không âm.",
-        },
-      },
-    },
-  },
-  validationLevel: "strict", // Bật chế độ strict từ khi tạo collection
-  validationAction: "error", // Mặc định từ chối dữ liệu không hợp lệ
-});
-
-export default mongoDB;
+export default mongoClient;

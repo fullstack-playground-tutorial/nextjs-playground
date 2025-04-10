@@ -24,9 +24,8 @@ export class AuthClient implements AuthService {
     ip: string,
     deviceId: string
   ): Promise<number> {
-    
     return this.httpInstance
-      .post<number>(
+      .post<number, any>(
         `${this.auth_url}/login`,
         {
           email: email,
@@ -45,22 +44,22 @@ export class AuthClient implements AuthService {
       .then((res) => {
         const setCookies = getSetCookieFromResponse(res.headers);
         console.log("cookies: ", setCookies);
-        
+
         storeCookies({
           accessToken: setCookies.accessToken,
           refreshToken: setCookies.refreshToken,
           userId: setCookies.userId,
         });
-        return res.body
+        return res.body;
       })
-      .catch((e) => {        
+      .catch((e) => {
         throw e;
       });
   }
 
   async register(user: Account): Promise<number> {
     try {
-      const res = await this.httpInstance.post<number>(
+      const res = await this.httpInstance.post<number, Account>(
         `${this.auth_url}/register`,
         user,
         {
@@ -89,7 +88,7 @@ export class AuthClient implements AuthService {
             [HeaderType.deviceId]: deviceId,
             [HeaderType.userAgent]: userAgent,
             [HeaderType.xForwardedFor]: ip,
-            [HeaderType.cookie]: getCookieHeader(),
+            [HeaderType.cookie]: await getCookieHeader(),
           },
           cache: "no-cache",
         }
@@ -108,7 +107,6 @@ export class AuthClient implements AuthService {
     userAgent: string
   ): Promise<Cookie | undefined> {
     try {
-      
       const res = await this.httpInstance.get<number>(
         `${this.auth_url}/refresh`,
         {
@@ -117,7 +115,7 @@ export class AuthClient implements AuthService {
             [HeaderType.deviceId]: deviceId,
             [HeaderType.userAgent]: userAgent,
             [HeaderType.xForwardedFor]: ip,
-            [HeaderType.cookie]: getCookieHeader(),
+            [HeaderType.cookie]: await getCookieHeader(),
           },
           cache: "no-cache",
         }
