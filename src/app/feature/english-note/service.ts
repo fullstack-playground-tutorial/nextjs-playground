@@ -54,14 +54,31 @@ export class ApiEnglishNoteClient implements ApiEnglishNoteService {
 }
 
 export class EnglishNoteClient implements EnglishNoteService {
-  constructor(private httpInstance: HttpService, private englishNote_url: string) {
+  constructor(
+    private httpInstance: HttpService,
+    private english_note_url: string
+  ) {
     this.insert = this.insert.bind(this);
+  }
+
+  async search(q?: string): Promise<Word[]> {
+    const searchParam = new URLSearchParams();
+    if (q) {
+      searchParam.set("q", q);
+    }
+
+    return this.httpInstance
+      .get<Word[]>(this.english_note_url + "/search" + searchParam)
+      .then((res) => res.body)
+      .catch((e) => {
+        throw e;
+      });
   }
 
   async insert(text: string, definition: string): Promise<boolean> {
     return this.httpInstance
       .post<boolean, Word>(
-        `${this.englishNote_url}`,
+        `${this.english_note_url}`,
         {
           text: text,
           definition: definition,

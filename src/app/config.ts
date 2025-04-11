@@ -7,7 +7,7 @@ export const config = {
   search_url: serverHost + "/search",
   notification_url: serverHost + "/notification",
   friend_url: serverHost + "/friend",
-  english_note_url: clientHost + "/eng-note",
+  english_note_url: clientHost + "/api/eng-note",
   ws: {
     notification_url: wsHost + `/notification/ws`,
   },

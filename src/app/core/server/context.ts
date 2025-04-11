@@ -17,8 +17,7 @@ import {
 } from "@/app/feature/english-note/english-note";
 import { ApiEnglishNoteClient, EnglishNoteClient } from "@/app/feature/english-note/service";
 import { EnglishNoteMongoRepository } from "@/app/feature/english-note/repository";
-import { Db } from "mongodb";
-import mongoDBInstance, { MongoDBClient } from "@/app/lib/mongodb";
+import { MongoDBClient } from "@/app/lib/mongodb";
 import mongoClient from "@/app/lib/mongodb";
 
 class ApplicationContext {
@@ -130,7 +129,7 @@ await mongoClient.init(async () => {
     validator: {
       $jsonSchema: {
         bsonType: "object",
-        required: [, "word", "definition"],
+        required: ["word", "definition"],
         additionalProperties: false,
         properties: {
           word: {

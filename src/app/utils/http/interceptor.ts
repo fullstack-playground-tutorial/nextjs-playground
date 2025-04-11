@@ -23,7 +23,7 @@ class InterceptorRequest {
 }
 
 class InterceptorResponse {
-  onIntercepterResponse?: (
+  onInterceptorResponse?: (
     response: Response,
     url: string,
     isRefreshing: boolean,
@@ -41,7 +41,7 @@ class InterceptorResponse {
       options: RequestInit
     ) => Promise<Response>
   ) {
-    this.onIntercepterResponse = callback;
+    this.onInterceptorResponse = callback;
     return;
   }
 }

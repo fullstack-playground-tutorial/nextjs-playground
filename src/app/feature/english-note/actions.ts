@@ -6,7 +6,7 @@ import { ValidateErrors } from "@/app/utils/validate/model";
 import { getEnglishNoteService } from "@/app/core/server/context";
 import { ResponseError } from "@/app/utils/exception/model/response-error";
 import { Error422Message } from "@/app/utils/exception/model/response";
-import { EnglishNoteActionState } from "@/app/[lang]/(auth)/eng-note/page";
+import { EnglishNoteActionState } from "@/app/[lang]/(auth)/eng-note/components/definition-form";
 
 export async function createWord(
   prevState: EnglishNoteActionState,
@@ -26,7 +26,7 @@ export async function createWord(
 
   try {
     await getEnglishNoteService().insert(text, definition);
-    return {...prevState, fieldErrs: {}};
+    return { ...prevState, fieldErrs: {} };
   } catch (e) {
     if (e instanceof ResponseError) {
       switch (e.status) {
@@ -43,4 +43,8 @@ export async function createWord(
       throw e;
     }
   }
+}
+
+export async function search(q?: string): Promise<Word[]> {
+  return getEnglishNoteService().search(q);
 }

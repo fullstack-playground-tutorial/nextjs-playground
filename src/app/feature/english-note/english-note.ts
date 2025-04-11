@@ -17,5 +17,6 @@ export interface ApiEnglishNoteRepository {
 }
 
 export interface EnglishNoteService {
+  search(q?: string): Promise<Word[]>;
   insert(text: string, definition: string): Promise<boolean>;
 }

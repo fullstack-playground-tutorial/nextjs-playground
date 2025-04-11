@@ -70,13 +70,13 @@ export class HttpService {
     options: RequestInit
   ): Promise<HTTPResponse<T>> {
     try {
-      if (this.interceptors.response.onIntercepterResponse) {
-        res = await this.interceptors.response.onIntercepterResponse(
+      if (this.interceptors.response.onInterceptorResponse) {
+        res = await this.interceptors.response.onInterceptorResponse(
           res,
           url,
           this.isRefreshing,
           options
-        );        
+        );
       }
       let contentType = res.headers.get(HeaderType.contentType);
       if (contentType == null) {
@@ -93,15 +93,24 @@ export class HttpService {
           throw new ResponseError(errMessage, res.status, null);
         }
       } else {
-        let response = await res.json();
-        response = response as T;
-        return {
-          headers: res.headers,
-          body: response,
-          status: res.status,
-        };
+        if (ContentType.isJson(contentType)) {
+          let response = await res.json();
+          response = response as T;
+          return {
+            headers: res.headers,
+            body: response,
+            status: res.status,
+          };
+        } else {
+          let response = await res.text();
+          return {
+            headers: res.headers,
+            status: res.status,
+            body: response as T
+          };
+        }
       }
-    } catch (error) {      
+    } catch (error) {
       throw error;
     }
   }
