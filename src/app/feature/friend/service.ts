@@ -16,7 +16,7 @@ export class FriendClient implements FriendService {
       {},
       {
         headers: {
-          [HeaderType.contentType]: ContentType.applicationJson,
+          [HeaderType.contentType]: ContentType.build("application/json", "utf-8"),
           [HeaderType.cookie]: await getCookieHeader(),
         },
         cache: "no-cache",
@@ -30,7 +30,7 @@ export class FriendClient implements FriendService {
       {},
       {
         headers: {
-          [HeaderType.contentType]: ContentType.applicationJson,
+          [HeaderType.contentType]: ContentType.build("application/json", "utf-8"),
           [HeaderType.cookie]: await getCookieHeader(),
         },
         cache: "no-cache",
@@ -45,7 +45,7 @@ export class FriendClient implements FriendService {
       {},
       {
         headers: {
-          [HeaderType.contentType]: ContentType.applicationJson,
+          [HeaderType.contentType]: ContentType.build("application/json", "utf-8"),
           [HeaderType.cookie]: await getCookieHeader(),
         },
         cache: "no-cache",
@@ -60,7 +60,7 @@ export class FriendClient implements FriendService {
       {},
       {
         headers: {
-          [HeaderType.contentType]: ContentType.applicationJson,
+          [HeaderType.contentType]: ContentType.build("application/json", "utf-8"),
           [HeaderType.cookie]: await getCookieHeader(),
         },
         cache: "no-cache",
@@ -75,7 +75,7 @@ export class FriendClient implements FriendService {
       {},
       {
         headers: {
-          [HeaderType.contentType]: ContentType.applicationJson,
+          [HeaderType.contentType]: ContentType.build("application/json", "utf-8"),
           [HeaderType.cookie]: await getCookieHeader(),
         },
         cache: "no-cache",

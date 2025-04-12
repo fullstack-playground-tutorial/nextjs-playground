@@ -1,5 +1,5 @@
 import { createWord } from "@/app/feature/english-note/actions";
-import { Word } from "@/app/feature/english-note/english-note";
+import { Vocabulary } from "@/app/feature/english-note/english-note";
 import { ValidateErrors } from "@/app/utils/validate/model";
 import {
   ChangeEvent,
@@ -10,54 +10,77 @@ import {
 } from "react";
 
 export type EnglishNoteActionState = {
-  text?: string;
   definition?: string;
-  fieldErrs: ValidateErrors;
+  fieldErrs?: ValidateErrors;
 };
 
 const initialActionState: EnglishNoteActionState = {
-  fieldErrs: {},
 };
 
 type Props = {
   handleAddWord: () => void;
   keyword: string;
+  addFormVisible: boolean;
+  handleClose: () => void;
 };
 
 type InternalState = {
-  addFormVisible: boolean;
-  newWord: Word;
+  newWord: Vocabulary;
 };
 
 const initialState: InternalState = {
-  addFormVisible: false,
   newWord: {
     definition: "",
-    text: "",
+    word: "",
     searchCount: 0,
   },
 };
 
-function DefinitionForm({ handleAddWord, keyword }: Props) {
+function DefinitionForm({
+  handleAddWord,
+  keyword,
+  addFormVisible,
+  handleClose,
+}: Props) {
   const [state, setState] = useState<InternalState>(initialState);
 
-  const clear = () => {
-    setState({
-      ...state,
-      newWord: { definition: "", text: "", searchCount: 0 },
-      addFormVisible: false,
-    });
+  const createWordAction = async (
+    prevState: EnglishNoteActionState,
+    formData: FormData
+  ) => {
+    try {
+      const res = await createWord(prevState, formData);
+      setState({
+        ...state,
+        newWord: { definition: "", word: "", searchCount: 0 },
+      });
+
+      if (!res.fieldErrs) {
+        
+        handleAddWord();
+        handleClose();
+      }
+
+      return res;
+    } catch (error) {
+      throw error;
+    }
   };
+
+  const [actionState, formAction, pending] = useActionState<
+    EnglishNoteActionState,
+    FormData
+  >(createWordAction, initialActionState);
 
   const handleCancelClick = (e: MouseEvent) => {
     e.preventDefault();
-    setState((prev) => ({ ...prev, addFormVisible: false }));
+    handleClose();
   };
 
   const handleOnWordChange = (e: ChangeEvent<HTMLInputElement>) => {
     setState((prev) => ({
       ...prev,
-      newWord: { ...prev.newWord, text: e.target.value.trim() },
+      newWord: { ...prev.newWord, word: e.target.value },
     }));
   };
 
@@ -65,31 +88,19 @@ function DefinitionForm({ handleAddWord, keyword }: Props) {
     e.preventDefault();
     setState((prev) => ({
       ...prev,
-      newWord: { ...prev.newWord, definition: e.target.value.trim() },
+      newWord: { ...prev.newWord, definition: e.target.value },
     }));
   };
 
-  const handleAddClick = (e: MouseEvent) => {
-    e.preventDefault();
-    if (state.newWord.text.length > 0 && state.newWord.definition.length > 0) {
-    //   setWords([...words, state.newWord]);
-    }
-    clear();
-    handleAddWord();
-  };
-
   useEffect(() => {
-    setState({ ...state, newWord: { ...state.newWord, text: keyword } });
+    setState({ ...state, newWord: { ...state.newWord, word: keyword } });
   }, [keyword]);
-  const [actionState, formAction] = useActionState<
-    EnglishNoteActionState,
-    FormData
-  >(createWord, initialActionState);
+
   return (
     <form
       action={formAction}
       className={`flex flex-col gap-2 w-[600px] bg-layer-2 shadow rounded-md p-4 ${
-        state.addFormVisible ? "" : "hidden"
+        addFormVisible ? "" : "hidden"
       }`}
     >
       <h1 className="self-center font-semibold text-2xl text-center">
@@ -102,16 +113,16 @@ function DefinitionForm({ handleAddWord, keyword }: Props) {
           </label>
           <input
             type="text"
-            name="text"
+            name="word"
             className="field-color-app border-app flex-auto rounded-md p-1"
             placeholder="Word"
-            value={state.newWord.text}
+            value={state.newWord.word}
             onChange={(e) => handleOnWordChange(e)}
           />
         </div>
-        {actionState.fieldErrs["text"] && (
+        { actionState.fieldErrs && actionState.fieldErrs["text"] && (
           <span className={`text-red-500 text-sm h-5 px-2`}>
-            {actionState.fieldErrs["text"]}
+            {actionState.fieldErrs["word"]}
           </span>
         )}
       </div>
@@ -127,7 +138,7 @@ function DefinitionForm({ handleAddWord, keyword }: Props) {
           placeholder="Define something here ..."
           onChange={(e) => handleOnDefinitionChange(e)}
         />
-        {actionState.fieldErrs["definition"] && (
+        {actionState.fieldErrs && actionState.fieldErrs["definition"] && (
           <span className={`text-red-500 text-sm h-5 px-2`}>
             {actionState.fieldErrs["definition"]}
           </span>
@@ -136,13 +147,15 @@ function DefinitionForm({ handleAddWord, keyword }: Props) {
       <div className="flex flex-row justify-end gap-2">
         <button
           className="btn btn-sm btn-primary flex-1/2"
-          onClick={(e) => handleAddClick(e)}
+          type="submit"
+          disabled={pending}
         >
           Add
         </button>
         <button
           className="btn btn-sm btn-outline-primary flex-1/2"
           onClick={(e) => handleCancelClick(e)}
+          disabled={pending}
         >
           Cancel
         </button>

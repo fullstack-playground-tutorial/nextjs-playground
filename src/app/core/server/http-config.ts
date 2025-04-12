@@ -44,7 +44,7 @@ async function handleStatus401<T>(
       .refresh(deviceId, ip, ua)
       .then((res) => {
         if (res) {
-          console.log("resfresh successfully");
+          console.log("refresh successfully");
           storeCookies({ accessToken: res });
           return httpServiceInstance.get(url, options);
         } else {

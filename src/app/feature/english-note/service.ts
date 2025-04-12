@@ -3,7 +3,7 @@ import {
   ApiEnglishNoteRepository,
   ApiEnglishNoteService,
   EnglishNoteService,
-  Word,
+  Vocabulary,
 } from "./english-note";
 import { HttpService } from "@/app/utils/http/http-default";
 import { ContentType, HeaderType } from "@/app/utils/http/headers";
@@ -13,7 +13,7 @@ export class ApiEnglishNoteClient implements ApiEnglishNoteService {
     this.search = this.search.bind(this);
     this.insert = this.insert.bind(this);
   }
-  async load(userId: string, text: string): Promise<Word | null> {
+  async load(userId: string, text: string): Promise<Vocabulary | null> {
     try {
       const word = await this.rp.load(userId, text);
       if (!word) {
@@ -28,22 +28,29 @@ export class ApiEnglishNoteClient implements ApiEnglishNoteService {
     }
   }
 
-  async insert(word: string, definition: string): Promise<boolean> {
+  async insert(
+    userId: string,
+    word: string,
+    definition: string
+  ): Promise<boolean> {
     try {
-      const existedWord = await this.rp.insert(word, definition);
+      const existedWord = await this.rp.load(word, definition);
       if (existedWord) {
         console.log(`error: ${word} already exists`);
         throw new ResponseError(`${word} already existed`, 409, null);
       } else {
-        const res = await this.rp.insert(word, definition);
-        return res;
+        return this.rp.transaction(async () => {
+          await this.rp.insert(word, definition);
+          const res = await this.rp.increase(userId, word);
+          return res;
+        });
       }
     } catch (error) {
       throw error;
     }
   }
 
-  async search(userId: string, q?: string): Promise<Word[]> {
+  async search(userId: string, q?: string): Promise<Vocabulary[]> {
     try {
       const words = await this.rp.search(userId, q);
       return words;
@@ -59,16 +66,17 @@ export class EnglishNoteClient implements EnglishNoteService {
     private english_note_url: string
   ) {
     this.insert = this.insert.bind(this);
+    this.search = this.search.bind(this);
   }
 
-  async search(q?: string): Promise<Word[]> {
+  async search(q?: string): Promise<Vocabulary[]> {
     const searchParam = new URLSearchParams();
     if (q) {
       searchParam.set("q", q);
     }
 
     return this.httpInstance
-      .get<Word[]>(this.english_note_url + "/search" + searchParam)
+      .get<Vocabulary[]>(this.english_note_url + "/search?" + searchParam.toString())
       .then((res) => res.body)
       .catch((e) => {
         throw e;
@@ -77,15 +85,15 @@ export class EnglishNoteClient implements EnglishNoteService {
 
   async insert(text: string, definition: string): Promise<boolean> {
     return this.httpInstance
-      .post<boolean, Word>(
+      .post<boolean, Vocabulary>(
         `${this.english_note_url}`,
         {
-          text: text,
+          word: text,
           definition: definition,
         },
         {
           headers: {
-            [HeaderType.contentType]: ContentType.applicationJson,
+            [HeaderType.contentType]: ContentType.build("application/json", "utf-8"),
           },
           cache: "no-cache",
         }

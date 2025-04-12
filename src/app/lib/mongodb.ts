@@ -1,8 +1,9 @@
-import { Db, MongoClient } from "mongodb";
+import { ClientSession, Db, MongoClient } from "mongodb";
 
 export class MongoDBClient {
   constructor(private mongoClient: MongoClient) {
     this.init = this.init.bind(this);
+    this.withTransaction = this.withTransaction.bind(this);
   }
 
   async init(callback: () => void) {
@@ -12,6 +13,21 @@ export class MongoDBClient {
 
   db(dbName: string): Db {
     return this.mongoClient.db(dbName);
+  }
+
+  async withTransaction<T>(cb: () => Promise<T>): Promise<T> {
+    const session = this.mongoClient.startSession();
+    try {
+      const res = session.withTransaction(async () => {
+        return cb();
+      });
+      return res;
+    } catch (error) {
+      console.error("error: ", error);
+      throw error;
+    } finally {
+      session.endSession();
+    }
   }
 }
 

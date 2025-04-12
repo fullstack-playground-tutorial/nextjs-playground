@@ -15,7 +15,10 @@ import {
   ApiEnglishNoteService,
   EnglishNoteService,
 } from "@/app/feature/english-note/english-note";
-import { ApiEnglishNoteClient, EnglishNoteClient } from "@/app/feature/english-note/service";
+import {
+  ApiEnglishNoteClient,
+  EnglishNoteClient,
+} from "@/app/feature/english-note/service";
 import { EnglishNoteMongoRepository } from "@/app/feature/english-note/repository";
 import { MongoDBClient } from "@/app/lib/mongodb";
 import mongoClient from "@/app/lib/mongodb";
@@ -87,7 +90,10 @@ class ApplicationContext {
 
   getEnglishNoteService = () => {
     if (!this.englishNoteService) {
-      this.englishNoteService = new EnglishNoteClient(this.httpService, config.english_note_url)
+      this.englishNoteService = new EnglishNoteClient(
+        this.httpService,
+        config.english_note_url
+      );
     }
     return this.englishNoteService;
   };
@@ -95,7 +101,8 @@ class ApplicationContext {
   getApiEnglishNoteService = () => {
     if (!this.apiEnglishNoteService) {
       const englishNoteRepo = new EnglishNoteMongoRepository(
-        this.mongoDBClient.db("english-note")
+        this.mongoDBClient,
+        "english-note"
       );
 
       this.apiEnglishNoteService = new ApiEnglishNoteClient(englishNoteRepo);
@@ -114,15 +121,16 @@ await mongoClient.init(async () => {
         required: ["userId"],
         additionalProperties: false,
         properties: {
+          _id: {},
           userId: {
             bsonType: "string",
-            description: "Phải là chuỗi và không được bỏ trống.",
+            description: "no blank",
           },
         },
       },
     },
-    validationLevel: "strict", // Bật chế độ strict từ khi tạo collection
-    validationAction: "error", // Mặc định từ chối dữ liệu không hợp lệ
+    validationLevel: "strict",
+    validationAction: "error",
   });
 
   await db.createCollection("words", {
@@ -132,19 +140,20 @@ await mongoClient.init(async () => {
         required: ["word", "definition"],
         additionalProperties: false,
         properties: {
+          _id: {},
           word: {
             bsonType: "string",
-            description: "Phải là chuỗi và không được bỏ trống.",
+            description: "no blank",
           },
           definition: {
             bsonType: "string",
-            description: "Phải là chuỗi và không được bỏ trống.",
+            description: "no blank",
           },
         },
       },
-      validationLevel: "strict", // Bật chế độ strict từ khi tạo collection
-      validationAction: "error", // Mặc định từ chối dữ liệu không hợp lệ
     },
+    validationLevel: "strict",
+    validationAction: "error",
   });
 
   await db.createCollection("searches", {
@@ -154,24 +163,25 @@ await mongoClient.init(async () => {
         required: ["userId", "word", "searchCount"],
         additionalProperties: false,
         properties: {
+          _id: {},
           userId: {
             bsonType: "string",
-            description: "tham chiếu đến user.",
+            description: "reference user.",
           },
           word: {
             bsonType: "string",
-            description: "tham chiếu đến word.",
+            description: "reference word.",
           },
           searchCount: {
             bsonType: "int",
             minimum: 0,
-            description: "Phải là số nguyên không âm.",
+            description: "must greater or equal 0",
           },
         },
       },
     },
-    validationLevel: "strict", // Bật chế độ strict từ khi tạo collection
-    validationAction: "error", // Mặc định từ chối dữ liệu không hợp lệ
+    validationLevel: "strict",
+    validationAction: "error",
   });
 });
 

@@ -12,40 +12,48 @@ export class HttpService {
   private baseRequestInit: RequestInit = {};
   interceptors: Interceptors;
   isRefreshing: boolean = false;
-  requestTimeout?: NodeJS.Timeout;
+  requestTimeout: null | number = null;
   // interceptorSubscribers: (() => Promise<Response>)[] = []
 
   constructor(httpDefault: HttpDefault) {
     this.interceptors = new Interceptors();
     if (httpDefault.timeout) {
-      this.setRequestTimeout(httpDefault.timeout);
+      this.requestTimeout = httpDefault.timeout;
     }
     this.get = this.get.bind(this);
     this.post = this.post.bind(this);
     this.put = this.put.bind(this);
     this.patch = this.patch.bind(this);
     this.delete = this.delete.bind(this);
-    this.setRequestTimeout = this.setRequestTimeout.bind(this);
     this.sendRequest = this.sendRequest.bind(this);
     this.handleResponse = this.handleResponse.bind(this);
-  }
-
-  private setRequestTimeout(timeout: number) {
-    const abortController = new AbortController();
-    this.baseRequestInit.signal = abortController.signal;
-    this.requestTimeout = setTimeout(() => {
-      abortController.abort();
-    }, timeout);
   }
 
   async sendRequest<T>(
     url: string,
     options: RequestInit
   ): Promise<HTTPResponse<T>> {
-    let mergeOptions = { ...this.baseRequestInit, ...options };
+    console.log("fetching API ...");
+    const abortController = new AbortController();
+    const timeout = this.requestTimeout;
+
+    const timer = timeout
+      ? setTimeout(() => abortController.abort(), timeout)
+      : null;
+
+    let mergeOptions = {
+      ...this.baseRequestInit,
+      signal: abortController.signal,
+      ...options,
+    };
+
     if (this.interceptors.request.config) {
       const configInterceptor = this.interceptors.request.config(options);
-      mergeOptions = { ...this.baseRequestInit, ...configInterceptor };
+      mergeOptions = {
+        ...this.baseRequestInit,
+        signal: abortController.signal,
+        ...configInterceptor,
+      };
     }
 
     if (this.isRefreshing) {
@@ -55,10 +63,10 @@ export class HttpService {
       console.log("refreshing ...");
       return new Promise<HTTPResponse<T>>((_, reject) => {
         reject("token is refreshing");
-      }).finally(() => clearTimeout(this.requestTimeout));
+      }).finally(() => timer && clearTimeout(timer));
     } else {
-      const res = await fetch(url, mergeOptions).finally(() =>
-        clearTimeout(this.requestTimeout)
+      const res = await fetch(url, mergeOptions).finally(
+        () => timer && clearTimeout(timer)
       );
       return this.handleResponse<T>(res, url, options);
     }
@@ -80,7 +88,7 @@ export class HttpService {
       }
       let contentType = res.headers.get(HeaderType.contentType);
       if (contentType == null) {
-        contentType = ContentType.textPlain;
+        contentType = ContentType.build("text/plain", 'utf-8');
       }
 
       if (!res.ok) {
@@ -90,6 +98,7 @@ export class HttpService {
           throw new ResponseError(null, res.status, response);
         } else {
           const errMessage = await res.text();
+          console.error("ERROR RESPONSE FROM CALL API: ", errMessage);
           throw new ResponseError(errMessage, res.status, null);
         }
       } else {
@@ -102,12 +111,9 @@ export class HttpService {
             status: res.status,
           };
         } else {
-          let response = await res.text();
-          return {
-            headers: res.headers,
-            status: res.status,
-            body: response as T
-          };
+          let errMessage = await res.text();
+          console.error("ERROR RESPONSE FROM CALL API: ", errMessage);
+          throw new ResponseError(errMessage, res.status, null);
         }
       }
     } catch (error) {

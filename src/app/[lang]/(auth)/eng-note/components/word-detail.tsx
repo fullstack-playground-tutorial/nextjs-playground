@@ -1,7 +1,7 @@
-import { Word } from "@/app/feature/english-note/english-note";
+import { Vocabulary } from "@/app/feature/english-note/english-note";
 
 type Props = {
-  searchedWord?: Word;
+  searchedWord?: Vocabulary;
 };
 function WordDetail({ searchedWord }: Props) {
   return (
@@ -9,7 +9,7 @@ function WordDetail({ searchedWord }: Props) {
       {searchedWord && (
         <div className="w-[800px] bg-layer-2 shadow rounded-md p-4">
           <h1 className="self-center font-semibold text-2xl text-center">
-            {searchedWord.text}
+            {searchedWord.word}
           </h1>
           <div>
             <p className="text-sm">{searchedWord.definition}</p>

@@ -1,77 +1,84 @@
-import { Db } from "mongodb";
-import { ApiEnglishNoteRepository, Word } from "./english-note";
+import { Db, Document, MongoClient } from "mongodb";
+import { ApiEnglishNoteRepository, Vocabulary } from "./english-note";
+import { MongoDBClient } from "@/app/lib/mongodb";
 
 export class EnglishNoteMongoRepository implements ApiEnglishNoteRepository {
-  constructor(private db: Db) {
+  private readonly db: Db;
+  constructor(private client: MongoDBClient, dbName: string) {
+    this.db = client.db(dbName);
     this.search = this.search.bind(this);
     this.insert = this.insert.bind(this);
     this.load = this.load.bind(this);
     this.increase = this.increase.bind(this);
+    this.transaction = this.transaction.bind(this);
   }
 
-  async search(userId: string, q?: string): Promise<Word[]> {
+  async search(userId: string, q?: string): Promise<Vocabulary[]> {
+    const pipeline: Document[] = [
+      {
+        $match: {
+          ...(q ? { word: { $regex: q, $options: "i" } } : {}),
+          userId: userId,
+        },
+      },
+      {
+        $lookup: {
+          from: "words",
+          localField: "word",
+          foreignField: "word",
+          as: "word_info",
+        },
+      },
+      {
+        $unwind: "$word_info", // excluded object.
+      },
+      {
+        $project: {
+          _id: 0,
+          word: 1,
+          definition: "$word_info.definition",
+          searchCount: 1,
+        },
+      },
+    ];
+
     try {
       const res = await this.db
         .collection("searches")
-        .aggregate<Word>([
-          {
-            $match: {
-              userId: userId,
-              word: { $regex: q, $options: "i" },
-            },
-          },
-
-          {
-            $lookup: {
-              from: "words",
-              localField: "word",
-              foreignField: "word",
-              as: "word_info",
-            },
-          },
-          {
-            $unwind: "$word_info", // bung object ra khỏi mảng
-          },
-          {
-            $project: {
-              _id: 0,
-              word: 1,
-              definition: "$word_info.definition",
-              searchCount: 1,
-            },
-          },
-        ])
+        .aggregate<Vocabulary>(pipeline)
         .toArray();
+
       return res;
     } catch (err) {
       if (err instanceof Error) {
-        console.error("MongoDB query error:", err.message);
+        console.error("MongoDB query error:", err);
       } else {
         console.error("Unknown error occurred during MongoDB query", err);
       }
+      console.log(JSON.stringify(err));
+
       throw err;
     }
   }
 
-  async insert(word: string, definition: string): Promise<boolean>{
+  async insert(word: string, definition: string): Promise<boolean> {    
     try {
-      const res = await this.db.collection<Word>("words").insertOne({
-        text: word,
+      const res = await this.db.collection("words").insertOne({
+        word: word,
         definition: definition,
-     })
-     return res.acknowledged;
-    } catch (error) {
-      console.log("error: ", error);
-      throw error;      
+      });
+      return res.acknowledged;
+    } catch (error: any) {
+      console.error("error: ", JSON.stringify(error, null, 2));
+      throw error;
     }
-    
   }
 
-  async load(userId: string, word?: string): Promise<Word | null> {
+  async load(userId: string, word?: string): Promise<Vocabulary | null> {
     try {
       const res = await this.db
         .collection("searches")
-        .findOne<Word>({ userId: userId, word: word });
+        .findOne<Vocabulary>({ userId: userId, word: word });
       return res;
     } catch (error) {
       console.log("error: ", error);
@@ -84,11 +91,10 @@ export class EnglishNoteMongoRepository implements ApiEnglishNoteRepository {
       const res = await this.db.collection("searches").updateOne(
         {
           userId: userId,
-          word: {
-            word: word,
-          },
+          word: word,
         },
-        { $inc: { searchCount: 1 } }
+        { $inc: { searchCount: 1 } },
+        { upsert: true }
       );
       return res.modifiedCount > 0;
     } catch (error) {
@@ -96,5 +102,9 @@ export class EnglishNoteMongoRepository implements ApiEnglishNoteRepository {
       console.log("error: ", error);
       return false;
     }
+  }
+
+  async transaction<T>(cb: () => Promise<T>) {
+    return this.client.withTransaction<T>(cb);
   }
 }

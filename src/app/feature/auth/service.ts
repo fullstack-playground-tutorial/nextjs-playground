@@ -33,7 +33,7 @@ export class AuthClient implements AuthService {
         },
         {
           headers: {
-            [HeaderType.contentType]: ContentType.applicationJson,
+            [HeaderType.contentType]: ContentType.build("application/json", "utf-8"),
             [HeaderType.deviceId]: deviceId,
             [HeaderType.userAgent]: userAgent,
             [HeaderType.xForwardedFor]: ip,
@@ -64,7 +64,7 @@ export class AuthClient implements AuthService {
         user,
         {
           headers: {
-            [HeaderType.contentType]: ContentType.applicationJson,
+            [HeaderType.contentType]: ContentType.build("application/json", "utf-8"),
           },
         }
       );
@@ -84,7 +84,7 @@ export class AuthClient implements AuthService {
         `${this.auth_url}/logout`,
         {
           headers: {
-            [HeaderType.contentType]: ContentType.applicationJson,
+            [HeaderType.contentType]: ContentType.build("application/json", "utf-8"),
             [HeaderType.deviceId]: deviceId,
             [HeaderType.userAgent]: userAgent,
             [HeaderType.xForwardedFor]: ip,
@@ -111,7 +111,7 @@ export class AuthClient implements AuthService {
         `${this.auth_url}/refresh`,
         {
           headers: {
-            [HeaderType.contentType]: ContentType.applicationJson,
+            [HeaderType.contentType]: ContentType.build("application/json", "utf-8"),
             [HeaderType.deviceId]: deviceId,
             [HeaderType.userAgent]: userAgent,
             [HeaderType.xForwardedFor]: ip,
