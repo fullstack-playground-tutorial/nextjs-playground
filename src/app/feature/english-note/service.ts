@@ -61,12 +61,10 @@ export class ApiEnglishNoteClient implements ApiEnglishNoteService {
 }
 
 export class EnglishNoteClient implements EnglishNoteService {
-  constructor(
-    private httpInstance: HttpService,
-    private english_note_url: string
-  ) {
+  constructor(private httpInstance: HttpService, private url: string) {
     this.insert = this.insert.bind(this);
     this.search = this.search.bind(this);
+    this.load = this.load.bind(this);
   }
 
   async search(q?: string): Promise<Vocabulary[]> {
@@ -76,24 +74,33 @@ export class EnglishNoteClient implements EnglishNoteService {
     }
 
     return this.httpInstance
-      .get<Vocabulary[]>(this.english_note_url + "/search?" + searchParam.toString())
+      .get<Vocabulary[]>(this.url + "/search?" + searchParam.toString())
       .then((res) => res.body)
       .catch((e) => {
         throw e;
       });
   }
 
+  async load(word: string): Promise<Vocabulary | null> {
+    return this.httpInstance
+      .get<Vocabulary | null>(`${this.url}/${word}`)
+      .then((res) => res.body);
+  }
+
   async insert(text: string, definition: string): Promise<boolean> {
     return this.httpInstance
       .post<boolean, Vocabulary>(
-        `${this.english_note_url}`,
+        `${this.url}`,
         {
           word: text,
           definition: definition,
         },
         {
           headers: {
-            [HeaderType.contentType]: ContentType.build("application/json", "utf-8"),
+            [HeaderType.contentType]: ContentType.build(
+              "application/json",
+              "utf-8"
+            ),
           },
           cache: "no-cache",
         }

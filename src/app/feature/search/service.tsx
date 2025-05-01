@@ -53,7 +53,7 @@ export class SearchClient implements SearchService {
         {
           cache: "no-cache",
           headers: {
-            [HeaderType.contentType]: ContentType.applicationJson,
+            [HeaderType.contentType]: ContentType.build("application/json"),
             [HeaderType.cookie]: await getCookieHeader(),
           },
         }

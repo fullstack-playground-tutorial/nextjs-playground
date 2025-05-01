@@ -49,5 +49,9 @@ export async function createWord(
 }
 
 export async function search(q?: string): Promise<Vocabulary[]> {
-  return getEnglishNoteService().search(q ? sanitize(q) : q)
+  return getEnglishNoteService().search(q ? sanitize(q) : q);
+}
+
+export async function load(word: string): Promise<Vocabulary | null> {
+  return getEnglishNoteService().load(word);
 }

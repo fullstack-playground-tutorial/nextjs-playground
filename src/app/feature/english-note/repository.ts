@@ -30,7 +30,7 @@ export class EnglishNoteMongoRepository implements ApiEnglishNoteRepository {
         },
       },
       {
-        $unwind: "$word_info", // excluded object.
+        $unwind: "$word_info",
       },
       {
         $project: {
