@@ -10,7 +10,7 @@ interface Props {
 }
 
 export async function NotificationElement({ noti }: Props) {
-  const userId = cookies().get("userId")?.value
+  const userId = (await cookies()).get("userId")?.value
   const internalization = use(InternalizationContext);
   const onAcceptClick = (e: React.MouseEvent) => {
     e.preventDefault();

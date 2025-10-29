@@ -5,7 +5,7 @@ import { verifySession } from "./app/dal";
 const publicRoute: string[] = ["/auth", "/test", "/marketplace","/eng-note"];
 const protectedRoute: string[] = ["/chat", "/profile", "/search", "/"];
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const locale = localeService.currentLocale;
 

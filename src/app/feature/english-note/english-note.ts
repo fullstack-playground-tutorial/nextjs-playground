@@ -18,7 +18,7 @@ export interface ApiEnglishNoteRepository {
 }
 
 export interface EnglishNoteService {
-  search(q?: string): Promise<string[]>;
+  search(q?: string): Promise<Vocabulary[]>;
   insert(text: string, definition: string): Promise<boolean>;
   load(word: string): Promise<Vocabulary | null>;
 }

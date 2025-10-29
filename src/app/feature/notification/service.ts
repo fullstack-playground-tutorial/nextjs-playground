@@ -13,12 +13,13 @@ export class NotificationClient implements NotificationService {
 
   async Search(filter: NotificationFilter): Promise<Notification[]> {
     try {
-      const res = await this.http.post<Notification[]>(
+      const cookieHeader = await getCookieHeader();
+      const res = await this.http.post<Notification[], NotificationFilter>(
         `${this.url}/search`,
         filter,
         {
           headers: {
-            [HeaderType.cookie]: getCookieHeader(),
+            [HeaderType.cookie]: cookieHeader,
           },
           cache: "no-cache",
         }
@@ -30,9 +31,10 @@ export class NotificationClient implements NotificationService {
   }
 
   async Patch(notification: Notification): Promise<number> {
+    const cookieHeader = await getCookieHeader();
     return this.http.patch<number>(`${this.url}`, notification, {
       headers: {
-        [HeaderType.cookie]: getCookieHeader(),
+        [HeaderType.cookie]: cookieHeader,
       },
       cache: "no-cache",
     }).then(res => res.body);
