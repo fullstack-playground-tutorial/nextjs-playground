@@ -1,12 +1,9 @@
-"use client";
-
 // import { SessionProvider } from "next-auth/react";
-import { ReactNode } from "react";
 // import LoadingProvider from "./loading/LoadingProvider";
 import InternalizationProvider from "./internalization/InternalizationProvider";
 import AlertProvider from "./alert/AlertProvider";
-import ThemeProvider from "./theme/ThemeProvider";
-// import AuthProvider from "./auth/AuthProvider";
+import { AuthProvider, logout } from "@/app/feature/auth";
+import { ThemeProvider } from "@/app/components/Theme/context";
 // import SearchProvider from "./search/SearchProvider";
 // export * from "./alert/AlertProvider";
 // export * from "./loading/LoadingProvider";
@@ -19,9 +16,11 @@ export interface Props {
 export const Providers = (props: Props) => {
   return (
     <InternalizationProvider>
-      <ThemeProvider>
-        <AlertProvider>{props.children}</AlertProvider>
-      </ThemeProvider>
+      <AuthProvider logoutAction={logout}>
+        <ThemeProvider>
+          <AlertProvider>{props.children}</AlertProvider>
+        </ThemeProvider>
+      </AuthProvider>
     </InternalizationProvider>
   );
 };

@@ -2,32 +2,15 @@
 import TransitionButton from "@/app/components/TransitionButton/TransitionButton";
 import { register } from "@/app/feature/auth/actions";
 import { ValidateErrors } from "@/app/utils/validate/model";
-import React, {
-  ChangeEvent,
-  MutableRefObject,
+import {
+  RefObject,
   useActionState,
-  useState,
 } from "react";
 
 interface Props {
   handleTransition: () => void;
-  ref: MutableRefObject<HTMLDivElement>
+  ref: RefObject<HTMLDivElement>
 }
-interface InternalState {
-  email: string;
-  username: string;
-  password: string;
-  phone: string;
-  confirmPassword: string;
-}
-
-const initialState: InternalState = {
-  email: "",
-  username: "",
-  password: "",
-  phone: "",
-  confirmPassword: "",
-};
 
 export interface SignUpFormState {
   fieldErrors: ValidateErrors;
@@ -38,117 +21,98 @@ const initialFormState: SignUpFormState = {
 };
 
 export const SignUpForm = (props: Props) => {
-  const [state, setState] = useState<InternalState>(initialState);
-  const [formState, formAction, pending] = useActionState<SignUpFormState, FormData>(
+  const [{fieldErrors}, formAction, pending] = useActionState<SignUpFormState, FormData>(
     register,
     initialFormState
   );
 
-  const updateState = (e: ChangeEvent<HTMLInputElement>) => {
-    e.preventDefault();
-    setState((prevState) => ({
-      ...prevState,
-      [e.target.name]: e.target.value,
-    }));
-  };
 
   return (
-    <form className="pt-12 m-4" action={formAction}>
-      <div className="rounded-xl max-w-md mx-auto bg-layer-2 p-4 shadow-lg">
-        <h1 className="text-center text-3xl font-semibold pt-4">
+      <form action={formAction} className="rounded-xl max-w-md mx-auto bg-layer-2 p-4 shadow-lg dark:bg-surface-1 mt-4">
+        <h1 className="dark:text-accent-0 text-center text-4xl font-semibold">
           Sign Up
         </h1>
-        <span className={`text-red-500 text-sm h-5 px-2 `}>
-          {formState.fieldErrors["common"] ?? ""}
+        <span className={`dark:text-alert-1 text-sm h-5 px-2`}>
+          {fieldErrors["common"] ?? ""}
         </span>
-        <div className="flex flex-col pt-4">
+        <div className="flex flex-col mt-4">
           <input
-            className="border-app field-color-app px-2 rounded-md h-9 text-base"
+            className="px-2 rounded-md h-10 text-base border dark:border-border-strong dark:focus:outline-accent-0 dark:text-primary dark:focus:outline-1 dark:placeholder:text-secondary dark:shadow dark:bg-surface-2"
             type="text"
             placeholder="Email"
             name="email"
             id="email"
-            value={state.email}
-            onChange={(e) => updateState(e)}
           />
-          <span className={`text-red-500 text-sm h-5 px-2 `}>
-            {formState.fieldErrors["email"] ?? ""}
+          <span className={`dark:text-alert-1 text-sm h-5 px-2 `}>
+            {fieldErrors["email"] ?? ""}
           </span>
         </div>
         <div className="flex flex-col">
           <input
-            className="border-app field-color-app px-2 rounded-md h-9 text-base"
+            className="px-2 rounded-md h-10 text-base border dark:border-border-strong dark:focus:outline-accent-0 dark:text-primary dark:focus:outline-1 dark:placeholder:text-secondary dark:shadow dark:bg-surface-2"
             type="text"
             placeholder="Username"
             name="username"
             id="username"
-            value={state.username}
-            onChange={(e) => updateState(e)}
           />
-          <span className="text-red-500 text-sm h-5 px-2">
-            {formState.fieldErrors["username"] ?? ""}
+          <span className="dark:text-alert-1 text-sm h-5 px-2">
+            {fieldErrors["username"] ?? ""}
           </span>
         </div>
         <div className="flex flex-col">
           <input
-            className="border-app px-2 rounded-md h-9 text-base field-color-app"
+            className="px-2 rounded-md h-10 text-base border dark:border-border-strong dark:focus:outline-accent-0 dark:text-primary dark:focus:outline-1 dark:placeholder:text-secondary dark:shadow dark:bg-surface-2"
             type="password"
             placeholder="Password"
             name="password"
             id="password"
-            value={state.password}
-            onChange={(e) => updateState(e)}
           />
-          <span className={`text-red-500 text-sm h-5 px-2 `}>
-            {formState.fieldErrors["password"] ?? ""}
+          <span className={`dark:text-alert-1 text-sm h-5 px-2 `}>
+            {fieldErrors["password"] ?? ""}
           </span>
         </div>
         <div className="flex flex-col">
           <input
-            className="border-app field-color-app px-2 rounded-md h-9 text-base"
+            className="px-2 rounded-md h-10 text-base border dark:border-border-strong dark:focus:outline-accent-0 dark:text-primary dark:focus:outline-1 dark:placeholder:text-secondary dark:shadow dark:bg-surface-2"
             type="password"
             placeholder="Confirm Password"
             name="confirmPassword"
             id="confirmPassword"
-            value={state.confirmPassword}
-            onChange={(e) => updateState(e)}
           />
-          <span className={`text-red-500 text-sm h-5 px-2 `}>
-            {formState.fieldErrors["confirmPassword"] ?? ""}
+          <span className={`dark:text-alert-1 text-sm h-5 px-2 `}>
+            {fieldErrors["confirmPassword"] ?? ""}
           </span>
         </div>
 
         <div className="flex flex-col">
           <input
-            className="border-app px-2 rounded-md h-9 text-base field-color-app"
+            className="px-2 rounded-md h-10 text-base border dark:border-border-strong dark:focus:outline-accent-0 dark:text-primary dark:focus:outline-1 dark:placeholder:text-secondary dark:shadow dark:bg-surface-2"
             type="tel"
             placeholder="Phone number"
             name="phone"
             id="phone"
-            value={state.phone}
-            onChange={(e) => updateState(e)}
           />
-          <span className={`text-red-500 text-sm h-5 px-2 `}>
-            {formState.fieldErrors["phone"] ?? ""}
+          <span className={`dark:text-alert-1 text-sm h-5 px-2 `}>
+            {fieldErrors["phone"] ?? ""}
           </span>
         </div>
 
         <div className="flex flex-col items-center">
           <button
-            className=" mx-auto bg-blue-500 text-white font-bold py-2 px-8 hover:bg-blue-700 rounded-full"
+            className=" mx-auto cursor-pointer transition-all dark:bg-accent-0 dark:text-primary font-bold py-2 px-8 dark:hover:bg-accent-1 rounded-full"
             type="submit"
-            aria-disabled = {pending}
+            disabled = {pending}
           >
-            Register
+            {pending ? "Registering ...": "Register"}
           </button>
-          <h4 className="pt-4 text-sm text-gray-500 text-center pb-4">
+          <h4 className="pt-4 text-sm dark:text-secondary text-center pb-4">
             Already have account?{" "}
             <TransitionButton
               handleTransition={props.handleTransition}
               refElement={props.ref}
               effectTransition="page-transition"
             >
-              <span className="text-blue-500 cursor-pointer hover:text-blue-700">
+              <span className="dark:text-blue-500 dark:hover:text-blue-600 cursor-pointer">
                 Login
               </span>
             </TransitionButton>
@@ -173,7 +137,6 @@ export const SignUpForm = (props: Props) => {
             </div>
           </div>
         </div>
-      </div>
     </form>
   );
 };

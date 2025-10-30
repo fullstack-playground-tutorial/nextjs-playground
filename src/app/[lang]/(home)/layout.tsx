@@ -1,31 +1,34 @@
-import { Suspense } from "react";
+"use server"
 import Header from "./components/Header";
-import Sidebar from "./components/Sidebar";
 import BottomBar from "./components/BottomBar";
-import Loading from "../loading";
 import NotificationComponent from "./components/Notification/Notification";
-import { search } from "@/app/feature/notification/actions";
+import { AuthUser, logout } from "@/app/feature/auth";
+import { Body } from "./components/Body";
 
-
-export  default async function HomeLayout({
+export default async function HomeLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const notifications = await search()
+  const user: AuthUser = {
+    id: "",
+    email: "",
+    name: undefined,
+    avatarUrl: undefined,
+    roleId: undefined,
+    permissions: [],
+  };
   return (
-        <div>
-          <Header />
-          <div className="w-full flex flex-row justify-between gap-4 p-4 h-[calc(100%-56px)]">
-            <Sidebar />
-            <Suspense fallback={<Loading />}>{children}</Suspense>
-            <div className="right-0 top-0"></div>
-          </div>
-          <BottomBar />
-          <div className="fixed md:hidden bottom-20 right-4 flex flex-col items-end">
-            <NotificationComponent notifications={notifications} />
-          </div>
-        </div>
-
+    <div>
+      <Body
+        user={user}
+        children={children}
+        logoutAction={logout}
+      />
+      <BottomBar />
+      <div className="fixed md:hidden bottom-20 right-4 flex flex-col items-end">
+        <NotificationComponent notifications={[]} />
+      </div>
+    </div>
   );
 }

@@ -1,5 +1,5 @@
 .story-post {
-    @apply flex flex-row gap-4 min-w-[400px] blur-none relative w-1/2 mx-auto bg-glass-100 rounded-lg p-4 shadow-lg border border-l-glass-500 backdrop-blur-lg border-t-glass-500 border-r-glass-200 border-b-glass-200;
+    @apply flex flex-row gap-4 min-w-[400px] blur-none relative w-1/2 mx-auto standard:bg-glass-100 rounded-lg p-4 shadow-lg border border-l-glass-500 backdrop-blur-lg border-t-glass-500 border-r-glass-200 border-b-glass-200;
     transition-property: flex-direction;
     transition-duration: 10s;
     transition-timing-function: ease-in-out;

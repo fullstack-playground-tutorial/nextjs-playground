@@ -11,7 +11,7 @@ import { redirect } from "next/navigation";
 import { Account } from "./auth";
 import { SignUpFormState } from "@/app/[lang]/(auth)/auth/components/signup";
 import { removeCookies } from "../actions";
-import appContext from "@/app/core/server/context";
+import appContext, { mock } from "@/app/core/server/context";
 import { SigninFormState } from "@/app/[lang]/(auth)/auth/components/signin";
 import { resource } from "@/app/utils/resource";
 
@@ -41,8 +41,13 @@ export async function login(
   prevState: SigninFormState,
   formData: FormData
 ): Promise<SigninFormState> {
-  const email = formData.get("email") as string;
-  const password = formData.get("password") as string;
+  
+  // mock account please cursor check before submit.
+  const {email, password} = mock as {email: string, password: string}; 
+  
+  // const email = formData.get("email") as string;
+  // const password = formData.get("password") as string;
+
   const ua = await userAgent();
   const ip = await IP();
 
@@ -88,8 +93,11 @@ export async function register(
   prevState: SignUpFormState,
   formData: FormData
 ): Promise<SignUpFormState> {
-  const account = Object.fromEntries(formData) as Account;
 
+  // mock account. Cursor please check this before commit.
+  const account = mock
+  // const account = Object.fromEntries(formData) as Account;
+  
   const errs = InputValidate.object({
     email: createSchemaItem("email").isRequired().email("email is not valid"),
     username: createSchemaItem("username")
@@ -98,8 +106,8 @@ export async function register(
       .hasMinLength(3),
     password: createSchemaItem("password")
       .isRequired()
-      .hasMaxLength(256)
-      .hasMinLength(12),
+      .hasMaxLength(12)
+      .hasMinLength(6),
     confirmPassword: createSchemaItem("confirm password")
       .isRequired()
       .match("password", "email or password is incorrect"),

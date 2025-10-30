@@ -1,5 +1,5 @@
 "use server"
-import { InternalizationContext } from "@/app/core/client/context/internalization/InternalizationContext";
+import { InternalizationContext } from "@/app/core/client/context/internalization/context";
 import { accept, reject } from "@/app/feature/friend/actions";
 import { Notification } from "@/app/feature/notification/notification";
 import { cookies } from "next/headers";

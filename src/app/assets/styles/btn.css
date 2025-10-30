@@ -1,17 +1,17 @@
 .btn {
-  @apply rounded-s py-1.5 px-3 text-base cursor-pointer bg-none mb-0;
+  @apply px-5 py-2.5 text-sm font-medium rounded-lg cursor-pointer bg-none mb-0 whitespace-nowrap;
 }
 
 .btn.btn-sm {
-  @apply rounded py-1 px-3 text-sm;
+  @apply px-3 py-1.5 text-sm font-medium rounded-sm;
 }
 
 .btn.btn-md {
-  @apply rounded-md py-2 px-4 text-base;
+  @apply px-5 py-2.5 text-sm font-medium rounded-lg;
 }
 
 .btn.btn-lg {
-  @apply py-3 px-6 text-lg rounded-lg font-bold;
+  @apply px-6 py-3 text-base font-semibold rounded-xl;
 }
 
 .btn.btn-outline-primary {
@@ -19,5 +19,5 @@
 }
 
 .btn.btn-primary {
-    @apply text-white bg-blue-500 hover:bg-blue-600 transition;
+  @apply text-white bg-blue-500 hover:bg-blue-600 transition;
 }

@@ -1,9 +1,9 @@
 "use client";
 
-import { MutableRefObject } from "react";
+import { MutableRefObject, RefObject } from "react";
 
 interface Props {
-  refElement: MutableRefObject<any>;
+  refElement: RefObject<any>;
   effectTransition: "page-transition";
   children: Readonly<React.ReactNode>;
   handleTransition: () => void;

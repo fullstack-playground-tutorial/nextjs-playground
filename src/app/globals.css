@@ -1,53 +1,38 @@
-@import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto:wght@100;300;400;500;700;900&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap");
-@import "tailwindcss";
+
 @import "./assets/styles/styles.css";
 
-@theme inline {
-  --color-primary-white: #fbfbfb;
-  --color-primary-black: rgb(8, 8, 9);
+:root {
+  background: var(--color-surface-0);
+  font-family: Roboto, Poppins, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
 
-  --color-glass-700: rgba(255, 255, 255, 0.7);
-  --color-glass-600: rgba(255, 255, 255, 0.6);
-  --color-glass-500: rgba(255, 255, 255, 0.5);
-  --color-glass-400: rgba(255, 255, 255, 0.4);
-  --color-glass-300: rgba(255, 255, 255, 0.3);
-  --color-glass-200: rgba(255, 255, 255, 0.2);
-  --color-glass-100: rgba(255, 255, 255, 0.1);
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
 
-  --color-black-500: rgb(0, 0, 0);
-  --color-black-400: rgb(28, 28, 28);
-  --color-black-300: rgb(56, 56, 56);
-  --color-black-200: rgb(85, 85, 85);
-  --color-black-100: rgb(113, 113, 113);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 
-  --color-white-500: #fff;
-  --color-white-400: #f0f1f5;
-  --color-white-300: #e0e4eb;
-  --color-white-200: #d1d6e0;
-  --color-white-100: #bfc6d4;
-
-  --color-standard-theme: linear-gradient(
-    to bottom,
-    rgb(70, 214, 126),
-    rgba(1, 81, 176)
-  );
-
-  --color-field-light: #f0f2f5;
+#root {
+  max-width: 1920px;
+  text-align: center;
 }
 
 body {
   padding: 0;
   margin: 0;
   box-sizing: border-box;
-  font-family: "Poppins", sans-serif;
-  transition: transform 0.5s, opacity 0.5s, filter 0.5sm, background;
+  transition: transform 0.5s, opacity 0.5s, filter 0.5ms, background;
   transition-timing-function: ease-in-out;
   min-height: 100vh;
+  min-width: 320px;
   overflow: auto;
 }
 
-body[data-theme="dark-theme"] {
+/* body[data-theme="dark-theme"] {
   --bg-layer-1: var(--color-black-400);
   --bg-layer-2: var(--color-black-300);
   --bg-layer-3: var(--color-black-200);
@@ -123,7 +108,7 @@ body[data-theme] h1 {
 }
 
 /* table */
-body[data-theme] table,
+/* body[data-theme] table,
 body[data-theme] th,
 body[data-theme] td {
   @apply border border-[var(--border-color)];
@@ -135,4 +120,4 @@ body[data-theme] table thead {
 body[data-theme] table tbody,
 body[data-theme] table tfoot {
   @apply bg-[var(--bg-layer-2)];
-}
+}  */

@@ -1,0 +1,10 @@
+.section-header {
+  position: relative;
+}
+.section-list {
+  position: absolute;
+  display: none;
+}
+.section-header:hover > .section-list {
+  display: block;
+}

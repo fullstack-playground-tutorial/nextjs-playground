@@ -1,5 +1,10 @@
+@import "./font.css";
+@import "tailwindcss";
+@import "./custom-variant.css";
+@import "./theme.css";
 @import "./google-icon.css";
 @import "./btn.css";
 @import "./animation.css";
 @import "./story.css";
 @import "./dot-loading.css";
+@import "./scrollbar.css"

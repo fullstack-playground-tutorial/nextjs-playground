@@ -4,7 +4,7 @@ interface Props {
 }
 export default function Page({ params }: Props) {
   return (
-    <div className="flex items-center justify-center flex-col">
+    <div className="flex flex-col h-screen items-center max-w-300 p-4 mx-auto">
       <SignInForm params={params} />
     </div>
   );

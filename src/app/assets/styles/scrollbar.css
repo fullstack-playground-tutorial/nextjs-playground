@@ -1,0 +1,15 @@
+.scrollbar::-webkit-scrollbar {
+  @apply w-1.5 py-10;
+}
+
+.scrollbar::-webkit-scrollbar-track {
+  @apply bg-transparent rounded-full;
+}
+
+.scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-[var(--color-accent-1)] rounded-full cursor-pointer;
+}
+
+.scrollbar::-webkit-scrollbar-thumb:hover {
+  @apply bg-[var(--color-accent-2)] rounded-full;
+}

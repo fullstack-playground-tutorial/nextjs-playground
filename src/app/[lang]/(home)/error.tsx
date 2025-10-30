@@ -1,6 +1,6 @@
 "use client";
 
-import { InternalizationContext } from "@/app/core/client/context/internalization/InternalizationContext";
+import { InternalizationContext } from "@/app/core/client/context/internalization/context";
 import { useContext, useEffect } from "react";
 
 interface Props {

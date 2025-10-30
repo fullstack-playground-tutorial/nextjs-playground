@@ -1,6 +1,7 @@
+"use client"
 import { ReactNode, useState } from "react";
 
-import { InternalizationContext, InternalizationState } from "./InternalizationContext";
+import { InternalizationContext, InternalizationState } from "./context";
 import { Sprintf } from "@/app/utils/string";
 import { Locale, localeService } from "@/app/utils/resource/locales";
 

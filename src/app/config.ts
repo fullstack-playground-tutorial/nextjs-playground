@@ -1,8 +1,8 @@
-export const serverHost = "http://localhost:8080";
-export const wsHost = "ws://localhost:8080";
+export const serverHost = "http://localhost:8000";
+export const wsHost = "ws://localhost:8000";
 export const clientHost = "http://localhost:3000";
 export const config = {
-  auth_url: serverHost + "/auth",
+  auth_url: serverHost + "/v1/auth",
   user_url: serverHost + "/user",
   search_url: serverHost + "/search",
   notification_url: serverHost + "/notification",

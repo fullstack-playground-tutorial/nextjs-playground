@@ -4,7 +4,8 @@ import {
   NotificationFilter,
   NotificationService,
 } from "./notification";
-import { getCookieHeader, HeaderType } from "@/app/utils/http/headers";
+import { getCookieHeader } from "@/app/utils/http/headers/headers.server";
+import { HeaderType } from "@/app/utils/http/headers";
 
 export class NotificationClient implements NotificationService {
   constructor(private http: HttpService, private url: string) {

@@ -1,5 +1,5 @@
 "use client";
-import { InternalizationContext } from "@/app/core/client/context/internalization/InternalizationContext";
+import { InternalizationContext } from "@/app/core/client/context/internalization/context";
 import { FriendStatus, SearchItem } from "@/app/feature/search/search";
 import React, {
   TransitionStartFunction,

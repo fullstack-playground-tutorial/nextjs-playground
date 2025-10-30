@@ -16,8 +16,6 @@ export class InputValidate {
 
 }
 
-
-
 const useObjectValidate = (schema: Schema) => {
     return new ObjectValidate(schema)
 }

@@ -1,5 +1,5 @@
 import { AuthService } from "@/app/feature/auth/auth";
-import { AuthClient } from "@/app/feature/auth/service";
+import { AuthClient, createMockValidAccount } from "@/app/feature/auth/service";
 import { HttpService } from "@/app/utils/http/http-default";
 
 import { StoryClient, StoryService } from "@/app/feature/story";
@@ -189,4 +189,7 @@ const appContext = new ApplicationContext(httpServiceInstance, mongoClient);
 
 export const getApiEnglishNoteService = appContext.getApiEnglishNoteService;
 export const getEnglishNoteService = appContext.getEnglishNoteService;
+
+export const mock = createMockValidAccount();
+
 export default appContext;

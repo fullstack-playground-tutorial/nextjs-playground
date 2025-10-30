@@ -10,16 +10,13 @@ export interface AuthService {
     deviceId: string
   ): Promise<number>;
   register(user: Account): Promise<number>;
-  logout(
-    deviceId: string,
-    ip: string,
-    userAgent: string
-  ): Promise<number>;
+  logout(deviceId: string, ip: string, userAgent: string): Promise<number>;
   refresh(
     deviceId: string,
     ip: string,
     userAgent: string
   ): Promise<Cookie | undefined>;
+  me(): Promise<AuthUser | null>;
 }
 
 export interface Token {
@@ -38,3 +35,19 @@ export interface Account {
   email?: string;
   phone?: string;
 }
+
+export type AuthUser = {
+  id: string;
+  email: string;
+  name?: string;
+  avatarUrl?: string;
+  roleId?: string;
+  // overridePermissions?: string[]; // use + or - to add or remove permissions
+  permissions: string[]; // direct permissions
+};
+
+export type LoginCredentials = {
+  email: string;
+  password: string;
+  rememberMe?: boolean;
+};

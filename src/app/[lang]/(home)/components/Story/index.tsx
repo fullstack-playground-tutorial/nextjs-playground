@@ -3,7 +3,7 @@
 import { Story } from "@/app/feature/story";
 import StoryDetailComponent from "./StoryDetail";
 import { useDate } from "@/app/hooks/useDate";
-import { InternalizationContext } from "@/app/core/client/context/internalization/InternalizationContext";
+import { InternalizationContext } from "@/app/core/client/context/internalization/context";
 import { use } from "react";
 
 interface Props {
