@@ -1,5 +1,4 @@
 "use server"
-import Header from "./components/Header";
 import BottomBar from "./components/BottomBar";
 import NotificationComponent from "./components/Notification/Notification";
 import { AuthUser, logout } from "@/app/feature/auth";

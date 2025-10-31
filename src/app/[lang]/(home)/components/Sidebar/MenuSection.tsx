@@ -6,7 +6,7 @@ import Link from "next/link";
 export type MenuSectionProps = {
   id: string; // use module name for authorization
   title: string;
-  Icon?: React.FC<React.SVGProps<SVGSVGElement>>;
+  iconName?: string;
   children?:
     | React.ReactElement<MenuSectionProps>
     | React.ReactElement<MenuSectionProps>[];
@@ -22,6 +22,7 @@ type _MenuSectionProps = {
   topbar: boolean;
   menuExpand: boolean;
   path: string[];
+  Icon?: React.FC<React.SVGProps<SVGSVGElement>>;
   handlePinnedList?: (item: MenuSectionInternalProps) => void;
   pinned: boolean;
   pinnedList?: MenuSectionInternalProps[];

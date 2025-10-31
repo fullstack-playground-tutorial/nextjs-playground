@@ -144,10 +144,12 @@ export async function register(
 
 export async function logout(): Promise<number> {
   try {
+
     const deviceId = await getDeviceId();
     const ip = await IP();
     const ua = await userAgent();
-    if (deviceId.length == 0 || userAgent.length == 0 || ip.length == 0) {
+
+    if (deviceId.length == 0 || ua.length == 0 || ip.length == 0) {
       return -1;
     }
 

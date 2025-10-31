@@ -41,6 +41,7 @@ export class AuthClient implements AuthService {
             [HeaderType.deviceId]: deviceId,
             [HeaderType.userAgent]: userAgent,
             [HeaderType.xForwardedFor]: ip,
+            apiKey: process.env.KONG_AUTH_APIKEY || "",
           },
           credentials: "include",
           cache: "no-cache",

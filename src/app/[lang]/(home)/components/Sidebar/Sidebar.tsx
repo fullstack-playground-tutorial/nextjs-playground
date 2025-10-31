@@ -9,7 +9,7 @@ import MobileIcon from "./icons/mobile.svg";
 import HistoryIcon from "./icons/History.svg";
 import RolesIcon from "./icons/roles.svg";
 import LogIcon from "./icons/log.svg";
-import Cinematic from "./icons/cinematic.svg";
+import CinematicIcon from "./icons/cinematic.svg";
 import LogoutIcon from "./icons/logout.svg";
 import HomeIcon from "./icons/home.svg";
 import UserManagerIcon from "./icons/user_manager.svg";
@@ -25,12 +25,34 @@ interface Props {
   onToggleViewbar: () => void;
 }
 
+const icons: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = {
+  TopicIcon,
+  AnalyticsIcon,
+  ProductIcon,
+  DashboardIcon,
+  AppleIcon,
+  SamsungIcon,
+  TabletIcon,
+  MobileIcon,
+  HistoryIcon,
+  RolesIcon,
+  LogIcon,
+  CinematicIcon,
+  LogoutIcon,
+  HomeIcon,
+  UserManagerIcon,
+};
+
 function Sidebar({ user, topbar, onToggleViewbar }: Props) {
   const [_, startTransition] = useTransition();
   const { logoutAction } = useAuth();
   const handleLogout = () => {
     startTransition(async () => {
-      logoutAction();
+      try {
+        await logoutAction();
+      } catch (error) {
+        throw error;
+      }
     });
   };
   const checkAuthorized = (module: string) => {
@@ -42,6 +64,7 @@ function Sidebar({ user, topbar, onToggleViewbar }: Props) {
       topbar={topbar}
       checkAuthorized={checkAuthorized}
       onToggleViewbar={onToggleViewbar}
+      icons={icons}
     >
       <UserSection
         name={user?.name}
@@ -51,37 +74,37 @@ function Sidebar({ user, topbar, onToggleViewbar }: Props) {
       <MenuSection
         id="home"
         title="Home"
-        Icon={HomeIcon}
+        iconName={"HomeIcon"}
         url="/"
         checkAuthorized={() => true}
       />
       <MenuSection
         id={"dashboard"}
         title={"Dashboard"}
-        Icon={DashboardIcon}
+        iconName={"DashboardIcon"}
         url={"/dashboard"}
       ></MenuSection>
-      <MenuSection id="product" title="Product" Icon={ProductIcon}>
-        <MenuSection id="phone" title="Phone" Icon={MobileIcon}>
-          <MenuSection id="samsung" title="Samsung" Icon={SamsungIcon} />
-          <MenuSection id="apple" title="Apple" Icon={AppleIcon}>
-            <MenuSection id="tablet" title="Tablet" Icon={TabletIcon} />
-            <MenuSection id="iphone" title="IPhone" Icon={MobileIcon} />
+      <MenuSection id="product" title="Product" iconName={"ProductIcon"}>
+        <MenuSection id="phone" title="Phone" iconName={"MobileIcon"}>
+          <MenuSection id="samsung" title="Samsung" iconName={"SamsungIcon"} />
+          <MenuSection id="apple" title="Apple" iconName={"AppleIcon"}>
+            <MenuSection id="tablet" title="Tablet" iconName={"TabletIcon"} />
+            <MenuSection id="iphone" title="IPhone" iconName={"MobileIcon"} />
           </MenuSection>
         </MenuSection>
       </MenuSection>
-      <MenuSection id="analyitics" title="Analytics" Icon={AnalyticsIcon} />
+      <MenuSection id="analyitics" title="Analytics" iconName={"AnalyticsIcon"} />
       <MenuSection
         id="topic"
         title="Topic"
-        Icon={TopicIcon}
+        iconName={"TopicIcon"}
         permission="topic.read"
       >
         <MenuSection
           id="topics"
           title="Topic"
           url="/topics"
-          permission="topic.write"
+          permission="topic.read"
         />
         <MenuSection
           id="topic-tags"
@@ -90,39 +113,39 @@ function Sidebar({ user, topbar, onToggleViewbar }: Props) {
           permission="topic.write"
         />
         <MenuSection
-          id="topic-management"
+          id="topic_management"
           title="Topic Management"
           url="/topics/topic-management"
           permission="topic.write"
         />
       </MenuSection>
-      <MenuSection id="history" title="History" Icon={HistoryIcon}>
-        <MenuSection id="log" title="Log" Icon={LogIcon} />
+      <MenuSection id="history" title="History" iconName={"HistoryIcon"}>
+        <MenuSection id="log" title="Log" iconName={"LogIcon"} />
       </MenuSection>
       <MenuSection
         id="user-management"
         permission="user_management.read"
         title="User management"
-        Icon={UserManagerIcon}
+        iconName={"UserManagerIcon"}
       >
         <MenuSection
           id="role"
           title="Role"
-          Icon={RolesIcon}
+          iconName={"RolesIcon"}
           url="/admin/roles"
           permission="user_manager.write"
         />
         <MenuSection
           id="users"
           title="Users"
-          Icon={AppleIcon}
+          iconName={"AppleIcon"}
           url="/admin/users"
           permission="user_manager.write"
         />
         <MenuSection
           id="settings"
           title="Settings"
-          Icon={AppleIcon}
+          iconName={"AppleIcon"}
           url="/admin/settings"
           permission="user_manager.write"
         />
@@ -131,13 +154,13 @@ function Sidebar({ user, topbar, onToggleViewbar }: Props) {
         id="cinematic"
         permission="cinematic.read"
         title="Cinematic"
-        Icon={Cinematic}
+        iconName={"CinematicIcon"}
         url="/cinematic"
       />
       <MenuSection
         id="logout"
         title="Logout"
-        Icon={LogoutIcon}
+        iconName={"LogoutIcon"}
         hidden={!user}
         onSectionClick={handleLogout}
         checkAuthorized={() => true}

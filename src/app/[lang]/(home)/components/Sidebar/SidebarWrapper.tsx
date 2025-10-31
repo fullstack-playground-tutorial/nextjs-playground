@@ -17,6 +17,7 @@ type Props = {
   children:
   | React.ReactElement<MenuSectionProps | UserSectionProps>
   | React.ReactElement<MenuSectionProps | UserSectionProps>[];
+  icons: Record<string, React.FC<React.SVGProps<SVGSVGElement>>>;
   topbar: boolean;
   onToggleViewbar: () => void;
   checkAuthorized: (module: string) => boolean;
@@ -26,7 +27,8 @@ export default function SidebarWrapper({
   children,
   topbar,
   onToggleViewbar,
-  checkAuthorized
+  checkAuthorized,
+  icons,
 }: Props) {
   const pathname = usePathname();
   const isSectionActive = (url: string) => {
@@ -60,6 +62,7 @@ export default function SidebarWrapper({
       return <UserSectionInternal {...child.props as UserSectionProps} menuExpanded={menuExpand} topbar={topbar} isSectionActive={isSectionActive} />;
     } else {
       const props = child.props as MenuSectionProps;
+      const Icon = props.iconName ? icons[props.iconName] : undefined;
       const isPinned = pinnedList.some(
         (pinnedItem) => pinnedItem.id === props.id
       );
@@ -67,6 +70,7 @@ export default function SidebarWrapper({
         <MenuSectionInternal
           key={props.id}
           {...props}
+          Icon={Icon}
           hidden={props.hidden}
           topbar={topbar}
           menuExpand={menuExpand}
