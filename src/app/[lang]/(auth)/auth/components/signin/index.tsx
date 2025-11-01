@@ -6,6 +6,7 @@ import { SignUpForm } from "../signup";
 import { login } from "@/app/feature/auth/actions";
 import { ValidateErrors } from "@/app/utils/validate/model";
 import "../signin/index.css";
+import { UserInfo } from "@/app/feature/auth";
 
 interface InternalState {
   showSignUp: boolean;
@@ -13,6 +14,7 @@ interface InternalState {
 
 export interface SigninFormState {
   fieldErrors: ValidateErrors;
+  info?: UserInfo;
 }
 
 const initialState: InternalState = {
@@ -29,11 +31,10 @@ export interface Props {
 export const SignInForm = (props: Props) => {
   const [state, setState] = useState(initialState);
   const ref = useRef<HTMLDivElement>(undefined);
-  const [formState, formAction, pending] = useActionState<
+  const [{fieldErrors, info}, formAction, pending] = useActionState<
     SigninFormState,
     FormData
   >(login, initialFormState);
-
   const handleTransition = () => {
     setState((prev) => ({ ...prev, showSignUp: !prev.showSignUp }));
   };
@@ -52,44 +53,44 @@ export const SignInForm = (props: Props) => {
               </div>
               <div
                 className={`pt-4 ${
-                  !formState.fieldErrors["common"] ? "h-5" : ""
+                  !fieldErrors["common"] ? "h-5" : ""
                 }`}
               >
-                {formState.fieldErrors["common"] && (
+                {fieldErrors["common"] && (
                   <span className={`dark:text-alert-1 text-sm h-5 px-2`}>
-                    {formState.fieldErrors["common"]}
+                    {fieldErrors["common"]}
                   </span>
                 )}
               </div>
               <div className="flex flex-col pt-2">
                 <input
                   className={`transition-all dark:border dark:border-border-strong dark:bg-surface-2 placeholder:text-tertiary-0 dark:focus:outline-1 dark:outline-accent-1 rounded-md px-4 w-full h-10 text-base ${
-                    formState.fieldErrors["email"] ? "" : "mb-5"
+                    fieldErrors["email"] ? "" : "mb-5"
                   }`}
                   type="text"
                   placeholder="Email"
                   name="email"
                   id="email"
                 />
-                {formState.fieldErrors["email"] && (
+                {fieldErrors["email"] && (
                   <span className={`dark:text-alert-1 text-sm h-5 px-2`}>
-                    {formState.fieldErrors["email"]}
+                    {fieldErrors["email"]}
                   </span>
                 )}
               </div>
               <div className="flex flex-col">
                 <input
                   className={`dark:border dark:border-border-strong dark:bg-surface-2 placeholder:text-tertiary-0 dark:focus:outline-1 dark:outline-accent-1 rounded-md px-4 w-full h-10 text-base ${
-                    formState.fieldErrors["password"] ? "" : "mb-5"
+                    fieldErrors["password"] ? "" : "mb-5"
                   }`}
                   type="password"
                   placeholder="Password"
                   name="password"
                   id="password"
                 />
-                {formState.fieldErrors["password"] && (
+                {fieldErrors["password"] && (
                   <span className={`dark:text-alert-1 text-sm h-5 px-2`}>
-                    {formState.fieldErrors["password"]}
+                    {fieldErrors["password"]}
                   </span>
                 )}
               </div>

@@ -65,12 +65,9 @@ export async function login(
   const deviceId = await getDeviceId();
 
   try {
-    const res = await appContext
-      .getAuthService()
-      .login(email, password, ua, ip, deviceId);
-    if (res > 0) {
-      redirect("/");
-    }
+    const AuthService = appContext.getAuthService();
+    const res = await AuthService
+      .login(email, password, ua, ip, deviceId)
     return {
       fieldErrors: {},
     };

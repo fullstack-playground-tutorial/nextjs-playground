@@ -4,6 +4,8 @@ import { cookies, headers } from "next/headers";
 import { Base64 } from "./utils/crypto/base64";
 import { HeaderType } from "./utils/http/headers";
 import { resource } from "./utils/resource";
+import { UserInfo } from "./feature/auth";
+import appContext from "./core/server/context";
 
 export const verifySession = async (): Promise<Session | null> => {
   const cookiesStore = await cookies();
@@ -24,8 +26,8 @@ export const verifySession = async (): Promise<Session | null> => {
     if (verifyToken(token)) {
       resource.session = {
         ...resource,
-        userId: token.payload?.userId,
-        username: token.payload?.username,
+        userId: token.payload.userId,
+        username: token.payload.username,
       };
       return {
         isAuth: true,
@@ -39,11 +41,11 @@ export const verifySession = async (): Promise<Session | null> => {
 
 interface Session {
   isAuth: boolean;
-  payload?: AccessTokenPayload;
+  payload: AccessTokenPayload;
 }
 
 interface Token {
-  payload?: AccessTokenPayload;
+  payload: AccessTokenPayload;
 }
 
 interface AccessTokenPayload {
@@ -103,4 +105,10 @@ export async function userAgent() {
     resource.setUserAgent(ua);
   }
   return ua;
+}
+
+export async function getUser(): Promise<UserInfo | null> {
+  const session = await verifySession();
+  if (!session) return null;
+  return appContext.getAuthService().me();
 }

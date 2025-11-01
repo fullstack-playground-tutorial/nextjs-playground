@@ -1,26 +1,24 @@
-"use server"
 import BottomBar from "./components/BottomBar";
 import NotificationComponent from "./components/Notification/Notification";
 import { AuthUser, logout } from "@/app/feature/auth";
 import { Body } from "./components/Body";
+import { getUser } from "@/app/dal";
+import { redirect } from "next/navigation";
 
 export default async function HomeLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const user: AuthUser = {
-    id: "",
-    email: "",
-    name: undefined,
-    avatarUrl: undefined,
-    roleId: undefined,
-    permissions: [],
-  };
+  const userInfo = await getUser()
+  if(!userInfo){
+    redirect("/auth")
+  }
+
   return (
     <div>
       <Body
-        user={user}
+        user={userInfo.user}
         children={children}
         logoutAction={logout}
       />

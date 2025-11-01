@@ -1,21 +1,21 @@
 "use client";
-import { AuthUser } from "@/app/feature/auth";
+import { AuthUser, UserInfo } from "@/app/feature/auth";
 import Sidebar from "./Sidebar/Sidebar";
 import { useState } from "react";
 
 export const Body = ({
-  user,
+  user: userInfo,
   children,
   logoutAction
 }: {
-  user: AuthUser;
+  user: UserInfo;
   children: React.ReactNode;
   logoutAction: () => Promise<number>;
 }) => {
   const [topbar, setTopbar] = useState(false);
   return (
     <div className={`w-full flex ${topbar ? "flex-col": "flex-row"} justify-between gap-1 h-screen`}>
-      <Sidebar user={user} topbar={topbar} onToggleViewbar={() => setTopbar(!topbar)}/>
+      <Sidebar userInfo={userInfo} topbar={topbar} onToggleViewbar={() => setTopbar(!topbar)}/>
       {children}
     </div>
   );

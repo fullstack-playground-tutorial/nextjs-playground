@@ -1,4 +1,3 @@
-import { HTTPResponse } from "@/app/utils/http/response";
 import { Cookie } from "../../utils/http/headers";
 
 export interface AuthService {
@@ -16,7 +15,7 @@ export interface AuthService {
     ip: string,
     userAgent: string
   ): Promise<Cookie | undefined>;
-  me(): Promise<AuthUser | null>;
+  me(): Promise<UserInfo>;
 }
 
 export interface Token {
@@ -46,8 +45,16 @@ export type AuthUser = {
   permissions: string[]; // direct permissions
 };
 
-export type LoginCredentials = {
-  email: string;
-  password: string;
-  rememberMe?: boolean;
-};
+export type UserInfo = {
+  user: AuthUser,
+  modules: Module
+}
+
+export type Module = {
+  id: string;
+  title: string;
+  url: string;
+  permission?: string;
+  icon?:string;
+  children: Module;
+}

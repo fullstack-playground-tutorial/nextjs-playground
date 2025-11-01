@@ -16,11 +16,11 @@ import UserManagerIcon from "./icons/user_manager.svg";
 import SidebarWrapper from "./SidebarWrapper";
 import { MenuSection } from "./MenuSection";
 import { UserSection } from "./UserSection";
-import useAuth, { AuthUser } from "@/app/feature/auth";
+import useAuth, { AuthUser, UserInfo } from "@/app/feature/auth";
 import { useTransition } from "react";
 
 interface Props {
-  user: AuthUser;
+  userInfo: UserInfo;
   topbar: boolean;
   onToggleViewbar: () => void;
 }
@@ -43,7 +43,8 @@ const icons: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = {
   UserManagerIcon,
 };
 
-function Sidebar({ user, topbar, onToggleViewbar }: Props) {
+function Sidebar({ userInfo, topbar, onToggleViewbar }: Props) {
+  const {user, modules} = userInfo
   const [_, startTransition] = useTransition();
   const { logoutAction } = useAuth();
   const handleLogout = () => {

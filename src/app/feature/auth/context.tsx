@@ -1,6 +1,5 @@
 "use client"
-import { createContext, useActionState } from "react";
-import { LoginCredentials } from "./auth";
+import { createContext } from "react";
 import { logout } from "./actions";
 
 interface AuthContextShape {

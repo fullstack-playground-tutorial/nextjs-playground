@@ -1,5 +1,5 @@
 import { HttpService } from "@/app/utils/http/http-default";
-import { Account, AuthService, AuthUser } from "./auth";
+import { Account, AuthService, AuthUser, UserInfo } from "./auth";
 import {
   ContentType,
   Cookie,
@@ -151,9 +151,9 @@ export class AuthClient implements AuthService {
     }
   }
 
-  async me(): Promise<AuthUser | null> {
+  async me(): Promise<UserInfo> {
     try {
-      const res = await this.httpInstance.get<AuthUser | null>(
+      const res = await this.httpInstance.get<UserInfo>(
         this.auth_url + "/me",
         {
           headers: {

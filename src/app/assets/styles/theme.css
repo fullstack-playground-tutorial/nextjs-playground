@@ -63,9 +63,11 @@
     --color-surface-2: #333333;
     --color-surface-3: #383838;
     --color-surface-4: #404040;
-    --color-primary: #e0e0e0;
-    --color-secondary: #a1a1a1;
-    --color-tertiary-0: var(--color-gray-400);
+    --color-primary: #e0e0e0; /*heading, main content*/
+    --color-secondary: #a1a1a1; /*label focus, short description, subinfo*/
+    --color-tertiary-0: var(
+      --color-gray-400
+    ); /* placeholder, hint, note, Timestamp, small capition. label unfocus*/
     --color-tertiary-1: var(--color-gray-500);
     --color-alert-0: var(--color-red-400);
     --color-alert-1: var(--color-red-500);
@@ -73,14 +75,18 @@
     --color-submit: #ffb74d;
     --color-success: #4caf50;
   
-    --color-border-subtle: #2f2f2f;
-    --color-border: #3a3a3a;
-    --color-border-strong: #4a4a4a;
-    --color-border-accent: var(--color-orange-500);
+    --color-border-subtle: #2f2f2f; /* divider, fine line*/
+    --color-border: #3a3a3a; /* main line(card, input)*/
+    --color-border-strong: #4a4a4a; /* hover, focus, active*/
+    --color-border-accent: var(
+      --color-orange-500
+    ); /* branch, primary emphasize(require constrast high) */
   
-    --color-accent-0: var(--color-orange-400);
-    --color-accent-1: var(--color-orange-500);
-    --color-accent-2: var(--color-orange-600);
+    --color-accent-0: var(
+      --color-orange-500
+    ); /* branch, primary emphasize(require constrast high) */
+    --color-accent-1: var(--color-orange-600);
+    --color-accent-2: var(--color-orange-700);
   
     --editor-color-focus-border: transparent;
     --editor-content-font-family: "Lato";
@@ -98,6 +104,16 @@
     --editor-color-button-default-active-color: var(--color-surface-3);
     --editor-color-button-on-active-background: var(--color-surface-3);
     --editor-focus-outer-shadow: var(--color-accent-0);
+
+
+    /* glass */
+    --color-glass-700: rgba(255, 255, 255, 0.7);
+    --color-glass-600: rgba(255, 255, 255, 0.6);
+    --color-glass-500: rgba(255, 255, 255, 0.5);
+    --color-glass-400: rgba(255, 255, 255, 0.4);
+    --color-glass-300: rgba(255, 255, 255, 0.3);
+    --color-glass-200: rgba(255, 255, 255, 0.2);
+    --color-glass-100: rgba(255, 255, 255, 0.1);
   }
   
   .light {
@@ -196,12 +212,62 @@
   
   @media (prefers-color-scheme: light) {
     :root {
-      --color-surface-0: hsl(210, 20%, 98%);
-      --color-surface-1: hsl(210, 20%, 96%);
-      --color-surface-2: hsl(210, 20%, 94%);
-      --color-surface-3: hsl(210, 20%, 92%);
-      --color-surface-4: hsl(210, 20%, 90%);
-      --color-surface-5: hsl(210, 20%, 88%);
+      --color-surface-0: #242424;
+    --color-surface-1: #2c2c2c;
+    --color-surface-2: #333333;
+    --color-surface-3: #383838;
+    --color-surface-4: #404040;
+    --color-primary: #e0e0e0; /*heading, main content*/
+    --color-secondary: #a1a1a1; /*label focus, short description, subinfo*/
+    --color-tertiary-0: var(
+      --color-gray-400
+    ); /* placeholder, hint, note, Timestamp, small capition. label unfocus*/
+    --color-tertiary-1: var(--color-gray-500);
+    --color-alert-0: var(--color-red-400);
+    --color-alert-1: var(--color-red-500);
+    --color-alert-2: var(--color-red-600);
+    --color-submit: #ffb74d;
+    --color-success: #4caf50;
+  
+    --color-border-subtle: #2f2f2f; /* divider, fine line*/
+    --color-border: #3a3a3a; /* main line(card, input)*/
+    --color-border-strong: #4a4a4a; /* hover, focus, active*/
+    --color-border-accent: var(
+      --color-orange-500
+    ); /* branch, primary emphasize(require constrast high) */
+  
+    --color-accent-0: var(
+      --color-orange-500
+    ); /* branch, primary emphasize(require constrast high) */
+    --color-accent-1: var(--color-orange-600);
+    --color-accent-2: var(--color-orange-700);
+  
+    --editor-color-focus-border: transparent;
+    --editor-content-font-family: "Lato";
+    --editor-color-base-background: var(--color-surface-1);
+    --editor-color-base-border: transparent;
+    --editor-content-font-color: var(--color-primary);
+    --editor-color-text: var(--color-secondary);
+    --editor-color-button-default-hover-background: var(--color-surface-0);
+    --editor-color-button-on-hover-background: var(--color-surface-2);
+    --editor-color-button-default-hover-color: var(--color-accent-0);
+    --editor-color-button-on-background: var(--color-surface-0);
+    --editor-color-button-on-color: var(--color-accent-0);
+    --editor-color-tooltip-text: var(--color-primary);
+    --editor-color-button-default-active-background: var(--color-surface-3);
+    --editor-color-button-default-active-color: var(--color-surface-3);
+    --editor-color-button-on-active-background: var(--color-surface-3);
+    --editor-focus-outer-shadow: var(--color-accent-0);
+
+
+    /* glass */
+    --color-glass-700: rgba(255, 255, 255, 0.7);
+    --color-glass-600: rgba(255, 255, 255, 0.6);
+    --color-glass-500: rgba(255, 255, 255, 0.5);
+    --color-glass-400: rgba(255, 255, 255, 0.4);
+    --color-glass-300: rgba(255, 255, 255, 0.3);
+    --color-glass-200: rgba(255, 255, 255, 0.2);
+    --color-glass-100: rgba(255, 255, 255, 0.1);
     }
   }
   
