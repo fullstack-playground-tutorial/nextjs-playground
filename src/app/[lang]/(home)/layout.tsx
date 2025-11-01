@@ -18,7 +18,7 @@ export default async function HomeLayout({
   return (
     <div>
       <Body
-        user={userInfo.user}
+        user={userInfo}
         children={children}
         logoutAction={logout}
       />
