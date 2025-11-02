@@ -22,6 +22,7 @@ export const UserSectionInternal = (_props: UserSectionInternalProps) => {
     _props;
   return (
     <section
+      key={"user-section"}
       className={`flex flex-col w-full z-1 ${
         !topbar ? (menuExpanded ? "pl-2" : "") : "section-header"
       }`}

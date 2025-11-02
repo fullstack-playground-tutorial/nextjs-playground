@@ -161,6 +161,7 @@ export class AuthClient implements AuthService {
               "application/json",
               "utf-8"
             ),
+            [HeaderType.cookie]: await getCookieHeader()
           },
           credentials: "include",
           cache: "no-cache",

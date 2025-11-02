@@ -1,4 +1,4 @@
- "use server"
+"use server";
 
 import { IP, userAgent } from "@/app/dal";
 import { ResponseError } from "@/app/utils/exception/model/response-error";
@@ -41,10 +41,9 @@ export async function login(
   prevState: SigninFormState,
   formData: FormData
 ): Promise<SigninFormState> {
-  
   // mock account please cursor check before submit.
-  const {email, password} = mock as {email: string, password: string}; 
-  
+  const { email, password } = mock as { email: string; password: string };
+
   // const email = formData.get("email") as string;
   // const password = formData.get("password") as string;
 
@@ -66,8 +65,8 @@ export async function login(
 
   try {
     const AuthService = appContext.getAuthService();
-    const res = await AuthService
-      .login(email, password, ua, ip, deviceId)
+    await AuthService.login(email, password, ua, ip, deviceId);
+    redirect("/");
     return {
       fieldErrors: {},
     };
@@ -90,11 +89,10 @@ export async function register(
   prevState: SignUpFormState,
   formData: FormData
 ): Promise<SignUpFormState> {
-
   // mock account. Cursor please check this before commit.
-  const account = mock
+  const account = mock;
   // const account = Object.fromEntries(formData) as Account;
-  
+
   const errs = InputValidate.object({
     email: createSchemaItem("email").isRequired().email("email is not valid"),
     username: createSchemaItem("username")
@@ -141,7 +139,6 @@ export async function register(
 
 export async function logout(): Promise<number> {
   try {
-
     const deviceId = await getDeviceId();
     const ip = await IP();
     const ua = await userAgent();

@@ -2,7 +2,6 @@ import { en } from "./en";
 import { vi } from "./vi";
 
 const Locales = ["en-US", "vi-VN"] as const;
-
 export type Locale = (typeof Locales)[number];
 
 export interface Dictionary {
@@ -11,58 +10,59 @@ export interface Dictionary {
 
 export type Dictionaries = Record<Locale, Dictionary>;
 
-class LocaleService {
-  locales = Locales;
-  dictionaries: Dictionaries = {
-    "en-US": en,
-    "vi-VN": vi,
+const dictionaries: Dictionaries = {
+  "en-US": en,
+  "vi-VN": vi,
+};
+
+export const createLocaleService = (defaultLocale: Locale = "en-US") => {
+  let currentLocale: Locale = defaultLocale;
+
+  const getDictionary = (locale: Locale): Dictionary => {
+    return dictionaries[locale] || dictionaries["en-US"];
   };
 
-  currentLocale: Locale = "en-US";
-  constructor() {
-    this.getDictionary = this.getDictionary.bind(this);
-    this.changeLanguage = this.changeLanguage.bind(this);
-  }
-
-  getDictionary(locale: Locale) {
-    if (!this.dictionaries) {
-      this.dictionaries = {
-        "en-US": en,
-        "vi-VN": vi,
-      };
+  const changeLanguage = (locale: Locale) => {
+    if (Locales.includes(locale)) {
+      currentLocale = locale;
+    } else {
+      currentLocale = "en-US";
     }
-    return this.dictionaries[locale];
-  }
+  };
 
-  changeLanguage(locale: Locale) {
-    this.currentLocale = locale;
-  }
+  const localize = (key: string): string => {
+    const dict = getDictionary(currentLocale);
+    return dict[key] || key;
+  };
 
-  localize(key: string) {
-    return this.getDictionary(this.currentLocale)[key];
-  }
+  const getLocale = (acceptLang?: string): Locale => {
+    if (!acceptLang) return currentLocale;
 
-  getLocale(acceptLang?: string): Locale {
-    if (!acceptLang) return this.currentLocale;
-
-    // "vi,en-US;q=0.9,en;q=0.8"
     const langs = acceptLang.split(",").map((l) => l.split(";")[0].trim());
 
-    // find match correct or match like "vi" -> "vi-VN"
     for (const lang of langs) {
-      const found = this.locales.find(
-        (loc) => loc === lang || loc.startsWith(lang)
-      );
+      const found = Locales.find((loc) => loc === lang || loc.startsWith(lang));
       if (found) {
-        this.currentLocale = found;
+        currentLocale = found;
         return found;
       }
     }
 
-    // fallback
-    this.currentLocale = "en-US";
+    currentLocale = "en-US";
     return "en-US";
-  }
-}
+  };
 
-export const localeService = new LocaleService();
+  const getSupportLocales = () => Locales;
+
+  return {
+    getDictionary,
+    changeLanguage,
+    localize,
+    getLocale,
+    currentLocale,
+    getSupportLocales,
+  };
+};
+
+// Khởi tạo instance dùng chung
+export const localeService = createLocaleService();

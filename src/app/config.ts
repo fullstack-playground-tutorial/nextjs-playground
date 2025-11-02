@@ -1,5 +1,5 @@
-export const serverHost = "http://localhost:8000";
-export const wsHost = "ws://localhost:8000";
+export const serverHost = "https://localhost:8081";
+export const wsHost = "ws://localhost:8081";
 export const clientHost = "http://localhost:3000";
 export const config = {
   auth_url: serverHost + "/v1/auth",

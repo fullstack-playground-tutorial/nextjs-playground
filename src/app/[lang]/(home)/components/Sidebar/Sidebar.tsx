@@ -14,9 +14,9 @@ import LogoutIcon from "./icons/logout.svg";
 import HomeIcon from "./icons/home.svg";
 import UserManagerIcon from "./icons/user_manager.svg";
 import SidebarWrapper from "./SidebarWrapper";
-import { MenuSection } from "./MenuSection";
+import { MenuSection, MenuSectionProps } from "./MenuSection";
 import { UserSection } from "./UserSection";
-import useAuth, { AuthUser, UserInfo } from "@/app/feature/auth";
+import useAuth, { Module, UserInfo } from "@/app/feature/auth";
 import { useTransition } from "react";
 
 interface Props {
@@ -44,7 +44,8 @@ const icons: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = {
 };
 
 function Sidebar({ userInfo, topbar, onToggleViewbar }: Props) {
-  const {user, modules} = userInfo
+  const { user, modules } = userInfo;
+
   const [_, startTransition] = useTransition();
   const { logoutAction } = useAuth();
   const handleLogout = () => {
@@ -56,8 +57,28 @@ function Sidebar({ userInfo, topbar, onToggleViewbar }: Props) {
       }
     });
   };
-  const checkAuthorized = (module: string) => {
-    return user?.permissions?.some((item) => item.startsWith(module)) || false;
+  const checkAuthorized = (perm: string) => {        
+    const authorized =
+      user?.permissions?.some((item) => item.startsWith(perm)) || false;
+      
+    return authorized;
+  };
+
+  const renderMenuItems = (
+    modules: Module[]
+  ): React.ReactElement<MenuSectionProps>[] => {
+    return modules.map(({ id, title, url, permission, icon, children }) => (
+      <MenuSection
+        key={id}
+        id={id}
+        title={title}
+        permission={permission}
+        iconName={icon}
+        url={url}
+      >
+        {children && renderMenuItems(children)}
+      </MenuSection>
+    ));
   };
 
   return (
@@ -66,107 +87,35 @@ function Sidebar({ userInfo, topbar, onToggleViewbar }: Props) {
       checkAuthorized={checkAuthorized}
       onToggleViewbar={onToggleViewbar}
       icons={icons}
-    >
-      <UserSection
-        name={user?.name}
-        email={user?.email}
-        avatarUrl={user?.avatarUrl}
-      />
-      <MenuSection
-        id="home"
-        title="Home"
-        iconName={"HomeIcon"}
-        url="/"
-        checkAuthorized={() => true}
-      />
-      <MenuSection
-        id={"dashboard"}
-        title={"Dashboard"}
-        iconName={"DashboardIcon"}
-        url={"/dashboard"}
-      ></MenuSection>
-      <MenuSection id="product" title="Product" iconName={"ProductIcon"}>
-        <MenuSection id="phone" title="Phone" iconName={"MobileIcon"}>
-          <MenuSection id="samsung" title="Samsung" iconName={"SamsungIcon"} />
-          <MenuSection id="apple" title="Apple" iconName={"AppleIcon"}>
-            <MenuSection id="tablet" title="Tablet" iconName={"TabletIcon"} />
-            <MenuSection id="iphone" title="IPhone" iconName={"MobileIcon"} />
-          </MenuSection>
-        </MenuSection>
-      </MenuSection>
-      <MenuSection id="analyitics" title="Analytics" iconName={"AnalyticsIcon"} />
-      <MenuSection
-        id="topic"
-        title="Topic"
-        iconName={"TopicIcon"}
-        permission="topic.read"
-      >
-        <MenuSection
-          id="topics"
-          title="Topic"
-          url="/topics"
-          permission="topic.read"
+      userSection={
+        <UserSection
+          key="user-section"
+          name={user?.name}
+          email={user?.email}
+          avatarUrl={user?.avatarUrl}
         />
+      }
+      menuSections={[
         <MenuSection
-          id="topic-tags"
-          title="Tags Management"
-          url="/topics/tags"
-          permission="topic.write"
-        />
+          key="home"
+          id="home"
+          title="Home"
+          iconName={"HomeIcon"}
+          url="/"
+          checkAuthorized={() => true}
+        />,
+        ...renderMenuItems(modules),
         <MenuSection
-          id="topic_management"
-          title="Topic Management"
-          url="/topics/topic-management"
-          permission="topic.write"
-        />
-      </MenuSection>
-      <MenuSection id="history" title="History" iconName={"HistoryIcon"}>
-        <MenuSection id="log" title="Log" iconName={"LogIcon"} />
-      </MenuSection>
-      <MenuSection
-        id="user-management"
-        permission="user_management.read"
-        title="User management"
-        iconName={"UserManagerIcon"}
-      >
-        <MenuSection
-          id="role"
-          title="Role"
-          iconName={"RolesIcon"}
-          url="/admin/roles"
-          permission="user_manager.write"
-        />
-        <MenuSection
-          id="users"
-          title="Users"
-          iconName={"AppleIcon"}
-          url="/admin/users"
-          permission="user_manager.write"
-        />
-        <MenuSection
-          id="settings"
-          title="Settings"
-          iconName={"AppleIcon"}
-          url="/admin/settings"
-          permission="user_manager.write"
-        />
-      </MenuSection>
-      <MenuSection
-        id="cinematic"
-        permission="cinematic.read"
-        title="Cinematic"
-        iconName={"CinematicIcon"}
-        url="/cinematic"
-      />
-      <MenuSection
-        id="logout"
-        title="Logout"
-        iconName={"LogoutIcon"}
-        hidden={!user}
-        onSectionClick={handleLogout}
-        checkAuthorized={() => true}
-      />
-    </SidebarWrapper>
+          key="logout"
+          id="logout"
+          title="Logout"
+          iconName={"LogoutIcon"}
+          hidden={!user}
+          onSectionClick={handleLogout}
+          checkAuthorized={() => true}
+        />,
+      ]}
+    ></SidebarWrapper>
   );
 }
 

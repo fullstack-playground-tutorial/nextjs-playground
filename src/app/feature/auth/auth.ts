@@ -47,7 +47,7 @@ export type AuthUser = {
 
 export type UserInfo = {
   user: AuthUser,
-  modules: Module
+  modules: Module[];
 }
 
 export type Module = {
@@ -56,5 +56,5 @@ export type Module = {
   url: string;
   permission?: string;
   icon?:string;
-  children: Module;
+  children?: Module[];
 }

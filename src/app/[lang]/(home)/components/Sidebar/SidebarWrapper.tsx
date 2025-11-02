@@ -8,27 +8,27 @@ import {
 import SidebarIcon from "./icons/sidebar.svg";
 import TopbarIcon from "./icons/topbar.svg";
 import React, { useState } from "react";
-import "./sidebar.css"
+import "./sidebar.css";
 import type { UserSectionProps } from "./UserSection";
 import { UserSection, UserSectionInternal } from "./UserSection";
 import { usePathname } from "next/navigation";
 
 type Props = {
-  children:
-  | React.ReactElement<MenuSectionProps | UserSectionProps>
-  | React.ReactElement<MenuSectionProps | UserSectionProps>[];
+  menuSections: React.ReactElement<MenuSectionProps>[];
   icons: Record<string, React.FC<React.SVGProps<SVGSVGElement>>>;
   topbar: boolean;
   onToggleViewbar: () => void;
   checkAuthorized: (module: string) => boolean;
+  userSection?: React.ReactElement<UserSectionProps>;
 };
 
 export default function SidebarWrapper({
-  children,
   topbar,
   onToggleViewbar,
   checkAuthorized,
   icons,
+  userSection,
+  menuSections,
 }: Props) {
   const pathname = usePathname();
   const isSectionActive = (url: string) => {
@@ -57,9 +57,17 @@ export default function SidebarWrapper({
     }
   };
 
-  const clonedChildren = React.Children.map(children, (child) => {
+  const clonedChildren = React.Children.map([userSection, ...menuSections], (child) => {    
+    if (!React.isValidElement(child)) return null;
     if (child.type === UserSection) {
-      return <UserSectionInternal {...child.props as UserSectionProps} menuExpanded={menuExpand} topbar={topbar} isSectionActive={isSectionActive} />;
+      return (
+        <UserSectionInternal
+          {...(child.props as UserSectionProps)}
+          menuExpanded={menuExpand}
+          topbar={topbar}
+          isSectionActive={isSectionActive}
+        />
+      );
     } else {
       const props = child.props as MenuSectionProps;
       const Icon = props.iconName ? icons[props.iconName] : undefined;
@@ -68,7 +76,6 @@ export default function SidebarWrapper({
       );
       return (
         <MenuSectionInternal
-          key={props.id}
           {...props}
           Icon={Icon}
           hidden={props.hidden}
@@ -92,7 +99,6 @@ export default function SidebarWrapper({
           {pinnedList.map((pi) => {
             return (
               <MenuSectionInternal
-                key={pi.id}
                 {...pi}
                 topbar={topbar}
                 menuExpand={menuExpand}
@@ -109,16 +115,20 @@ export default function SidebarWrapper({
   };
   return (
     <nav
-      className={`flex bg-gray-800 text-primary items-center shadow p-2 z-2 ${topbar
-        ? `flex-row w-full justify-center top-0 ${menuExpand ? "fixed h-[90%]" : "sticky h-auto"
-        }`
-        : `fixed md:sticky flex-col h-screen overflow-y-auto scrollbar transition-all ease-in-out overflow-hidden ${menuExpand ? "w-60" : "w-14"
-        }`
-        }`}
+      className={`flex bg-gray-800 text-primary items-center shadow p-2 z-2 ${
+        topbar
+          ? `flex-row w-full justify-center top-0 ${
+              menuExpand ? "fixed h-[90%]" : "sticky h-auto"
+            }`
+          : `fixed md:sticky flex-col h-screen overflow-y-auto scrollbar transition-all ease-in-out overflow-hidden ${
+              menuExpand ? "w-60" : "w-14"
+            }`
+      }`}
     >
       <button
-        className={`self-start items-center justify-center font-semibold cursor-pointer p-2 ${topbar ? "hidden h-12" : ""
-          } ${!topbar && menuExpand ? "pl-4" : ""}`}
+        className={`self-start items-center justify-center font-semibold cursor-pointer p-2 ${
+          topbar ? "hidden h-12" : ""
+        } ${!topbar && menuExpand ? "pl-4" : ""}`}
         onClick={(e) => handleToggleMenuExpand(e)}
       >
         {menuExpand ? (
@@ -128,8 +138,9 @@ export default function SidebarWrapper({
         )}
       </button>
       <button
-        className={`self-start flex flex-row gap-2 items-center justify-center font-semibold cursor-pointer ${topbar ? "h-12" : "p-2 pl-2"
-          } ${!topbar && menuExpand ? "pl-4" : ""}`}
+        className={`self-start flex flex-row gap-2 items-center justify-center font-semibold cursor-pointer ${
+          topbar ? "h-12" : "p-2 pl-2"
+        } ${!topbar && menuExpand ? "pl-4" : ""}`}
         onClick={(e) => handleToggleViewbar(e)}
       >
         {!topbar ? (
@@ -144,7 +155,11 @@ export default function SidebarWrapper({
           </>
         )}
       </button>
-      <aside className={`flex ${topbar ? "flex-row gap-4 justify-between" : "flex-col p-2"} w-full`}>
+      <aside
+        className={`flex ${
+          topbar ? "flex-row gap-4 justify-between" : "flex-col p-2"
+        } w-full`}
+      >
         {renderPinnedList()}
         {clonedChildren}
       </aside>

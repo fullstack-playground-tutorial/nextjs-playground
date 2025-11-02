@@ -52,8 +52,11 @@ export const MenuSectionInternal = (props: MenuSectionInternalProps) => {
     onSectionClick,
     checkAuthorized,
   } = props;
-  if (props.hidden || (checkAuthorized && !checkAuthorized(permission || "")))
+
+  if (props.hidden || (checkAuthorized && !checkAuthorized(permission || ""))) {
     return null;
+  }
+
   const clonedChildren = !children
     ? undefined
     : React.Children.map(children, (child) => {
@@ -62,7 +65,6 @@ export const MenuSectionInternal = (props: MenuSectionInternalProps) => {
         );
         return (
           <MenuSectionInternal
-            key={child.props.id}
             {...child.props}
             topbar={topbar}
             menuExpand={menuExpand}
