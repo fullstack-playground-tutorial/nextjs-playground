@@ -1,25 +1,21 @@
 import Link from "next/link";
 import LoginIcon from "./icons/login.svg";
 import AvatarIcon from "./icons/profile.svg";
+
 export type UserSectionProps = {
   name?: string;
   email?: string;
   avatarUrl?: string;
-};
 
-export const UserSection = (_props: UserSectionProps) => {
-  return <></>;
-};
-
-type UserSectionInternalProps = UserSectionProps & {
   menuExpanded: boolean;
   isSectionActive: (url: string) => boolean;
   topbar: boolean;
 };
 
-export const UserSectionInternal = (_props: UserSectionInternalProps) => {
+export const UserSection = (_props: UserSectionProps) => {
   const { name, email, avatarUrl, menuExpanded, isSectionActive, topbar } =
     _props;
+    
   return (
     <section
       key={"user-section"}

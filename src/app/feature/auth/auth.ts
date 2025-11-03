@@ -35,26 +35,27 @@ export interface Account {
   phone?: string;
 }
 
-export type AuthUser = {
+export type User = {
   id: string;
   email: string;
-  name?: string;
+  username?: string;
   avatarUrl?: string;
   roleId?: string;
-  // overridePermissions?: string[]; // use + or - to add or remove permissions
-  permissions: string[]; // direct permissions
+  phone?: string;
 };
 
 export type UserInfo = {
-  user: AuthUser,
+  user: User;
   modules: Module[];
-}
+  permissions: string[]; // direct permissions
+  // overridePermissions?: string[]; // use + or - to add or remove permissions
+};
 
 export type Module = {
   id: string;
   title: string;
   url: string;
   permission?: string;
-  icon?:string;
+  icon?: string;
   children?: Module[];
-}
+};

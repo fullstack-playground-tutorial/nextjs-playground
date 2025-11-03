@@ -10,26 +10,28 @@ import TopbarIcon from "./icons/topbar.svg";
 import React, { useState } from "react";
 import "./sidebar.css";
 import type { UserSectionProps } from "./UserSection";
-import { UserSection, UserSectionInternal } from "./UserSection";
+import { UserSection } from "./UserSection";
 import { usePathname } from "next/navigation";
+import { User } from "@/app/feature/auth";
 
 type Props = {
+  user?: User;
   menuSections: React.ReactElement<MenuSectionProps>[];
   icons: Record<string, React.FC<React.SVGProps<SVGSVGElement>>>;
   topbar: boolean;
   onToggleViewbar: () => void;
   checkAuthorized: (module: string) => boolean;
-  userSection?: React.ReactElement<UserSectionProps>;
 };
 
 export default function SidebarWrapper({
+  user,
   topbar,
   onToggleViewbar,
   checkAuthorized,
   icons,
-  userSection,
   menuSections,
 }: Props) {
+  
   const pathname = usePathname();
   const isSectionActive = (url: string) => {
     return pathname.startsWith(url);
@@ -57,39 +59,28 @@ export default function SidebarWrapper({
     }
   };
 
-  const clonedChildren = React.Children.map([userSection, ...menuSections], (child) => {    
+  const clonedChildren = React.Children.map(menuSections, (child) => {
     if (!React.isValidElement(child)) return null;
-    if (child.type === UserSection) {
-      return (
-        <UserSectionInternal
-          {...(child.props as UserSectionProps)}
-          menuExpanded={menuExpand}
-          topbar={topbar}
-          isSectionActive={isSectionActive}
-        />
-      );
-    } else {
-      const props = child.props as MenuSectionProps;
-      const Icon = props.iconName ? icons[props.iconName] : undefined;
-      const isPinned = pinnedList.some(
-        (pinnedItem) => pinnedItem.id === props.id
-      );
-      return (
-        <MenuSectionInternal
-          {...props}
-          Icon={Icon}
-          hidden={props.hidden}
-          topbar={topbar}
-          menuExpand={menuExpand}
-          path={[props.id]}
-          handlePinnedList={handlePinnedList}
-          pinned={isPinned}
-          pinnedList={pinnedList}
-          isSectionActive={isSectionActive}
-          checkAuthorized={props.checkAuthorized || checkAuthorized}
-        />
-      );
-    }
+    const props = child.props as MenuSectionProps;
+    const Icon = props.iconName ? icons[props.iconName] : undefined;
+    const isPinned = pinnedList.some(
+      (pinnedItem) => pinnedItem.id === props.id
+    );
+    return (
+      <MenuSectionInternal
+        {...props}
+        Icon={Icon}
+        hidden={props.hidden}
+        topbar={topbar}
+        menuExpand={menuExpand}
+        path={[props.id]}
+        handlePinnedList={handlePinnedList}
+        pinned={isPinned}
+        pinnedList={pinnedList}
+        isSectionActive={isSectionActive}
+        checkAuthorized={props.checkAuthorized || checkAuthorized}
+      />
+    );
   });
 
   const renderPinnedList = () => {
@@ -161,6 +152,14 @@ export default function SidebarWrapper({
         } w-full`}
       >
         {renderPinnedList()}
+        <UserSection
+          name={user?.username}
+          email={user?.email}
+          avatarUrl={user?.avatarUrl}
+          menuExpanded={menuExpand}
+          topbar={topbar}
+          isSectionActive={isSectionActive}
+        />
         {clonedChildren}
       </aside>
     </nav>

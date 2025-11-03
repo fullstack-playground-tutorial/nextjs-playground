@@ -1,14 +1,14 @@
 "use client";
-import { AuthUser, UserInfo } from "@/app/feature/auth";
+import { User, UserInfo } from "@/app/feature/auth";
 import Sidebar from "./Sidebar/Sidebar";
 import { useState } from "react";
 
 export const Body = ({
-  user: userInfo,
+  userInfo,
   children,
   logoutAction
 }: {
-  user: UserInfo;
+  userInfo: UserInfo;
   children: React.ReactNode;
   logoutAction: () => Promise<number>;
 }) => {

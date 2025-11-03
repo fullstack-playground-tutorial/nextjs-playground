@@ -15,7 +15,6 @@ import HomeIcon from "./icons/home.svg";
 import UserManagerIcon from "./icons/user_manager.svg";
 import SidebarWrapper from "./SidebarWrapper";
 import { MenuSection, MenuSectionProps } from "./MenuSection";
-import { UserSection } from "./UserSection";
 import useAuth, { Module, UserInfo } from "@/app/feature/auth";
 import { useTransition } from "react";
 
@@ -44,7 +43,8 @@ const icons: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = {
 };
 
 function Sidebar({ userInfo, topbar, onToggleViewbar }: Props) {
-  const { user, modules } = userInfo;
+  const { modules, permissions, user } = userInfo;
+  console.log("user", userInfo);
 
   const [_, startTransition] = useTransition();
   const { logoutAction } = useAuth();
@@ -59,7 +59,7 @@ function Sidebar({ userInfo, topbar, onToggleViewbar }: Props) {
   };
   const checkAuthorized = (perm: string) => {        
     const authorized =
-      user?.permissions?.some((item) => item.startsWith(perm)) || false;
+      permissions.some((item) => item.startsWith(perm)) || false;
       
     return authorized;
   };
@@ -87,14 +87,7 @@ function Sidebar({ userInfo, topbar, onToggleViewbar }: Props) {
       checkAuthorized={checkAuthorized}
       onToggleViewbar={onToggleViewbar}
       icons={icons}
-      userSection={
-        <UserSection
-          key="user-section"
-          name={user?.name}
-          email={user?.email}
-          avatarUrl={user?.avatarUrl}
-        />
-      }
+      user={user}
       menuSections={[
         <MenuSection
           key="home"

@@ -67,10 +67,7 @@ export async function login(
     const AuthService = appContext.getAuthService();
     await AuthService.login(email, password, ua, ip, deviceId);
     redirect("/");
-    return {
-      fieldErrors: {},
-    };
-  } catch (e: any) {
+  } catch (e: any) {    
     const err = e as ResponseError<Error422Message[]>;
     if (err.status == 422) {
       const fieldErrs: ValidateErrors = {};

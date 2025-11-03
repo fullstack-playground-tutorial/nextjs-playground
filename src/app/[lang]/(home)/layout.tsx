@@ -1,6 +1,6 @@
 import BottomBar from "./components/BottomBar";
 import NotificationComponent from "./components/Notification/Notification";
-import { AuthUser, logout } from "@/app/feature/auth";
+import { User, logout } from "@/app/feature/auth";
 import { Body } from "./components/Body";
 import { getUser } from "@/app/dal";
 import { redirect } from "next/navigation";
@@ -10,7 +10,7 @@ export default async function HomeLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const userInfo = await getUser()
+  const userInfo = await getUser()  
   if(!userInfo){
     redirect("/auth")
   }
@@ -18,7 +18,7 @@ export default async function HomeLayout({
   return (
     <div>
       <Body
-        user={userInfo}
+        userInfo={userInfo}
         children={children}
         logoutAction={logout}
       />

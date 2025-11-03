@@ -1,5 +1,5 @@
 import { HttpService } from "@/app/utils/http/http-default";
-import { Account, AuthService, AuthUser, UserInfo } from "./auth";
+import { Account, AuthService, User, UserInfo } from "./auth";
 import {
   ContentType,
   Cookie,

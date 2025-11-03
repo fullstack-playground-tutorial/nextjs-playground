@@ -1,5 +1,3 @@
-import { HTTPResponse } from "./response";
-
 export class Interceptors {
   request: InterceptorRequest;
   response: InterceptorResponse;
