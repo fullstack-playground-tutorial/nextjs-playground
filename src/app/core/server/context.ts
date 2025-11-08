@@ -1,6 +1,5 @@
 import { AuthService } from "@/app/feature/auth/auth";
 import { AuthClient, createMockValidAccount } from "@/app/feature/auth/service";
-import { HttpService } from "@/app/utils/http/http-default";
 
 import { StoryClient, StoryService } from "@/app/feature/story";
 import { NotificationService } from "@/app/feature/notification/notification";
@@ -22,6 +21,9 @@ import {
 import { EnglishNoteMongoRepository } from "@/app/feature/english-note/repository";
 import { MongoDBClient } from "@/app/lib/mongodb";
 import mongoClient from "@/app/lib/mongodb";
+import { HTTPService } from "@/app/utils/http";
+import { createTopicService, TopicService } from "@/app/feature/topic";
+import { createTopicTagService, TopicTagService } from "@/app/feature/topic-tags";
 
 class ApplicationContext {
   private authService?: AuthService;
@@ -31,9 +33,11 @@ class ApplicationContext {
   private friendService?: FriendService;
   private apiEnglishNoteService?: ApiEnglishNoteService;
   private englishNoteService?: EnglishNoteService;
+  private topicService?: TopicService;
+  private topicTagService?:TopicTagService;
 
   constructor(
-    private httpService: HttpService,
+    private httpService: HTTPService,
     private mongoDBClient: MongoDBClient
   ) {
     this.getAuthService = this.getAuthService.bind(this);
@@ -42,6 +46,8 @@ class ApplicationContext {
     this.getFriendService = this.getFriendService.bind(this);
     this.getEnglishNoteService = this.getEnglishNoteService.bind(this);
     this.getApiEnglishNoteService = this.getApiEnglishNoteService.bind(this);
+    this.getTopicService = this.getTopicService.bind(this);
+    this.getTopicTagService = this.getTopicTagService.bind(this);
   }
 
   getAuthService(): AuthService {
@@ -88,6 +94,25 @@ class ApplicationContext {
     return this.searchService;
   };
 
+  getTopicService = () => {
+    if (!this.topicService) {
+      this.topicService = createTopicService(
+        this.httpService,
+        config.topic_url
+      );
+    }
+    return this.topicService;
+  };
+
+  getTopicTagService = () => {
+    if (!this.topicTagService) {
+      this.topicTagService = createTopicTagService(
+        this.httpService,
+        config.topic_tag_url
+      );
+    }
+    return this.topicTagService;
+  }
   getEnglishNoteService = () => {
     if (!this.englishNoteService) {
       this.englishNoteService = new EnglishNoteClient(
@@ -187,9 +212,5 @@ await mongoClient.init(async () => {
 
 const appContext = new ApplicationContext(httpServiceInstance, mongoClient);
 
-export const getApiEnglishNoteService = appContext.getApiEnglishNoteService;
-export const getEnglishNoteService = appContext.getEnglishNoteService;
-
+export const { getApiEnglishNoteService, getEnglishNoteService,getAuthService, getTopicService,getTopicTagService, getNotificationService, getFriendService, getSearchService, getStoryService } = appContext;
 export const mock = createMockValidAccount();
-
-export default appContext;

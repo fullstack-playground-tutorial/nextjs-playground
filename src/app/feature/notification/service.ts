@@ -1,4 +1,3 @@
-import { HttpService } from "@/app/utils/http/http-default";
 import {
   Notification,
   NotificationFilter,
@@ -6,9 +5,10 @@ import {
 } from "./notification";
 import { getCookieHeader } from "@/app/utils/http/headers/headers.server";
 import { HeaderType } from "@/app/utils/http/headers";
+import { HTTPService } from "@/app/utils/http";
 
 export class NotificationClient implements NotificationService {
-  constructor(private http: HttpService, private url: string) {
+  constructor(private http: HTTPService, private url: string) {
     this.Search = this.Search.bind(this);
   }
 

@@ -1,5 +1,5 @@
 "use client"
-import { createContext } from "react";
+import { createContext, useCallback } from "react";
 import { logout } from "./actions";
 
 interface AuthContextShape {
@@ -15,5 +15,6 @@ export const AuthContext = createContext<AuthContextShape | null>(null);
 export function AuthProvider({
   children,
 }: React.PropsWithChildren<{ logoutAction: () => Promise<number> }>) {
+
   return <AuthContext value={{ logoutAction: logout }}>{children}</AuthContext>;
 }

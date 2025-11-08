@@ -1,4 +1,3 @@
-import { HttpService } from "@/app/utils/http/http-default";
 import { Account, AuthService, User, UserInfo } from "./auth";
 import {
   ContentType,
@@ -8,9 +7,10 @@ import {
   HeaderType,
 } from "@/app/utils/http/headers";
 import { storeCookies } from "../actions";
+import { HTTPService } from "@/app/utils/http";
 
 export class AuthClient implements AuthService {
-  constructor(private httpInstance: HttpService, private auth_url: string) {
+  constructor(private httpInstance: HTTPService, private auth_url: string) {
     this.login = this.login.bind(this);
     this.register = this.register.bind(this);
     this.logout = this.logout.bind(this);
@@ -33,19 +33,20 @@ export class AuthClient implements AuthService {
           password: password,
         },
         {
-          headers: {
-            [HeaderType.contentType]: ContentType.build(
-              "application/json",
-              "utf-8"
-            ),
-            [HeaderType.deviceId]: deviceId,
-            [HeaderType.userAgent]: userAgent,
-            [HeaderType.xForwardedFor]: ip,
-            apiKey: process.env.KONG_AUTH_APIKEY || "",
+          authSkip: true,
+            headers: {
+              [HeaderType.contentType]: ContentType.build(
+                "application/json",
+                "utf-8"
+              ),
+              [HeaderType.deviceId]: deviceId,
+              [HeaderType.userAgent]: userAgent,
+              [HeaderType.xForwardedFor]: ip,
+              apiKey: process.env.KONG_AUTH_APIKEY || "",
+            },
+            credentials: "include",
+            cache: "no-cache",
           },
-          credentials: "include",
-          cache: "no-cache",
-        }
       )
       .then(async (res) => {
         // get Set-cookie from response
@@ -77,12 +78,13 @@ export class AuthClient implements AuthService {
         `${this.auth_url}/register`,
         user,
         {
-          headers: {
-            [HeaderType.contentType]: ContentType.build(
-              "application/json",
-              "utf-8"
-            ),
-          },
+          authSkip: true,
+            headers: {
+              [HeaderType.contentType]: ContentType.build(
+                "application/json",
+                "utf-8"
+              ),
+            },
         }
       );
 
@@ -101,6 +103,7 @@ export class AuthClient implements AuthService {
       const res = await this.httpInstance.get<number>(
         `${this.auth_url}/logout`,
         {
+          authSkip: true,
           headers: {
             [HeaderType.contentType]: ContentType.build(
               "application/json",
@@ -130,6 +133,7 @@ export class AuthClient implements AuthService {
       const res = await this.httpInstance.get<number>(
         `${this.auth_url}/refresh`,
         {
+          authSkip: true,
           headers: {
             [HeaderType.contentType]: ContentType.build(
               "application/json",
@@ -153,20 +157,18 @@ export class AuthClient implements AuthService {
 
   async me(): Promise<UserInfo> {
     try {
-      const res = await this.httpInstance.get<UserInfo>(
-        this.auth_url + "/me",
-        {
-          headers: {
-            [HeaderType.contentType]: ContentType.build(
-              "application/json",
-              "utf-8"
-            ),
-            [HeaderType.cookie]: await getCookieHeader()
-          },
-          credentials: "include",
-          cache: "no-cache",
-        }
-      );
+      const res = await this.httpInstance.get<UserInfo>(this.auth_url + "/me", {
+        authSkip: true,
+        headers: {
+          [HeaderType.contentType]: ContentType.build(
+            "application/json",
+            "utf-8"
+          ),
+          [HeaderType.cookie]: await getCookieHeader(),
+        },
+        credentials: "include",
+        cache: "no-cache",
+      });
 
       return res.body;
     } catch (error) {

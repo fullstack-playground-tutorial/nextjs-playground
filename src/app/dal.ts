@@ -5,14 +5,15 @@ import { Base64 } from "./utils/crypto/base64";
 import { HeaderType } from "./utils/http/headers";
 import { resource } from "./utils/resource";
 import { UserInfo } from "./feature/auth";
-import appContext from "./core/server/context";
+import { getAuthService } from "./core/server/context";
+import { uuidv4 } from "./utils/random/random";
 
 export const verifySession = async (): Promise<Session | null> => {
   const cookiesStore = await cookies();
   const accessToken = cookiesStore.get("accessToken");
   const refreshToken = cookiesStore.get("refreshToken");
 
-  if (refreshToken && accessToken == undefined) {
+  if (refreshToken && !accessToken) {
     // return "refresh_access_token";
     return null;
   }
@@ -107,8 +108,42 @@ export async function userAgent() {
   return ua;
 }
 
-export async function getUser(): Promise<UserInfo | null> {
+export async function getUser(): Promise<UserInfo> {
   const session = await verifySession();
-  if (!session) return null;
-  return appContext.getAuthService().me();
+  if (!session) {
+    throw new Error('You must be signed in to perform this action') 
+  }
+  
+  return getAuthService().me();
 }
+
+export async function hasPermission(perms: string[]): Promise<boolean>{
+  const session = await verifySession();
+  if (!session) {
+    throw new Error('You must be signed in to perform this action') 
+  }
+  
+  return getAuthService().me().then(user => {
+    const permissions = user?.permissions ?? [];
+    return perms.some((p) => permissions.includes(p));
+  })
+}
+
+/**
+ * Get Device ID for device. If It hasn't already existed, created new one.
+ */
+export const getDeviceId = async (): Promise<string> => {
+  const cookieStore = await cookies();
+   let deviceId = cookieStore.get("deviceId")?.value;
+    if (!deviceId) {
+      deviceId = uuidv4();
+      cookieStore.set("deviceId", deviceId, {
+        httpOnly: true,
+        sameSite: "strict",
+        secure: true,
+      });
+      resource.setDeviceId(deviceId);
+    }
+
+  return deviceId;
+};

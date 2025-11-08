@@ -1,6 +1,6 @@
 "use server";
 
-import { IP, userAgent } from "@/app/dal";
+import { getDeviceId, IP, userAgent } from "@/app/dal";
 import { ResponseError } from "@/app/utils/exception/model/response-error";
 import { Error422Message } from "@/app/utils/exception/model/response";
 import { uuidv4 } from "@/app/utils/random/random";
@@ -11,31 +11,9 @@ import { redirect } from "next/navigation";
 import { Account } from "./auth";
 import { SignUpFormState } from "@/app/[lang]/(auth)/auth/components/signup";
 import { removeCookies } from "../actions";
-import appContext, { mock } from "@/app/core/server/context";
+import { getAuthService, mock } from "@/app/core/server/context";
 import { SigninFormState } from "@/app/[lang]/(auth)/auth/components/signin";
 import { resource } from "@/app/utils/resource";
-
-/**
- * Get Device ID for device. If It hasn't already existed, created new one.
- */
-export const getDeviceId = async (): Promise<string> => {
-  const cookieStore = await cookies();
-  let deviceId = resource.session.deviceId;
-  if (!deviceId) {
-    deviceId = cookieStore.get("deviceId")?.value;
-    if (!deviceId) {
-      deviceId = uuidv4();
-      cookieStore.set("deviceId", deviceId, {
-        httpOnly: true,
-        sameSite: "strict",
-        secure: true,
-      });
-      resource.setDeviceId(deviceId);
-    }
-  }
-
-  return deviceId;
-};
 
 export async function login(
   prevState: SigninFormState,
@@ -64,7 +42,7 @@ export async function login(
   const deviceId = await getDeviceId();
 
   try {
-    const AuthService = appContext.getAuthService();
+    const AuthService = getAuthService();
     await AuthService.login(email, password, ua, ip, deviceId);
     redirect("/");
   } catch (e: any) {    
@@ -111,7 +89,7 @@ export async function register(
   }
 
   try {
-    const res = await appContext.getAuthService().register(account);
+    const res = await getAuthService().register(account);
     if (res > 0) {
       redirect("/");
     }
@@ -144,7 +122,7 @@ export async function logout(): Promise<number> {
       return -1;
     }
 
-    const res = await appContext.getAuthService().logout(deviceId, ip, ua);
+    const res = await getAuthService().logout(deviceId, ip, ua);
     if (res > 0) {
       await removeCookies();
       resource.session = {};

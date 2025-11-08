@@ -1,7 +1,7 @@
 "use client";
 
 import CustomSwitch from "@/app/components/ThemeToggle";
-import StoryPost from "../../(home)/components/Story/StoryPost";
+import StoryPost from "../../(backoffice)/components/Story/StoryPost";
 import { MouseEvent, useRef, useState } from "react";
 import "./ImagePan.css";
 type Position = { x: number; y: number };
@@ -17,7 +17,6 @@ export default function Page() {
   const imageRef = useRef<HTMLImageElement>(undefined);
 
   const handleToggle = () => {
-    console.log("handleToggle");
     setChecked(!checked);
   };
   const handleMouseMove = (e: MouseEvent) => {
@@ -40,7 +39,6 @@ export default function Page() {
     // Movement limit of image.
     const maxX = imageWidth - container.clientWidth;
     const maxY = imageHeight - container.clientHeight;
-    console.log(maxX);
     
     // Convert mouse position in container to percent unit.
     const xPercentage =

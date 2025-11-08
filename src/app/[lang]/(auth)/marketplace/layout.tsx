@@ -1,6 +1,6 @@
 import { Suspense } from "react";
-import Header from "../../(home)/components/Header";
-import Sidebar from "../../(home)/components/Sidebar";
+import Header from "../../(backoffice)/components/Header";
+import Sidebar from "../../(backoffice)/components/Sidebar";
 import Loading from "../../loading";
 
 export default function MarketLayout({

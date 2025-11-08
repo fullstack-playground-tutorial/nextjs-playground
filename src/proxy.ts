@@ -54,9 +54,8 @@ export async function proxy(request: NextRequest) {
   }
 
   const session = await verifySession();
+  
   const pathType = pathIdentify(pathname, locale);
-  console.log("session", session);
-  console.log("pathType", pathType, pathname);
 
   if (session) {
     if (pathType === "public" && pathname.startsWith(`/${locale}/auth`)) {

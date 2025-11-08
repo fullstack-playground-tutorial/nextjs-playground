@@ -1,4 +1,3 @@
-import { HttpService } from "@/app/utils/http/http-default";
 import {
   SearchResult,
   SearchItem,
@@ -12,10 +11,11 @@ import {
   HeaderType,
 } from "@/app/utils/http/headers";
 import { ResponseError } from "@/app/utils/exception/model/response-error";
+import { HTTPService } from "@/app/utils/http";
 
 export class SuggestionSearchClient<T> implements SuggestionSearchService {
   private search_url = config.search_url;
-  constructor(private http: HttpService) {
+  constructor(private http: HTTPService) {
     this.search = this.search.bind(this);
     this.delay = this.delay.bind(this);
   }
@@ -35,7 +35,7 @@ export class SuggestionSearchClient<T> implements SuggestionSearchService {
 }
 
 export class SearchClient implements SearchService {
-  constructor(private http: HttpService, private search_url: string) {
+  constructor(private http: HTTPService, private search_url: string) {
     this.search = this.search.bind(this);
     this.delay = this.delay.bind(this);
   }

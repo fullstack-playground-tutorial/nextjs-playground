@@ -3,14 +3,13 @@
 import { StoryFilter } from "./story";
 import { InputValidate, createSchemaItem } from "@/app/utils/validate/validate";
 import { ValidateErrors } from "@/app/utils/validate/model";
-import { redirect } from "next/navigation";
 import { ResponseError } from "@/app/utils/exception/model/response-error";
 import { Error422Message } from "@/app/utils/exception/model/response";
-import appContext from "@/app/core/server/context";
 import { IP, userAgent } from "@/app/dal";
+import { getStoryService } from "@/app/core/server/context";
 
 export const search = async (filter: StoryFilter) => {
-  return appContext.getStoryService().all(filter);
+  return getStoryService().all(filter);
 };
 
 export interface StoryActionState {

@@ -1,6 +1,6 @@
 "use server";
 
-import appContext from "@/app/core/server/context";
+import { getSearchService } from "@/app/core/server/context";
 import { SearchResult, SearchItem } from "./search";
 import { cookies } from "next/headers";
 
@@ -11,7 +11,7 @@ export interface SearchActionState {
 
 export async function search(q: string): Promise<SearchActionState> {
   const cookieService = await cookies()
-  return appContext.getSearchService()
+  return getSearchService()
     .search(q)
     .then((res) => {
       const userId = cookieService.get("userId")?.value;

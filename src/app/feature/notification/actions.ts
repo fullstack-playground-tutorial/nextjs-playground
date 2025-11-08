@@ -1,5 +1,5 @@
 "use server";
-import appContext from "@/app/core/server/context";
+import { getNotificationService } from "@/app/core/server/context";
 import { Notification } from "./notification";
 import { cookies } from "next/headers";
 
@@ -10,7 +10,7 @@ export async function search(): Promise<Notification[]> {
   try {
     const cookieList = await cookies();
     const userId = cookieList.get("userId")?.value;
-    const res = await appContext.getNotificationService().Search({
+    const res = await getNotificationService().Search({
       subscriberId: userId ?? "",
     });
     return res;

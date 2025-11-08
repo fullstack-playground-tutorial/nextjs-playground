@@ -1,4 +1,4 @@
-import { HeaderType } from "@/app/utils/http/headers/headers.server";
+import { HeaderType } from "@/app/utils/http/headers";
 import { Filter, BaseSearchService as BaseSearchService } from "./search";
 import { ResponseError } from "@/app/utils/exception/model/response-error";
 export * from "./search"

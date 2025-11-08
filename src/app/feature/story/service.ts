@@ -1,8 +1,8 @@
-import { HttpService } from "@/app/utils/http/http-default";
+import { HTTPService } from "@/app/utils/http";
 import { Story, StoryFilter, StoryService } from "./story";
 
 export class StoryClient implements StoryService {
-  constructor(private httpService: HttpService, private url: string) {
+  constructor(private httpService: HTTPService, private url: string) {
     this.all = this.all.bind(this);
     this.delay = this.delay.bind(this);
   }
