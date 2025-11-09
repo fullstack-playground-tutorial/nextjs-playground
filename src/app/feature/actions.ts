@@ -18,6 +18,8 @@ export async function storeCookie(key: string, cookie: Cookie) {
     httpOnly: cookie.httpOnly,
     secure: cookie.secure,
     expires: new Date(cookie.expires ?? ""),
+    sameSite: cookie.sameSite,
+    path: cookie.path
   });
 }
 

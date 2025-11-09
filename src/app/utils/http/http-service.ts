@@ -10,6 +10,11 @@ interface HttpDefault {
 
 export type RequestConfig = RequestInit & { authSkip?: boolean };
 
+export type RefreshingState = {
+  isRefreshing: boolean;
+  queue: Array<(s: boolean) => void>;
+};
+
 export interface HTTPService {
   get<T>(url: string, options?: RequestConfig): Promise<HTTPResponse<T>>;
   post<T, B extends object>(
@@ -37,7 +42,10 @@ export const createHttpClient = (
   // Private internal state (đóng gói bằng closure)
   const baseRequestInit: RequestInit = {};
   const requestTimeout = httpDefault.timeout ?? null;
-  let isRefreshing = false;
+  const refreshState: RefreshingState = {
+    isRefreshing: false,
+    queue: [],
+  };
 
   // ====== private helper ======
   const handleResponse = async <T>(
@@ -47,7 +55,7 @@ export const createHttpClient = (
   ): Promise<HTTPResponse<T>> => {
     try {
       if (interceptors?.response) {
-        res = await interceptors.response(res, url, isRefreshing, options);
+        res = await interceptors.response(res, url, refreshState, options);
       }
 
       let contentType = res.headers.get(HeaderType.contentType);
@@ -103,19 +111,31 @@ export const createHttpClient = (
     };
 
     if (interceptors?.request) {
-      const configInterceptor = interceptors.request(options);
+      const configInterceptor = await interceptors.request(options);
       mergeOptions = {
         ...mergeOptions,
         ...configInterceptor,
       };
     }
 
-    delete mergeOptions.authSkip;
-    
-    if (isRefreshing) {
+    // Store tmp variable for retrying logic after.
+    const hadAuthSkip = (mergeOptions as any).authSkip === true;
+    // Remove authSkip before fetching (fetch unknow this property)
+    delete (mergeOptions as any).authSkip;
+
+    if (refreshState.isRefreshing) {
       console.log("refreshing ...");
-      return new Promise<HTTPResponse<T>>((_, reject) => {
-        reject("token is refreshing");
+      return new Promise<HTTPResponse<T>>((resolve, reject) => {
+        refreshState.queue.push((success) => {
+          if (!success) {
+            reject("token is refreshing");
+            return;
+          }
+          // retry original request after refresh; set authSkip to true to avoid loop
+          sendRequest<T>(url, { ...options, authSkip: true })
+            .then(resolve)
+            .catch(reject);
+        });
       }).finally(() => timer && clearTimeout(timer));
     } else {
       const res = await fetch(url, mergeOptions).finally(

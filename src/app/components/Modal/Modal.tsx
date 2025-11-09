@@ -1,13 +1,14 @@
+"use client";
 import { useEffect, useRef } from "react";
 import type { ReactNode } from "react";
 import { createPortal } from "react-dom";
 import CloseIcon from "@/assets/images/icons/close.svg";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 interface ModalProps {
   open: boolean;
-  onClose: () => void;
   title?: ReactNode;
   body?: ReactNode;
-  footer?: ReactNode;
+  footer?:ReactNode;
   showCloseButton?: boolean;
   closeOnOverlayClick?: boolean;
   closeOnEsc?: boolean;
@@ -15,7 +16,6 @@ interface ModalProps {
 
 export default function Modal({
   open,
-  onClose,
   title,
   body,
   footer,
@@ -24,18 +24,20 @@ export default function Modal({
   closeOnEsc = true,
 }: ModalProps) {
   const dialogRef = useRef<HTMLDivElement | null>(null);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
 
   useEffect(() => {
     if (!open || !closeOnEsc) return;
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         e.preventDefault();
-        onClose();
       }
     };
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [open, closeOnEsc, onClose]);
+  }, [open, closeOnEsc]);
 
   useEffect(() => {
     if (!open) return;
@@ -47,6 +49,12 @@ export default function Modal({
   }, [open]);
 
   if (!open) return null;
+
+  const onClose = () => {
+    const params = new URLSearchParams(searchParams);
+    params.delete("showModal");    
+    router.replace(`${pathname}?${params.toString()}`);
+  };
 
   const modal = (
     <div className={`fixed inset-0 z-50`} aria-hidden={!open}>
@@ -89,11 +97,7 @@ export default function Modal({
 
           <div className="lg:px-6 px-4 pt-4 max-h-[70vh]">{body}</div>
 
-          {footer && (
-            <div className="p-4 px-6">
-              {footer}
-            </div>
-          )}
+          {footer && <div className="p-4 px-6">{footer}</div>}
         </div>
       </div>
     </div>

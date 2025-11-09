@@ -1,13 +1,13 @@
 "use client";
-import { Suspense, use, useEffect, useState, type FormEvent } from "react";
+import { Suspense, use, useState, type FormEvent } from "react";
 import {
   SkeletonElement,
   SkeletonWrapper,
 } from "@/components/SkeletionLoading";
-import { addTags, loadTag } from "@/app/feature/topic-tags";
+import { addTags, Tag } from "@/app/feature/topic-tags";
 
 type Props = {
-  id?: string;
+  tag: Promise<Tag | undefined>;
   onCancel?: () => void;
 };
 
@@ -16,29 +16,22 @@ type InternalState = {
   slug: string;
   description?: string;
   color?: string;
+  id?: string;
 };
 
-export default function TagForm({ id, onCancel }: Props) {
+export default function TagForm({ onCancel, tag: tagPromise }: Props) {
+  const tag = use(tagPromise);
+  
   let initialState: InternalState = {
-    title: "",
-    slug: "",
-    description: "",
-    color: "#ffffff",
+    title: tag?.title || "",
+    slug: tag?.slug || "",
+    description: tag?.description || "",  
+    color: tag?.color || "#ffffff",
+    id: tag?.id || undefined
   };
-  if (id) {
-    const tag = use(loadTag(id));
-    if (tag) {
-      initialState = {
-        ...initialState,
-        title: tag.title,
-        slug: tag.slug,
-        description: tag.description,
-        color: tag.color,
-      };
-    }
-  }
+
   const [state, setState] = useState(initialState);
-  const { slug, description, title, color } = state;
+  const { slug, description, title, color, id } = state;
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();

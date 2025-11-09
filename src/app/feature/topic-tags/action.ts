@@ -9,7 +9,7 @@ export const searchTags = async (
   return getTopicTagService().search(filter);
 };
 
-export const deleteTags = async (id: string) => {
+export const deleteTag = async (id: string) => {
     return getTopicTagService().remove(id)
 }
 

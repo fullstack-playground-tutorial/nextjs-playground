@@ -12,10 +12,7 @@ import {
   SkeletonElement,
   SkeletonWrapper,
 } from "@/components/SkeletionLoading";
-import EditIcon from "@/assets/images/icons/edit.svg";
-import BinIcon from "@/assets/images/icons/bin.svg";
-import useModal from "@/components/Modal/hook";
-import TagForm from "./TagForm";
+
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Tag } from "@/app/feature/topic-tags";
 import { SearchResult } from "@/app/utils/service";
@@ -60,7 +57,6 @@ const selectedList: FilterDropdownItem[] = [
 function TagManagement({ hasPermission, limit, currentPage, data }: Props) {
   const { list, total } = use(data);
   const [state, setState] = useState(initialState);
-  const { openModal, closeModal } = useModal();
   const searchParams = useSearchParams();
   const { replace } = useRouter();
   const pathname = usePathname();
@@ -93,58 +89,28 @@ function TagManagement({ hasPermission, limit, currentPage, data }: Props) {
   };
 
   const handleCreateClick = () => {
-    openModal(
-      <div className="flex flex-row gap-2 items-center">
-        <EditIcon className="size-5 fill-primary" />
-        <h3 className="text-lg md:text-xl font-semibold text-primary">
-          {"New Tag"}
-        </h3>
-      </div>,
-      <TagForm onCancel={closeModal} />,
-      undefined
-    );
+    const params = new URLSearchParams(searchParams);
+    params.set("showModal", "true");
+    params.delete("id");
+    params.set("action", "create");
+    replace(`${pathname}?${params.toString()}`);
   };
 
-  const handleTagEdit = (id: string, title: string) => {
-    openModal(
-      <div className="flex flex-row gap-2 items-center">
-        <EditIcon className="size-5 fill-primary" />
-        <h3 className="text-lg md:text-xl font-semibold text-primary">
-          {"Edit " + title}
-        </h3>
-      </div>,
-      <TagForm id={id} onCancel={closeModal} />,
-      undefined
-    );
+  const handleTagEdit = (id: string) => {
+    const params = new URLSearchParams(searchParams);
+    params.set("showModal", "true");
+    params.set("id", id);
+    params.set("action", "edit");
+    replace(`${pathname}?${params.toString()}`);
   };
 
   const handleTagDelete = (id: string, title: string) => {
-    openModal(
-      <div className="flex flex-row gap-2 items-center">
-        <BinIcon className="size-5 fill-primary" />
-        <h3 className="text-lg md:text-xl font-semibold text-primary">
-          {"Delete " + title}
-        </h3>
-      </div>,
-      `Are you sure you want to delete ${title}?`,
-      <div className="flex flex-row gap-3 items-center justify-center">
-        <button
-          type="button"
-          className="btn btn-md dark:border-secondary dark:border dark:text-primary hover:dark:bg-secondary cursor-pointer transition-colors"
-          onClick={closeModal}
-        >
-          Cancel
-        </button>
-        <button
-          type="button"
-          className="btn btn-md dark:bg-alert-0 dark:text-primary hover:dark:bg-alert-1 cursor-pointer transition-colors"
-          onClick={() => {}}
-        >
-          Delete
-        </button>
-      </div>
-    );
-  };
+    const params = new URLSearchParams(searchParams);
+    params.set("showModal", "true");
+    params.set("id", id);
+    params.set("action", "delete");
+    replace(`${pathname}?${params.toString()}`);
+    };
 
   const pageTotal = useMemo(() => {
     if (total) return 0;
@@ -280,7 +246,7 @@ function TagManagement({ hasPermission, limit, currentPage, data }: Props) {
                 count={item.usageCount || 0}
                 tagColor={item.color}
                 onDelete={() => handleTagDelete(item.id, item.title)}
-                onEdit={() => handleTagEdit(item.id, item.title)}
+                onEdit={() => handleTagEdit(item.id)}
               />
             ))}
           </Suspense>
