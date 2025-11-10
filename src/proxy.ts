@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { localeService } from "./app/utils/resource/locales";
 import { verifySession } from "./app/dal";
+import { refreshSession } from "./app/feature/auth";
 
 const publicRoutes: string[] = ["/auth", "/test", "/marketplace", "/eng-note"];
 const protectedRoutes: string[] = ["/chat", "/profile", "/search", "/"];
@@ -33,6 +34,11 @@ function pathIdentify(
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-query-string", request.nextUrl.searchParams.toString());
+  requestHeaders.set("x-pathname", pathname);
+
   const { getSupportLocales, getLocale } = localeService;
 
   const supportedLocales = getSupportLocales();
@@ -48,26 +54,44 @@ export async function proxy(request: NextRequest) {
     const redirectUrl = new URL(`/${locale}${pathname}`, request.url);
     return NextResponse.redirect(redirectUrl);
   } else {
-    locale = supportedLocales.find((loc) =>
-      pathname.startsWith(`/${loc}`)
-    );
+    locale = supportedLocales.find((loc) => pathname.startsWith(`/${loc}`));
   }
 
-  const session = await verifySession();
-  
   const pathType = pathIdentify(pathname, locale);
 
+  const session = await verifySession();
+
+  // case logined
   if (session) {
+    // if token expired => rotate token
+    if (session == "refresh") {
+      try {
+        await refreshSession();
+      } catch (error) {
+        console.log("refresh failed: ", error);
+        return NextResponse.redirect(new URL(`/${locale}/auth`, request.url));
+      }
+    }
+
     if (pathType === "public" && pathname.startsWith(`/${locale}/auth`)) {
-      // evade auth when already login
+      // evade auth when already login => redirect from login page to home page
       return NextResponse.redirect(new URL(`/${locale}`, request.url));
     }
-    return NextResponse.next();
+    return NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    });
   } else {
+    // case not login but can be access to public page
     if (pathType === "public") {
-      return NextResponse.next();
+      return NextResponse.next({
+        request: {
+          headers: requestHeaders,
+        },
+      });
     }
-    // not login redirect to /auth
+    // not login and access to protected page => redirect to /auth
     return NextResponse.redirect(new URL(`/${locale}/auth`, request.url));
   }
 }

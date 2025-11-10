@@ -31,7 +31,7 @@ export interface Props {
 export const SignInForm = (props: Props) => {
   const [state, setState] = useState(initialState);
   const ref = useRef<HTMLDivElement>(undefined);
-  const [{fieldErrors, info}, formAction, pending] = useActionState<
+  const [{fieldErrors}, formAction, pending] = useActionState<
     SigninFormState,
     FormData
   >(login, initialFormState);

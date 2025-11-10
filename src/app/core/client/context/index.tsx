@@ -18,7 +18,7 @@ export const Providers = (props: Props) => {
     <InternalizationProvider>
       <AuthProvider logoutAction={logout}>
         <ThemeProvider>
-            <AlertProvider>{props.children}</AlertProvider>
+          <AlertProvider>{props.children}</AlertProvider>
         </ThemeProvider>
       </AuthProvider>
     </InternalizationProvider>

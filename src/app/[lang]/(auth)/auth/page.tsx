@@ -1,4 +1,3 @@
-import { verifySession } from "@/app/dal";
 import { SignInForm } from "./components/signin";
 interface Props {
   params: { language: string };

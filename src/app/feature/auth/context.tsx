@@ -7,7 +7,7 @@ interface AuthContextShape {
   // hasPermission: (perms: string[]) => boolean;
   // login: (credentials: LoginCredentials) => Promise<number>;
   // isLoading: boolean;
-  logoutAction: () => Promise<number>;
+  logoutAction: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextShape | null>(null);

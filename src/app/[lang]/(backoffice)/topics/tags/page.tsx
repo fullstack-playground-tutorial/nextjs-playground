@@ -1,16 +1,9 @@
+// file src/app/[lang]/(backoffice)/topics/tags/page.tsx
 import { hasPermission } from "@/app/dal";
 import TagManagement from "./components/TagManagement";
 import { redirect } from "next/navigation";
-import { deleteTag, loadTag, searchTags } from "@/app/feature/topic-tags";
+import { loadTag, searchTags } from "@/app/feature/topic-tags";
 import TagForm from "./components/TagForm";
-import { Tag } from "@/app/feature/topic-tags";
-import Modal from "@/components/Modal";
-import { Suspense } from "react";
-import {
-  SkeletonElement,
-  SkeletonWrapper,
-} from "@/components/SkeletionLoading";
-import EditIcon from "@/assets/images/icons/edit.svg";
 import DeleteForm from "./components/DeleteForm";
 
 export default async function Page(props: {
@@ -37,18 +30,19 @@ export default async function Page(props: {
 
   const showModal = Boolean(searchParams?.showModal) || false;
   const action = searchParams?.action || "create";
-  const id = searchParams?.id;
+  const id = searchParams?.id || "";
 
-  const data = searchTags({
-    keyword: q,
-    sort: sort,
-    offset: (currentPage - 1) * limit,
-    limit: limit,
+  const [data, tagDetail] = await Promise.all([
+    searchTags({
+      keyword: q,
+      sort: sort,
+      offset: (currentPage - 1) * limit,
+      limit: limit,
+    }),
+    loadTag(id),
+  ]).catch((e) => {
+    throw e;
   });
-
-  const tagDetail: Promise<Tag | undefined> = id
-    ? loadTag(id)
-    : Promise.resolve(undefined);
 
   return (
     <>
@@ -59,22 +53,11 @@ export default async function Page(props: {
         sort={sort}
         currentPage={currentPage}
       />
-      <Modal
-        open={showModal && (action === "create" || action === "edit")}
-        title={id ? "Edit Tag" : "Create Tag"}
-        body={
-          <Suspense
-            fallback={
-              <SkeletonWrapper className="w-full h-full">
-                <SkeletonElement width={"100%"} height={"100%"} />
-              </SkeletonWrapper>
-            }
-          >
-            <TagForm tag={tagDetail} />
-          </Suspense>
-        }
-      />
-      <DeleteForm showModal={showModal} id={id} action={action}/>
+
+      {showModal && id && <DeleteForm id={id} action={action} />}
+      {showModal  && (
+        <TagForm id={id} tag={tagDetail} action={action} />
+      )}
     </>
   );
 }

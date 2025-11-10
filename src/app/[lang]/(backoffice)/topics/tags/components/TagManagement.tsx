@@ -1,3 +1,4 @@
+//src/app/[lang]/(backoffice)/topics/tags/components/TagManagement.tsx
 "use client";
 import Pagination from "@/components/Pagination";
 import {
@@ -6,19 +7,15 @@ import {
   type FilterDropdownItem,
 } from "@/components/Search";
 import { FilterBar } from "@/components/Search/Filter";
-import { Suspense, use, useMemo, useState, useTransition } from "react";
+import { useMemo, useState } from "react";
 import Card from "../../components/Card";
-import {
-  SkeletonElement,
-  SkeletonWrapper,
-} from "@/components/SkeletionLoading";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Tag } from "@/app/feature/topic-tags";
 import { SearchResult } from "@/app/utils/service";
 
 type Props = {
-  data: Promise<SearchResult<Tag>>;
+  data: SearchResult<Tag>;
   hasPermission: boolean;
   limit: number;
   currentPage: number;
@@ -55,7 +52,7 @@ const selectedList: FilterDropdownItem[] = [
 ];
 
 function TagManagement({ hasPermission, limit, currentPage, data }: Props) {
-  const { list, total } = use(data);
+  const { list, total } = data
   const [state, setState] = useState(initialState);
   const searchParams = useSearchParams();
   const { replace } = useRouter();
@@ -101,6 +98,7 @@ function TagManagement({ hasPermission, limit, currentPage, data }: Props) {
     params.set("showModal", "true");
     params.set("id", id);
     params.set("action", "edit");
+
     replace(`${pathname}?${params.toString()}`);
   };
 
@@ -110,7 +108,7 @@ function TagManagement({ hasPermission, limit, currentPage, data }: Props) {
     params.set("id", id);
     params.set("action", "delete");
     replace(`${pathname}?${params.toString()}`);
-    };
+  };
 
   const pageTotal = useMemo(() => {
     if (total) return 0;
@@ -158,98 +156,19 @@ function TagManagement({ hasPermission, limit, currentPage, data }: Props) {
           </FilterBar>
         </div>
         <div className="grid mt-4 md:mt-6 lg:mt-8 xl:mt-10 xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-4 mx-auto">
-          <Suspense
-            fallback={
-              <>
-                <SkeletonWrapper className="xl:w-70 xl:h-40 max-h-40 h-auto md:w-65 w-full rounded-xl">
-                  <SkeletonElement
-                    width={"100%"}
-                    height={"100%"}
-                  ></SkeletonElement>
-                </SkeletonWrapper>
-                <SkeletonWrapper className="xl:w-70 xl:h-40 max-h-40 h-auto md:w-65 w-full rounded-xl">
-                  <SkeletonElement
-                    width={"100%"}
-                    height={"100%"}
-                  ></SkeletonElement>
-                </SkeletonWrapper>
-                <SkeletonWrapper className="xl:w-70 xl:h-40 max-h-40 h-auto md:w-65 w-full rounded-xl">
-                  <SkeletonElement
-                    width={"100%"}
-                    height={"100%"}
-                  ></SkeletonElement>
-                </SkeletonWrapper>
-                <SkeletonWrapper className="xl:w-70 xl:h-40 max-h-40 h-auto md:w-65 w-full rounded-xl">
-                  <SkeletonElement
-                    width={"100%"}
-                    height={"100%"}
-                  ></SkeletonElement>
-                </SkeletonWrapper>
-                <SkeletonWrapper className="xl:w-70 xl:h-40 max-h-40 h-auto md:w-65 w-full rounded-xl">
-                  <SkeletonElement
-                    width={"100%"}
-                    height={"100%"}
-                  ></SkeletonElement>
-                </SkeletonWrapper>
-                <SkeletonWrapper className="xl:w-70 xl:h-40 max-h-40 h-auto md:w-65 w-full rounded-xl">
-                  <SkeletonElement
-                    width={"100%"}
-                    height={"100%"}
-                  ></SkeletonElement>
-                </SkeletonWrapper>
-                <SkeletonWrapper className="xl:w-70 xl:h-40 max-h-40 h-auto md:w-65 w-full rounded-xl">
-                  <SkeletonElement
-                    width={"100%"}
-                    height={"100%"}
-                  ></SkeletonElement>
-                </SkeletonWrapper>
-                <SkeletonWrapper className="xl:w-70 xl:h-40 max-h-40 h-auto md:w-65 w-full rounded-xl">
-                  <SkeletonElement
-                    width={"100%"}
-                    height={"100%"}
-                  ></SkeletonElement>
-                </SkeletonWrapper>
-                <SkeletonWrapper className="xl:w-70 xl:h-40 max-h-40 h-auto md:w-65 w-full rounded-xl">
-                  <SkeletonElement
-                    width={"100%"}
-                    height={"100%"}
-                  ></SkeletonElement>
-                </SkeletonWrapper>
-                <SkeletonWrapper className="xl:w-70 xl:h-40 max-h-40 h-auto md:w-65 w-full rounded-xl">
-                  <SkeletonElement
-                    width={"100%"}
-                    height={"100%"}
-                  ></SkeletonElement>
-                </SkeletonWrapper>
-                <SkeletonWrapper className="xl:w-70 xl:h-40 max-h-40 h-auto md:w-65 w-full rounded-xl">
-                  <SkeletonElement
-                    width={"100%"}
-                    height={"100%"}
-                  ></SkeletonElement>
-                </SkeletonWrapper>
-                <SkeletonWrapper className="xl:w-70 xl:h-40 max-h-40 h-auto md:w-65 w-full rounded-xl">
-                  <SkeletonElement
-                    width={"100%"}
-                    height={"100%"}
-                  ></SkeletonElement>
-                </SkeletonWrapper>
-              </>
-            }
-          >
-            {list.map((item) => (
-              <Card
-                key={item.id}
-                id={item.id}
-                title={item.title}
-                slug={item.slug}
-                description={item.description || ""}
-                count={item.usageCount || 0}
-                tagColor={item.color}
-                onDelete={() => handleTagDelete(item.id, item.title)}
-                onEdit={() => handleTagEdit(item.id)}
-              />
-            ))}
-          </Suspense>
+          {list.map((item) => (
+            <Card
+              key={item.id}
+              id={item.id}
+              title={item.title}
+              slug={item.slug}
+              description={item.description || ""}
+              count={item.usageCount || 0}
+              tagColor={item.color}
+              onDelete={() => handleTagDelete(item.id, item.title)}
+              onEdit={() => handleTagEdit(item.id)}
+            />
+          ))}
         </div>
         <div className="mt-6 md:mt-8 lg:mt-10 self-center">
           <Pagination

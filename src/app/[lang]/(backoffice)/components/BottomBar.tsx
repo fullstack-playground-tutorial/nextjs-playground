@@ -1,4 +1,4 @@
-"use client";
+"use client"
 import { useState } from "react";
 import Link from "next/link";
 import { logout } from "@/app/feature/auth/actions";
@@ -14,10 +14,7 @@ const initialState = {
 
 export default function BottomBar() {
   const [state, setState] = useState<InternalState>(initialState);
-  const onClickLogout = (e: React.MouseEvent) => {
-    e.preventDefault();
-    logout();
-  };
+
   return (
     <div className="fixed z-10 left-[50%] translate-x-[-50%] mx-auto md:hidden bottom-[64px] flex flex-col items-center">
       <div className="mb-4 mx-auto">
@@ -65,7 +62,7 @@ export default function BottomBar() {
         ></Link>
         <button
           className="rounded-full w-8 h-8 bg-green-300 shadow-md "
-          onClick={(e) => onClickLogout(e)}
+          formAction={logout}
         ></button>
       </div>
     </div>

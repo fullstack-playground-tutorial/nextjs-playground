@@ -1,16 +1,14 @@
 "use client";
-import { User, UserInfo } from "@/app/feature/auth";
+import {UserInfo } from "@/app/feature/auth";
 import Sidebar from "./Sidebar/Sidebar";
 import { useState } from "react";
 
 export const Body = ({
   userInfo,
   children,
-  logoutAction,
 }: {
   userInfo: UserInfo;
   children: React.ReactNode;
-  logoutAction: () => Promise<number>;
 }) => {
   const [topbar, setTopbar] = useState(false);
   return (

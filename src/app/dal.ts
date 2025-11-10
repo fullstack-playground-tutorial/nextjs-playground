@@ -1,48 +1,32 @@
 "use server";
 
 import { cookies, headers } from "next/headers";
-import { Base64 } from "./utils/crypto/base64";
 import { HeaderType } from "./utils/http/headers";
 import { resource } from "./utils/resource";
-import { UserInfo } from "./feature/auth";
+import { refreshSession, UserInfo } from "./feature/auth";
 import { getAuthService } from "./core/server/context";
 import { uuidv4 } from "./utils/random/random";
 
-export const verifySession = async (): Promise<Session | null> => {
+export const verifySession = async (): Promise<
+  "refresh" | "logined" | null
+> => {
   const cookiesStore = await cookies();
   const accessToken = cookiesStore.get("accessToken");
   const refreshToken = cookiesStore.get("refreshToken");
 
-  if (refreshToken && !accessToken) {
-    // return "refresh_access_token";
+  if ((!refreshToken && !accessToken) || (accessToken && !refreshToken)) {
     return null;
   }
 
-  if (accessToken && refreshToken) {
-    const token = descryptToken(accessToken.value);
-    if (!token) {
-      return null;
-    }
-
-    if (verifyToken(token)) {
-      resource.session = {
-        ...resource,
-        userId: token.payload.userId,
-        username: token.payload.username,
-      };
-      return {
-        isAuth: true,
-        payload: token.payload,
-      } as Session;
-    }
+  if (refreshToken && !accessToken) {
+    return "refresh";
   }
 
-  return null;
+  return "logined";
 };
 
 interface Session {
-  isAuth: boolean;
-  payload: AccessTokenPayload;
+  needRefresh: boolean;
 }
 
 interface Token {
@@ -52,32 +36,6 @@ interface Token {
 interface AccessTokenPayload {
   userId: string;
   username: string;
-}
-
-function verifyToken(token: Token): boolean {
-  if (!token.payload) {
-    return false;
-  }
-
-  if (!token.payload.userId && !token.payload.username) {
-    return false;
-  }
-
-  return true;
-}
-
-function descryptToken(token: string): Token | null {
-  const parts = token.split(".");
-  if (parts.length != 3) {
-    return null;
-  }
-
-  const payloadJSON = Base64.DecodeToString(parts[1]);
-  const payload: AccessTokenPayload = JSON.parse(payloadJSON);
-
-  return {
-    payload: payload,
-  };
 }
 
 export async function IP() {
@@ -111,22 +69,38 @@ export async function userAgent() {
 export async function getUser(): Promise<UserInfo> {
   const session = await verifySession();
   if (!session) {
-    throw new Error('You must be signed in to perform this action') 
+    throw new Error("You must be signed in to perform this action");
   }
-  
+  if (session == "refresh") {
+    return refreshSession().then(() => getAuthService().me());
+  }
+
   return getAuthService().me();
 }
 
-export async function hasPermission(perms: string[]): Promise<boolean>{
+export async function hasPermission(perms: string[]): Promise<boolean> {
   const session = await verifySession();
   if (!session) {
-    throw new Error('You must be signed in to perform this action') 
+    throw new Error("You must be signed in to perform this action");
   }
-  
-  return getAuthService().me().then(user => {
-    const permissions = user?.permissions ?? [];
-    return perms.some((p) => permissions.includes(p));
-  })
+
+  if (session == "refresh") {
+    return refreshSession().then(() =>
+      getAuthService()
+        .me()
+        .then((user) => {
+          const permissions = user?.permissions ?? [];
+          return perms.some((p) => permissions.includes(p));
+        })
+    );
+  }
+
+  return getAuthService()
+    .me()
+    .then((user) => {
+      const permissions = user?.permissions ?? [];
+      return perms.some((p) => permissions.includes(p));
+    });
 }
 
 /**
@@ -134,16 +108,16 @@ export async function hasPermission(perms: string[]): Promise<boolean>{
  */
 export const getDeviceId = async (): Promise<string> => {
   const cookieStore = await cookies();
-   let deviceId = cookieStore.get("deviceId")?.value;
-    if (!deviceId) {
-      deviceId = uuidv4();
-      cookieStore.set("deviceId", deviceId, {
-        httpOnly: true,
-        sameSite: "strict",
-        secure: true,
-      });
-      resource.setDeviceId(deviceId);
-    }
+  let deviceId = cookieStore.get("deviceId")?.value;
+  if (!deviceId) {
+    deviceId = uuidv4();
+    cookieStore.set("deviceId", deviceId, {
+      httpOnly: true,
+      sameSite: "strict",
+      secure: true,
+    });
+    resource.setDeviceId(deviceId);
+  }
 
   return deviceId;
 };

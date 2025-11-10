@@ -3,17 +3,17 @@
 import { getDeviceId, IP, userAgent } from "@/app/dal";
 import { ResponseError } from "@/app/utils/exception/model/response-error";
 import { Error422Message } from "@/app/utils/exception/model/response";
-import { uuidv4 } from "@/app/utils/random/random";
 import { ValidateErrors } from "@/app/utils/validate/model";
 import { InputValidate, createSchemaItem } from "@/app/utils/validate/validate";
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { Account } from "./auth";
 import { SignUpFormState } from "@/app/[lang]/(auth)/auth/components/signup";
-import { removeCookies } from "../actions";
+import { removeCookies, storeCookies } from "../actions";
 import { getAuthService, mock } from "@/app/core/server/context";
 import { SigninFormState } from "@/app/[lang]/(auth)/auth/components/signin";
 import { resource } from "@/app/utils/resource";
+import { cookies } from "next/headers";
+import { HeaderType } from "@/app/utils/http/headers";
 
 export async function login(
   prevState: SigninFormState,
@@ -43,9 +43,10 @@ export async function login(
 
   try {
     const AuthService = getAuthService();
-    await AuthService.login(email, password, ua, ip, deviceId);
+    const cookies = await AuthService.login(email, password, ua, ip, deviceId);
+    await storeCookies(cookies);
     redirect("/");
-  } catch (e: any) {    
+  } catch (e: any) {
     const err = e as ResponseError<Error422Message[]>;
     if (err.status == 422) {
       const fieldErrs: ValidateErrors = {};
@@ -112,14 +113,14 @@ export async function register(
   }
 }
 
-export async function logout(): Promise<number> {
+export async function logout(f?: FormData) {
   try {
     const deviceId = await getDeviceId();
     const ip = await IP();
     const ua = await userAgent();
 
     if (deviceId.length == 0 || ua.length == 0 || ip.length == 0) {
-      return -1;
+      await removeCookies();
     }
 
     const res = await getAuthService().logout(deviceId, ip, ua);
@@ -128,10 +129,35 @@ export async function logout(): Promise<number> {
       resource.session = {};
       redirect("/");
     }
-    return res;
   } catch (e) {
     await removeCookies();
     resource.session = {};
     throw e;
   }
+}
+
+export async function refreshSession() {
+  const cookieStore = await cookies();
+  const [deviceId, ip, ua] = await Promise.all([
+    getDeviceId(),
+    IP(),
+    userAgent(),
+  ]);
+  const id = cookieStore.get(HeaderType.deviceId)?.value;
+
+  if (
+    deviceId.length == 0 ||
+    ua.length == 0 ||
+    ip.length == 0 ||
+    id! ||
+    (id && id.length == 0)
+  ) {
+    throw new Response(undefined, {
+      status: 401,
+      statusText: "Unauthorized",
+    });
+  }
+
+  const newAccessToken = await getAuthService().refresh(deviceId, ip, ua);
+  storeCookies({ accessToken: newAccessToken });
 }

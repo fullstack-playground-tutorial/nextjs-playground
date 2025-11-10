@@ -1,12 +1,13 @@
-import { Account, AuthService, User, UserInfo } from "./auth";
+import { Account, AuthService, UserInfo } from "./auth";
 import {
   ContentType,
   Cookie,
   getCookieHeader,
   getSetCookieFromResponse,
   HeaderType,
+  StoreRequestCookies,
 } from "@/app/utils/http/headers";
-import { storeCookies } from "../actions";
+import { storeCookie } from "../actions";
 import { HTTPService } from "@/app/utils/http";
 
 export class AuthClient implements AuthService {
@@ -24,7 +25,7 @@ export class AuthClient implements AuthService {
     userAgent: string,
     ip: string,
     deviceId: string
-  ): Promise<number> {
+  ): Promise<StoreRequestCookies> {
     return this.httpInstance
       .post<number, any>(
         `${this.auth_url}/login`,
@@ -34,38 +35,24 @@ export class AuthClient implements AuthService {
         },
         {
           authSkip: true,
-            headers: {
-              [HeaderType.contentType]: ContentType.build(
-                "application/json",
-                "utf-8"
-              ),
-              [HeaderType.deviceId]: deviceId,
-              [HeaderType.userAgent]: userAgent,
-              [HeaderType.xForwardedFor]: ip,
-              apiKey: process.env.KONG_AUTH_APIKEY || "",
-            },
-            credentials: "include",
-            cache: "no-cache",
+          headers: {
+            [HeaderType.contentType]: ContentType.build(
+              "application/json",
+              "utf-8"
+            ),
+            [HeaderType.deviceId]: deviceId,
+            [HeaderType.userAgent]: userAgent,
+            [HeaderType.xForwardedFor]: ip,
+            apiKey: process.env.KONG_AUTH_APIKEY || "",
           },
+          credentials: "include",
+          cache: "no-cache",
+        }
       )
       .then(async (res) => {
         // get Set-cookie from response
-        const setCookies = getSetCookieFromResponse(res.headers);
-
-        // store cookies
-        if (
-          setCookies.accessToken ||
-          setCookies.refreshToken ||
-          setCookies.userId
-        ) {
-          await storeCookies({
-            accessToken: setCookies.accessToken,
-            refreshToken: setCookies.refreshToken,
-            userId: setCookies.userId,
-          });
-        }
-
-        return res.body;
+        const setCookies = getSetCookieFromResponse(res.headers)
+        return setCookies
       })
       .catch((e) => {
         throw e;
@@ -79,12 +66,12 @@ export class AuthClient implements AuthService {
         user,
         {
           authSkip: true,
-            headers: {
-              [HeaderType.contentType]: ContentType.build(
-                "application/json",
-                "utf-8"
-              ),
-            },
+          headers: {
+            [HeaderType.contentType]: ContentType.build(
+              "application/json",
+              "utf-8"
+            ),
+          },
         }
       );
 
@@ -133,6 +120,7 @@ export class AuthClient implements AuthService {
       const res = await this.httpInstance.get<number>(
         `${this.auth_url}/refresh`,
         {
+          _isRefresh: true,
           authSkip: true,
           headers: {
             [HeaderType.contentType]: ContentType.build(
@@ -149,6 +137,9 @@ export class AuthClient implements AuthService {
       );
 
       const setCookies = getSetCookieFromResponse(res.headers);
+      if (setCookies["accessToken"]) {
+        await storeCookie("accessToken", setCookies.accessToken);
+      }
       return setCookies.accessToken;
     } catch (err: unknown) {
       throw err;

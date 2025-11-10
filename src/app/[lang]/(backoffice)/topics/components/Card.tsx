@@ -1,3 +1,4 @@
+// src/app/[lang]/(backoffice)/topics/components/Card.tsx
 import BinIcon from "@/assets/images/icons/bin.svg";
 import EditIcon from "@/assets/images/icons/edit.svg";
 interface Props {

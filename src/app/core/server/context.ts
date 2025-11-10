@@ -8,7 +8,6 @@ import { FriendService } from "@/app/feature/friend/friend";
 import { FriendClient } from "@/app/feature/friend/service";
 import { SearchService } from "@/app/feature/search/search";
 import { SearchClient } from "@/app/feature/search/service";
-import { httpServiceInstance } from "./http-config";
 import { config } from "@/app/config";
 import {
   ApiEnglishNoteService,
@@ -24,6 +23,7 @@ import mongoClient from "@/app/lib/mongodb";
 import { HTTPService } from "@/app/utils/http";
 import { createTopicService, TopicService } from "@/app/feature/topic";
 import { createTopicTagService, TopicTagService } from "@/app/feature/topic-tags";
+import { httpServiceInstance } from "./http-config";
 
 class ApplicationContext {
   private authService?: AuthService;

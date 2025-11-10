@@ -1,4 +1,4 @@
-import { Cookie } from "../../utils/http/headers";
+import { Cookie, StoreRequestCookies } from "../../utils/http/headers";
 
 export interface AuthService {
   login(
@@ -7,7 +7,7 @@ export interface AuthService {
     userAgent: string,
     ip: string,
     deviceId: string
-  ): Promise<number>;
+  ): Promise<StoreRequestCookies>;
   register(user: Account): Promise<number>;
   logout(deviceId: string, ip: string, userAgent: string): Promise<number>;
   refresh(

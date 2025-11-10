@@ -1,3 +1,4 @@
+"use server";
 import { ResponseError } from "../exception/model/response-error";
 import { ContentType, HeaderType } from "./headers";
 import { Interceptors } from "./interceptor";
@@ -6,9 +7,14 @@ import { HTTPResponse } from "./response";
 
 interface HttpDefault {
   timeout?: number;
+  headers?: HeadersInit;
 }
 
-export type RequestConfig = RequestInit & { authSkip?: boolean };
+export type RequestConfig = RequestInit & {
+  authSkip?: boolean;
+  refreshed?: boolean;
+  _isRefresh?: boolean;
+};
 
 export type RefreshingState = {
   isRefreshing: boolean;
@@ -35,12 +41,12 @@ export interface HTTPService {
   delele<T>(url: string, options?: RequestConfig): Promise<HTTPResponse<T>>;
 }
 
-export const createHttpClient = (
+export const createHttpClient = async (
   httpDefault: HttpDefault = {},
   interceptors?: Interceptors
-): HTTPService => {
-  // Private internal state (đóng gói bằng closure)
-  const baseRequestInit: RequestInit = {};
+): Promise<HTTPService> => {
+  // Private internal state
+  const baseRequestInit: RequestConfig = { refreshed: false };
   const requestTimeout = httpDefault.timeout ?? null;
   const refreshState: RefreshingState = {
     isRefreshing: false,
@@ -96,7 +102,7 @@ export const createHttpClient = (
     url: string,
     options: RequestConfig
   ): Promise<HTTPResponse<T>> => {
-    console.log("fetching API ...");
+    console.log(`Calling API [HTTP] ${options.method} ${url} `);
     const abortController = new AbortController();
     const timeout = requestTimeout;
 
@@ -110,38 +116,44 @@ export const createHttpClient = (
       ...options,
     };
 
-    if (interceptors?.request) {
-      const configInterceptor = await interceptors.request(options);
-      mergeOptions = {
-        ...mergeOptions,
-        ...configInterceptor,
-      };
-    }
+    try {
+      if (interceptors?.request) {
+        const intercepted = await interceptors.request(options);
+        mergeOptions = {
+          ...mergeOptions,
+          ...intercepted,
+        };
+      }
 
-    // Store tmp variable for retrying logic after.
-    const hadAuthSkip = (mergeOptions as any).authSkip === true;
-    // Remove authSkip before fetching (fetch unknow this property)
-    delete (mergeOptions as any).authSkip;
-
-    if (refreshState.isRefreshing) {
-      console.log("refreshing ...");
-      return new Promise<HTTPResponse<T>>((resolve, reject) => {
-        refreshState.queue.push((success) => {
-          if (!success) {
-            reject("token is refreshing");
-            return;
-          }
-          // retry original request after refresh; set authSkip to true to avoid loop
-          sendRequest<T>(url, { ...options, authSkip: true })
-            .then(resolve)
-            .catch(reject);
+      const isRefreshRequest = mergeOptions._isRefresh === true;
+      if (refreshState.isRefreshing && !isRefreshRequest) {
+        console.log("Waiting for token refresh...");
+        return new Promise<HTTPResponse<T>>((resolve, reject) => {
+          refreshState.queue.push((success) => {
+            if (!success) {
+              reject("token refresh failed");
+              return;
+            }
+            // Retry original request after refresh;
+            sendRequest<T>(url, options).then(resolve).catch(reject);
+          });
         });
-      }).finally(() => timer && clearTimeout(timer));
-    } else {
-      const res = await fetch(url, mergeOptions).finally(
-        () => timer && clearTimeout(timer)
-      );
-      return handleResponse<T>(res, url, options);
+      } else {
+        const res = await fetch(url, mergeOptions).finally(
+          () => timer && clearTimeout(timer)
+        );
+        return handleResponse<T>(res, url, options);
+      }
+    } catch (error: any) {
+      if (error.name === "AbortError") {
+        console.warn(`Request to ${url} timed out after ${timeout}ms`);
+        throw new ResponseError("Request timeout", 408, null);
+      }
+
+      console.error(` Network error calling ${url}:`, error);
+      throw error;
+    } finally {
+      timer && clearTimeout(timer);
     }
   };
 

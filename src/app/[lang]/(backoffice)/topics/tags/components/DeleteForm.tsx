@@ -1,28 +1,33 @@
-"use client";
+// src/app/[lang]/(backoffice)/topics/tags/components/DeleteForm.tsx
+"use server";
 import Modal from "@/components/Modal";
 import BinIcon from "@/assets/images/icons/bin.svg";
 import { deleteTag } from "@/app/feature/topic-tags";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 
 type Props = {
-  showModal: boolean;
-  id?: string;
+  id: string;
   action: "create" | "edit" | "delete";
 };
 
-export default function DeleteForm({ showModal, id, action }: Props) {
-    const pathname = usePathname();
-    const searchParams = useSearchParams();
-    const router =useRouter();
-    function onClose(){
-        const params = new URLSearchParams(searchParams);
-        params.delete("showModal");
-        params.delete("action");
-        router.replace(`${pathname}?${params.toString()}`);
-    }
+export default async function DeleteForm({ id, action }: Props) {
+  const headerList = await headers();
+  const queryString = headerList.get("x-query-string");
+  const params = new URLSearchParams(queryString || "");
+  const pathname = headerList.get("x-pathname");
+
+  async function closeAction(form: FormData) {
+    "use server"
+    params.delete("showModal");
+    params.delete("action");
+    redirect(`/topics/tags/${pathname}?${params.toString()}`);
+  }
+
+  const deleteTagWithId = deleteTag.bind(null, id);
   return (
     <Modal
-      open={showModal && action === "delete" && id !== undefined}
+      open={action === "delete" && id !== undefined}
       title={
         <div className="flex flex-row gap-2 items-center">
           <BinIcon className="size-5 fill-primary" />
@@ -35,16 +40,16 @@ export default function DeleteForm({ showModal, id, action }: Props) {
       footer={
         <div className="flex flex-row gap-3 items-center justify-center">
           <button
-            type="button"
+            formAction={closeAction}
+            type="submit"
             className="btn btn-md dark:border-secondary dark:border dark:text-primary hover:dark:bg-secondary cursor-pointer transition-colors"
-            onClick={onClose}
           >
             Cancel
           </button>
           <button
             type="submit"
+            formAction={deleteTagWithId}
             className="btn btn-md dark:bg-alert-0 dark:text-primary hover:dark:bg-alert-1 cursor-pointer transition-colors"
-            formAction={async () =>{await deleteTag(id!)}}
           >
             Delete
           </button>
