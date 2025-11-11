@@ -1,12 +1,13 @@
 "use client";
 
 import TransitionButton from "@/app/components/TransitionButton/TransitionButton";
-import { useActionState, useRef, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { SignUpForm } from "../signup";
 import { login } from "@/app/feature/auth/actions";
 import { ValidateErrors } from "@/app/utils/validate/model";
-import "../signin/index.css";
+import "./index.css";
 import { UserInfo } from "@/app/feature/auth";
+import { useRouter, useSearchParams } from "next/navigation";
 
 interface InternalState {
   showSignUp: boolean;
@@ -15,6 +16,7 @@ interface InternalState {
 export interface SigninFormState {
   fieldErrors: ValidateErrors;
   info?: UserInfo;
+  loginSuccess: boolean;
 }
 
 const initialState: InternalState = {
@@ -23,15 +25,18 @@ const initialState: InternalState = {
 
 const initialFormState: SigninFormState = {
   fieldErrors: {},
+  loginSuccess: false,
 };
 
 export interface Props {
+  modal: boolean;
   params: { language: string };
 }
 export const SignInForm = (props: Props) => {
+  const router = useRouter();
   const [state, setState] = useState(initialState);
   const ref = useRef<HTMLDivElement>(undefined);
-  const [{fieldErrors}, formAction, pending] = useActionState<
+  const [{ fieldErrors, loginSuccess }, formAction, pending] = useActionState<
     SigninFormState,
     FormData
   >(login, initialFormState);
@@ -39,10 +44,22 @@ export const SignInForm = (props: Props) => {
     setState((prev) => ({ ...prev, showSignUp: !prev.showSignUp }));
   };
 
+  useEffect(() => {    
+    if (loginSuccess) {
+      if(props.modal){
+
+        router.back();
+    
+      } else {
+        router.replace("/");
+      }
+    }
+  }, [loginSuccess]);
+
   return (
     <>
       <div
-        className="transition-all dark:bg-surface-1 mt-12 w-100 rounded-xl dark:shadow dark:border dark:border-border"
+        className="transition-all dark:bg-surface-1 w-100 rounded-xl dark:shadow dark:border dark:border-border"
         ref={ref as any}
       >
         {state.showSignUp == false ? (
@@ -51,11 +68,7 @@ export const SignInForm = (props: Props) => {
               <div className="text-center text-4xl font-semibold mt-4 dark:text-accent-0">
                 Sign In
               </div>
-              <div
-                className={`pt-4 ${
-                  !fieldErrors["common"] ? "h-5" : ""
-                }`}
-              >
+              <div className={`pt-4 ${!fieldErrors["common"] ? "h-5" : ""}`}>
                 {fieldErrors["common"] && (
                   <span className={`dark:text-alert-1 text-sm h-5 px-2`}>
                     {fieldErrors["common"]}

@@ -18,7 +18,7 @@ import { MenuSection, MenuSectionProps } from "./MenuSection";
 import { logout, Module, UserInfo } from "@/app/feature/auth";
 
 interface Props {
-  userInfo: UserInfo;
+  userInfo?: UserInfo;
   topbar: boolean;
   onToggleViewbar: () => void;
 }
@@ -42,11 +42,14 @@ const icons: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = {
 };
 
 function Sidebar({ userInfo, topbar, onToggleViewbar }: Props) {
-  const { modules, permissions, user } = userInfo;
+  const modules = userInfo?.modules ?? [];
+  const permissions: string[] = userInfo?.permissions ?? [];
+  const user = userInfo?.user;
+
   const checkAuthorized = (perm: string) => {        
     const authorized =
-      permissions.some((item) => item.startsWith(perm)) || false;
-      
+      permissions.some((item: string) => item.startsWith(perm)) || false;
+
     return authorized;
   };
 

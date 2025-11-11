@@ -7,7 +7,7 @@ export default function SkeletonWrapper({
 }) {
   return (
     <div
-      className={`relative  overflow-hidden dark:bg-[#444] ${
+      className={`relative overflow-hidden dark:bg-[#444] ${
         className ? className.toString() : ""
       } w-full h-full`}
     >

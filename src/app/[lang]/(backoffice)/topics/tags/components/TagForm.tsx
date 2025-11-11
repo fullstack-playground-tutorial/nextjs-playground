@@ -1,48 +1,60 @@
 //src/app/[lang]/(backoffice)/topics/tags/components/TagForm.tsx
 "use client";
-import { Suspense, use } from "react";
-import { addTag, editTag, loadTag, Tag } from "@/app/feature/topic-tags";
-import Modal from "@/components/Modal";
-import {
-  usePathname,
-  useRouter,
-  useSearchParams,
-} from "next/navigation";
-import TagFormLoading from "./TagFormLoading";
+import { Tag, upsertTag } from "@/app/feature/topic-tags";
+import useToast from "@/components/Toast";
+import { useRouter } from "next/navigation";
+import { use, useActionState, useEffect } from "react";
 
 type Props = {
-  id?: string;
-  action?: "delete" | "edit" | "create";
-  tag?: Tag;
+  tagPromise?: Promise<Tag | undefined>;
 };
-export default function TagForm({ tag, id, action }: Props) {
 
+export type UpsertActionState = {
+  successMessage?: string;
+  error?: any;
+};
+
+export default function TagForm({ tagPromise }: Props) {
+  const toast = useToast();
+  const [{ error, successMessage }, formAction, pending] = useActionState<
+    UpsertActionState,
+    FormData
+  >(upsertTag, {});
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const pathname = usePathname();
-
-   function handleCloseModal(form: FormData) {
-    const params = new URLSearchParams(searchParams);
-    params.delete("showModal");
-    params.delete("action");
-    router.replace(`${pathname}?${params.toString()}`);
+  const tag = tagPromise ? use(tagPromise) : undefined;
+  function handleCloseModal() {
+    router.back();
   }
 
-  async function submitFormAction(form: FormData) {
-    if (id) {
-      await editTag.bind(null, id)(form);
-    } else {
-      await addTag(form);
+  useEffect(() => {
+    if (error) {
+      toast.addToast("error", error.message);
     }
-  }
+  }, [error]);
+
+  useEffect(() => {
+    if (successMessage) {
+      toast.addToast("success", successMessage);
+      router.back();
+    }
+  }, [successMessage]);
 
   return (
-    <Modal
-      open={action === "create" || action === "edit"}
-      title={id ? "Edit Tag" : "Create Tag"}
-      body={
-        <Suspense fallback={<TagFormLoading />}>
+    <div className="relative h-full w-full flex items-center justify-center p-4">
+      <div
+        className={`w-full h-full dark:text-primary dark:bg-surface-0 border border-border rounded-lg shadow-xl outline-none`}
+      >
+        <div className="flex items-center justify-between px-4 py-3 border-b dark:border-border">
+          <div
+            id="modal-title"
+            className="text-base font-semibold dark:text-primary"
+          >
+            {tag?.id ? "Edit Tag" : "Create Tag"}
+          </div>
+        </div>
+        <div className="lg:px-6 px-4 pt-4 max-h-[70vh]">
           <form className="flex flex-col items-start max-w-300 gap-4 dark:bg-surface-0">
+            {tag && tag.id && <input type="hidden" name="id" value={tag.id} />}
             <div className="flex flex-row items-center gap-4">
               <label
                 htmlFor="title"
@@ -106,23 +118,29 @@ export default function TagForm({ tag, id, action }: Props) {
             </div>
             <div className="flex flex-row gap-3 mx-auto pt-2 pb-6 px-8">
               <button
-                type="submit"
-                className="btn btn-md dark:border-secondary dark:border dark:text-primary hover:dark:bg-secondary cursor-pointer transition-colors"
-                formAction={handleCloseModal}
+                type="button"
+                className="btn btn-sm dark:border-secondary dark:border dark:text-primary hover:dark:bg-secondary cursor-pointer transition-colors"
+                onClick={handleCloseModal}
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="btn btn-md dark:bg-accent-0 dark:text-primary hover:dark:bg-accent-1 cursor-pointer transition-colors"
-                formAction={submitFormAction}
+                className="btn btn-sm dark:bg-accent-0 dark:text-primary hover:dark:bg-accent-1 cursor-pointer transition-colors"
+                formAction={formAction}
               >
-                {id ? "Edit" : "Create"}
+                {tag?.id
+                  ? !pending
+                    ? "Edit"
+                    : "Editing ..."
+                  : !pending
+                  ? "Create"
+                  : "Creating ..."}
               </button>
             </div>
           </form>
-        </Suspense>
-      }
-    />
+        </div>
+      </div>
+    </div>
   );
 }

@@ -7,14 +7,14 @@ interface AuthContextShape {
   // hasPermission: (perms: string[]) => boolean;
   // login: (credentials: LoginCredentials) => Promise<number>;
   // isLoading: boolean;
-  logoutAction: () => Promise<void>;
+  logoutAction: (f?: FormData) => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextShape | null>(null);
 
 export function AuthProvider({
   children,
-}: React.PropsWithChildren<{ logoutAction: () => Promise<number> }>) {
+}: React.PropsWithChildren<{ logoutAction: (f?: FormData) => Promise<void> }>) {
 
   return <AuthContext value={{ logoutAction: logout }}>{children}</AuthContext>;
 }

@@ -8,6 +8,8 @@ import { HTTPResponse } from "./response";
 interface HttpDefault {
   timeout?: number;
   headers?: HeadersInit;
+  next?: NextFetchRequestConfig; 
+  cache?: RequestCache;
 }
 
 export type RequestConfig = RequestInit & {

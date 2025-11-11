@@ -101,7 +101,6 @@ export class AuthClient implements AuthService {
             [HeaderType.xForwardedFor]: ip,
             [HeaderType.cookie]: await getCookieHeader(),
           },
-          cache: "no-cache",
         }
       );
 
@@ -137,9 +136,6 @@ export class AuthClient implements AuthService {
       );
 
       const setCookies = getSetCookieFromResponse(res.headers);
-      if (setCookies["accessToken"]) {
-        await storeCookie("accessToken", setCookies.accessToken);
-      }
       return setCookies.accessToken;
     } catch (err: unknown) {
       throw err;

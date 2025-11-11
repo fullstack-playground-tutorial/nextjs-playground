@@ -3,29 +3,46 @@ import { SearchFilter, SearchResult } from "./type";
 
 export interface GenericService<T, F> {
   httpService: HTTPService;
-  getAll(cache?: RequestCache, authSkip?: boolean): Promise<T[]>;
+  getAll(next?: NextFetchRequestConfig, authSkip?: boolean): Promise<T[]>;
   search(
     filter: Partial<F>,
-    cache?: RequestCache,
+    next?: NextFetchRequestConfig,
     searchGet?: boolean,
     authSkip?: boolean
   ): Promise<SearchResult<T>>;
   load(
     id: string,
-    cache?: RequestCache,
+    next?: NextFetchRequestConfig,
     authSkip?: boolean
   ): Promise<T | undefined>;
-  create(data: Omit<T, "id">, authSkip?: boolean): Promise<number>;
-  update(id: string, data: Partial<T>, authSkip?: boolean): Promise<number>;
-  patch(id: string, data: Partial<T>, authSkip?: boolean): Promise<number>;
-  remove(id: string, authSkip?: boolean): Promise<number>;
+  create(
+    data: Omit<T, "id">,
+    next?: NextFetchRequestConfig,
+    authSkip?: boolean
+  ): Promise<number>;
+  update(
+    id: string,
+    data: Partial<T>,
+    next?: NextFetchRequestConfig,
+    authSkip?: boolean
+  ): Promise<number>;
+  patch(
+    id: string,
+    data: Partial<T>,
+    next?: NextFetchRequestConfig,
+    authSkip?: boolean
+  ): Promise<number>;
+  remove(
+    id: string,
+    next?: NextFetchRequestConfig,
+    authSkip?: boolean
+  ): Promise<number>;
 }
 
 export const createGenericService = <T extends Object, F extends SearchFilter>(
   httpService: HTTPService,
-  url: string
+  url: string,
 ): GenericService<T, F> => {
-  
   function buildUrlParams<F extends Record<string, any>>(
     baseUrl: string,
     filter: Partial<F>
@@ -40,11 +57,11 @@ export const createGenericService = <T extends Object, F extends SearchFilter>(
   }
   async function search(
     filter: Partial<F>,
-    cache: RequestCache = "default",
+    next: NextFetchRequestConfig,
     searchGet: boolean = false,
     authSkip: boolean = false
   ) {
-    const options = { cache, authSkip };
+    const options = { next, authSkip};
     if (searchGet) {
       const queryURL = buildUrlParams(url + "/search", filter);
       return httpService
@@ -58,24 +75,29 @@ export const createGenericService = <T extends Object, F extends SearchFilter>(
   }
 
   async function getAll(
-    cache: RequestCache = "default",
+    next: NextFetchRequestConfig = {revalidate: 60},
     authSkip: boolean = false
   ) {
-    const res = await httpService.get<T[]>(url, { cache, authSkip });
+    const res = await httpService.get<T[]>(url, { next, authSkip });
     return res.body;
   }
 
   async function load(
     id: string,
-    cache: RequestCache = "default",
+    next: NextFetchRequestConfig = {revalidate: 60},
     authSkip: boolean = false
   ) {
-    const res = await httpService.get<T>(url + "/" + id, { cache, authSkip });
+    const res = await httpService.get<T>(url + "/" + id, { next, authSkip });
     return res.body;
   }
 
-  async function create(data: Omit<T, "id">, authSkip: boolean = false) {
+  async function create(
+    data: Omit<T, "id">,
+    next: NextFetchRequestConfig,
+    authSkip: boolean = false
+  ) {
     const res = await httpService.post<number, Omit<T, "id">>(url, data, {
+      next,
       authSkip,
     });
     return res.body;
@@ -84,9 +106,11 @@ export const createGenericService = <T extends Object, F extends SearchFilter>(
   async function update(
     id: string,
     data: Partial<T>,
+    next: NextFetchRequestConfig,
     authSkip: boolean = false
   ) {
     const res = await httpService.put<number>(url + "/" + id, data, {
+      next,
       authSkip,
     });
     return res.body;
@@ -95,16 +119,25 @@ export const createGenericService = <T extends Object, F extends SearchFilter>(
   async function patch(
     id: string,
     data: Partial<T>,
+    next: NextFetchRequestConfig,
     authSkip: boolean = false
   ) {
     const res = await httpService.patch<number>(url + "/" + id, data, {
+      next,
       authSkip,
     });
     return res.body;
   }
 
-  async function remove(id: string, authSkip: boolean = false) {
-    const res = await httpService.delele<number>(url + "/" + id, { authSkip });
+  async function remove(
+    id: string,
+    next: NextFetchRequestConfig,
+    authSkip: boolean = false
+  ) {
+    const res = await httpService.delele<number>(url + "/" + id, {
+      authSkip,
+      next,
+    });
     return res.body;
   }
 

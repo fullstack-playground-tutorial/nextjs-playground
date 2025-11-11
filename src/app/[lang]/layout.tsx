@@ -19,7 +19,6 @@ export default async function RootLayout({
         <Providers>
           <Suspense fallback={<Loading />}>
             {children}
-            <div id="portal-modal"></div>
           </Suspense>
         </Providers>
       </body>

@@ -7,7 +7,7 @@ export const Body = ({
   userInfo,
   children,
 }: {
-  userInfo: UserInfo;
+  userInfo?: UserInfo;
   children: React.ReactNode;
 }) => {
   const [topbar, setTopbar] = useState(false);

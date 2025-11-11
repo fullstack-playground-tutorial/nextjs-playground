@@ -1,60 +1,58 @@
 // src/app/[lang]/(backoffice)/topics/tags/components/DeleteForm.tsx
-"use server";
-import Modal from "@/components/Modal";
+"use client";
 import BinIcon from "@/assets/images/icons/bin.svg";
 import { deleteTag } from "@/app/feature/topic-tags";
-import { redirect } from "next/navigation";
-import { headers } from "next/headers";
+import { useRouter, useSearchParams } from "next/navigation";
 
 type Props = {
   id: string;
-  action: "create" | "edit" | "delete";
 };
 
-export default async function DeleteForm({ id, action }: Props) {
-  const headerList = await headers();
-  const queryString = headerList.get("x-query-string");
-  const params = new URLSearchParams(queryString || "");
-  const pathname = headerList.get("x-pathname");
+export default function DeleteForm({ id }: Props) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
-  async function closeAction(form: FormData) {
-    "use server"
-    params.delete("showModal");
-    params.delete("action");
-    redirect(`/topics/tags/${pathname}?${params.toString()}`);
+  function handleCloseModal() {
+    router.back();
   }
 
   const deleteTagWithId = deleteTag.bind(null, id);
   return (
-    <Modal
-      open={action === "delete" && id !== undefined}
-      title={
-        <div className="flex flex-row gap-2 items-center">
-          <BinIcon className="size-5 fill-primary" />
-          <h3 className="text-lg md:text-xl font-semibold text-primary">
-            {"Delete " + id}
-          </h3>
+    <>
+      <div className="relative h-full w-full max-w-lg shadow-xl flex flex-col items-center justify-center px-4 py-3 dark:bg-surface-0 border border-border outline-none rounded-lg">
+        <div
+          id="modal-title"
+          className="flex w-full text-base font-semibold text-gray-900 px-4 py-3 border-b border-border dark:text-gray-100 self-start"
+        >
+          <div className="flex flex-row gap-2 items-center">
+            <BinIcon className="size-5 fill-primary" />
+            <h3 className="text-base md:text-xl font-semibold dark:text-primary">
+              {"Delete " + id}
+            </h3>
+          </div>
         </div>
-      }
-      body={`Are you sure you want to delete ${id}?`}
-      footer={
-        <div className="flex flex-row gap-3 items-center justify-center">
+
+        <div className="lg:px-6 px-4 pt-4 max-h-[70vh] flex flex-col gap-4">
+          <div className="text-base font-medium">{`Are you sure you want to delete ${id}?`}</div>
+          <div className="flex flex-row gap-3 items-end justify-center pb-3">
           <button
-            formAction={closeAction}
+            onClick={handleCloseModal}
             type="submit"
-            className="btn btn-md dark:border-secondary dark:border dark:text-primary hover:dark:bg-secondary cursor-pointer transition-colors"
+            className="btn btn-sm dark:border-secondary dark:border dark:text-primary hover:dark:bg-secondary cursor-pointer transition-colors"
           >
             Cancel
           </button>
           <button
             type="submit"
             formAction={deleteTagWithId}
-            className="btn btn-md dark:bg-alert-0 dark:text-primary hover:dark:bg-alert-1 cursor-pointer transition-colors"
+            className="btn btn-sm dark:bg-alert-1 dark:text-primary hover:dark:bg-alert-2 cursor-pointer transition-colors"
           >
             Delete
           </button>
         </div>
-      }
-    />
+        </div>
+        
+      </div>
+    </>
   );
 }

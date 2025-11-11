@@ -52,7 +52,7 @@ export const UserSection = (_props: UserSectionProps) => {
           </Link>
         ) : (
           <Link
-            href="/login"
+            href="/auth"
             className={`flex flex-row gap-2 cursor-pointer text-sm font-semibold ${
               topbar ? "items-center" : "items-end"
             } w-full h-full`}

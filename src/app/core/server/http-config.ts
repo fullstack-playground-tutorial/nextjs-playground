@@ -1,6 +1,4 @@
-import {
-  createHttpClient,
-} from "@/app/utils/http";
+import { createHttpClient } from "@/app/utils/http";
 import {
   ContentType,
   getCookieHeader,
@@ -13,6 +11,10 @@ export const httpServiceInstance = await createHttpClient(
     headers: {
       [HeaderType.contentType]: ContentType.build("application/json", "utf-8"),
     },
+    next: {
+      revalidate: 3600,
+    },
+    cache: "force-cache",
   },
   {
     response: async (response, url, isRefreshing, options) => {

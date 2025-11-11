@@ -1,18 +1,18 @@
-"use server";
-
+import "server-only";
 import { cookies, headers } from "next/headers";
 import { HeaderType } from "./utils/http/headers";
 import { resource } from "./utils/resource";
-import { refreshSession, UserInfo } from "./feature/auth";
+import { UserInfo } from "./feature/auth";
 import { getAuthService } from "./core/server/context";
 import { uuidv4 } from "./utils/random/random";
+import { redirect } from "next/navigation";
 
 export const verifySession = async (): Promise<
   "refresh" | "logined" | null
 > => {
   const cookiesStore = await cookies();
-  const accessToken = cookiesStore.get("accessToken");
-  const refreshToken = cookiesStore.get("refreshToken");
+  const accessToken = cookiesStore.get("accessToken")?.value;
+  const refreshToken = cookiesStore.get("refreshToken")?.value;
 
   if ((!refreshToken && !accessToken) || (accessToken && !refreshToken)) {
     return null;
@@ -24,19 +24,6 @@ export const verifySession = async (): Promise<
 
   return "logined";
 };
-
-interface Session {
-  needRefresh: boolean;
-}
-
-interface Token {
-  payload: AccessTokenPayload;
-}
-
-interface AccessTokenPayload {
-  userId: string;
-  username: string;
-}
 
 export async function IP() {
   const headersList = await headers();
@@ -66,15 +53,7 @@ export async function userAgent() {
   return ua;
 }
 
-export async function getUser(): Promise<UserInfo> {
-  const session = await verifySession();
-  if (!session) {
-    throw new Error("You must be signed in to perform this action");
-  }
-  if (session == "refresh") {
-    return refreshSession().then(() => getAuthService().me());
-  }
-
+export async function getUser(): Promise<UserInfo | undefined> {
   return getAuthService().me();
 }
 
@@ -85,14 +64,7 @@ export async function hasPermission(perms: string[]): Promise<boolean> {
   }
 
   if (session == "refresh") {
-    return refreshSession().then(() =>
-      getAuthService()
-        .me()
-        .then((user) => {
-          const permissions = user?.permissions ?? [];
-          return perms.some((p) => permissions.includes(p));
-        })
-    );
+    redirect("/auth");
   }
 
   return getAuthService()

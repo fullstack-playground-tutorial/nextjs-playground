@@ -10,7 +10,7 @@ import {
 } from "react";
 import { ImageCarousel } from "./img-carousel";
 import { start } from "repl";
-import { Modal } from "@/app/components/Modal";
+import { Modal } from "@/components/Modal";
 
 export interface ImageInfo {
   id: string;

@@ -2,9 +2,7 @@
 import { hasPermission } from "@/app/dal";
 import TagManagement from "./components/TagManagement";
 import { redirect } from "next/navigation";
-import { loadTag, searchTags } from "@/app/feature/topic-tags";
-import TagForm from "./components/TagForm";
-import DeleteForm from "./components/DeleteForm";
+import { searchTags } from "@/app/feature/topic-tags";
 
 export default async function Page(props: {
   searchParams?: Promise<{
@@ -28,18 +26,13 @@ export default async function Page(props: {
   const limit = Number(searchParams?.limit) || 25;
   const sort = searchParams?.sort || "created_at";
 
-  const showModal = Boolean(searchParams?.showModal) || false;
-  const action = searchParams?.action || "create";
-  const id = searchParams?.id || "";
-
-  const [data, tagDetail] = await Promise.all([
+  const [data] = await Promise.all([
     searchTags({
       keyword: q,
       sort: sort,
       offset: (currentPage - 1) * limit,
       limit: limit,
     }),
-    loadTag(id),
   ]).catch((e) => {
     throw e;
   });
@@ -53,11 +46,6 @@ export default async function Page(props: {
         sort={sort}
         currentPage={currentPage}
       />
-
-      {showModal && id && <DeleteForm id={id} action={action} />}
-      {showModal  && (
-        <TagForm id={id} tag={tagDetail} action={action} />
-      )}
     </>
   );
 }

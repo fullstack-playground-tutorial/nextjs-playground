@@ -9,7 +9,7 @@ import { redirect } from "next/navigation";
 import { Account } from "./auth";
 import { SignUpFormState } from "@/app/[lang]/(auth)/auth/components/signup";
 import { removeCookies, storeCookies } from "../actions";
-import { getAuthService, mock } from "@/app/core/server/context";
+import { getAuthService } from "@/app/core/server/context";
 import { SigninFormState } from "@/app/[lang]/(auth)/auth/components/signin";
 import { resource } from "@/app/utils/resource";
 import { cookies } from "next/headers";
@@ -19,11 +19,8 @@ export async function login(
   prevState: SigninFormState,
   formData: FormData
 ): Promise<SigninFormState> {
-  // mock account please cursor check before submit.
-  const { email, password } = mock as { email: string; password: string };
-
-  // const email = formData.get("email") as string;
-  // const password = formData.get("password") as string;
+  const email = formData.get("email") as string;
+  const password = formData.get("password") as string;
 
   const ua = await userAgent();
   const ip = await IP();
@@ -37,7 +34,7 @@ export async function login(
   });
 
   if (JSON.stringify(errs) != "{}") {
-    return { fieldErrors: errs };
+    return { fieldErrors: errs, loginSuccess: false };
   }
   const deviceId = await getDeviceId();
 
@@ -45,7 +42,10 @@ export async function login(
     const AuthService = getAuthService();
     const cookies = await AuthService.login(email, password, ua, ip, deviceId);
     await storeCookies(cookies);
-    redirect("/");
+    return {
+      fieldErrors: {},
+      loginSuccess: true,
+    };
   } catch (e: any) {
     const err = e as ResponseError<Error422Message[]>;
     if (err.status == 422) {
@@ -54,7 +54,7 @@ export async function login(
         fieldErrs[item.field] = item.message;
       });
 
-      return { fieldErrors: fieldErrs };
+      return { fieldErrors: fieldErrs, loginSuccess: false };
     } else {
       throw err;
     }
@@ -65,9 +65,7 @@ export async function register(
   prevState: SignUpFormState,
   formData: FormData
 ): Promise<SignUpFormState> {
-  // mock account. Cursor please check this before commit.
-  const account = mock;
-  // const account = Object.fromEntries(formData) as Account;
+  const account = Object.fromEntries(formData) as Account;
 
   const errs = InputValidate.object({
     email: createSchemaItem("email").isRequired().email("email is not valid"),
@@ -136,28 +134,3 @@ export async function logout(f?: FormData) {
   }
 }
 
-export async function refreshSession() {
-  const cookieStore = await cookies();
-  const [deviceId, ip, ua] = await Promise.all([
-    getDeviceId(),
-    IP(),
-    userAgent(),
-  ]);
-  const id = cookieStore.get(HeaderType.deviceId)?.value;
-
-  if (
-    deviceId.length == 0 ||
-    ua.length == 0 ||
-    ip.length == 0 ||
-    id! ||
-    (id && id.length == 0)
-  ) {
-    throw new Response(undefined, {
-      status: 401,
-      statusText: "Unauthorized",
-    });
-  }
-
-  const newAccessToken = await getAuthService().refresh(deviceId, ip, ua);
-  storeCookies({ accessToken: newAccessToken });
-}

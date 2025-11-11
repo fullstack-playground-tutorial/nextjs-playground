@@ -1,11 +1,18 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, userAgent } from "next/server";
 import { localeService } from "./app/utils/resource/locales";
-import { verifySession } from "./app/dal";
-import { refreshSession } from "./app/feature/auth";
+import { getDeviceId, IP, verifySession } from "./app/dal";
+import { PassportKeys } from "./app/utils/http/headers";
+import { getAuthService } from "./app/core/server/context";
 
-const publicRoutes: string[] = ["/auth", "/test", "/marketplace", "/eng-note"];
-const protectedRoutes: string[] = ["/chat", "/profile", "/search", "/"];
-
+const publicRoutes: string[] = [
+  "/auth",
+  "/test",
+  "/marketplace",
+  "/eng-note",
+  "",
+];
+const protectedRoutes: string[] = ["/chat", "/profile", "/search"];
+const defaultPath = "/";
 function pathIdentify(
   pathname: string,
   locale?: string
@@ -32,12 +39,37 @@ function pathIdentify(
   return "invalid";
 }
 
+export async function refreshSession(req: NextRequest) {
+  const res = NextResponse.next();
+
+  const ua = userAgent({ headers: req.headers }).ua;
+
+  const [deviceId, ip] = await Promise.all([getDeviceId(), IP()]);
+
+  if (deviceId.length == 0 || ua.length == 0 || ip.length == 0) {
+    res.cookies.delete(PassportKeys.accessToken);
+    res.cookies.delete(PassportKeys.refreshToken);
+  } else {
+    const newAccessToken = await getAuthService().refresh(deviceId, ip, ua);
+    if (!newAccessToken) {
+      res.cookies.delete(PassportKeys.accessToken);
+      res.cookies.delete(PassportKeys.refreshToken);
+    } else {
+      res.cookies.set(PassportKeys.accessToken, newAccessToken.value, {
+        httpOnly: newAccessToken.httpOnly,
+        path: newAccessToken.pa,
+        sameSite: newAccessToken.sameSite,
+        secure: newAccessToken.secure,
+        expires: Number(newAccessToken.expires),
+      });
+    }
+  }
+
+  return res;
+}
+
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-
-  const requestHeaders = new Headers(request.headers);
-  requestHeaders.set("x-query-string", request.nextUrl.searchParams.toString());
-  requestHeaders.set("x-pathname", pathname);
 
   const { getSupportLocales, getLocale } = localeService;
 
@@ -66,10 +98,12 @@ export async function proxy(request: NextRequest) {
     // if token expired => rotate token
     if (session == "refresh") {
       try {
-        await refreshSession();
+        return await refreshSession(request);
       } catch (error) {
         console.log("refresh failed: ", error);
-        return NextResponse.redirect(new URL(`/${locale}/auth`, request.url));
+        return NextResponse.redirect(
+          new URL(`/${locale}${defaultPath}`, request.url)
+        );
       }
     }
 
@@ -77,22 +111,17 @@ export async function proxy(request: NextRequest) {
       // evade auth when already login => redirect from login page to home page
       return NextResponse.redirect(new URL(`/${locale}`, request.url));
     }
-    return NextResponse.next({
-      request: {
-        headers: requestHeaders,
-      },
-    });
+    return NextResponse.next();
   } else {
-    // case not login but can be access to public page
+    // case not login but can be access to public page => allow
     if (pathType === "public") {
-      return NextResponse.next({
-        request: {
-          headers: requestHeaders,
-        },
-      });
+      return NextResponse.next();
+    } else {
+      // not login and access to protected or invalid page => redirect to defaultPath
+      return NextResponse.redirect(
+        new URL(`/${locale}${defaultPath}`, request.url)
+      );
     }
-    // not login and access to protected page => redirect to /auth
-    return NextResponse.redirect(new URL(`/${locale}/auth`, request.url));
   }
 }
 

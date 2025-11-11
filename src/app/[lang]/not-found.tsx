@@ -3,9 +3,6 @@ import { headers } from "next/headers";
 import Link from "next/link";
 
 export default async function NotFound() {
-  const headerList = await headers();
-  const domain = headerList.get("host");
-
   return (
     <div className="flex justify-center h-screen items-center flex-col drop-shadow-sm">
       <div>URL not found</div>

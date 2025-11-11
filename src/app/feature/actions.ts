@@ -2,10 +2,10 @@
 import { cookies } from "next/headers";
 import { Cookie, StoreRequestCookies } from "../utils/http/headers";
 
-export async function storeCookies(req: StoreRequestCookies) {
+export async function storeCookies(cookies: StoreRequestCookies) {
   let k: keyof StoreRequestCookies;
-  for (k in req) {
-    const cookie = req[k];
+  for (k in cookies) {
+    const cookie = cookies[k];
     if (cookie) {
       await storeCookie(k, cookie);
     }

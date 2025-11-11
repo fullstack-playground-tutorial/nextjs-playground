@@ -4,6 +4,7 @@ import InternalizationProvider from "./internalization/InternalizationProvider";
 import AlertProvider from "./alert/AlertProvider";
 import { AuthProvider, logout } from "@/app/feature/auth";
 import { ThemeProvider } from "@/app/components/Theme/context";
+import { ToastProvider } from "@/components/Toast";
 // import SearchProvider from "./search/SearchProvider";
 // export * from "./alert/AlertProvider";
 // export * from "./loading/LoadingProvider";
@@ -18,7 +19,9 @@ export const Providers = (props: Props) => {
     <InternalizationProvider>
       <AuthProvider logoutAction={logout}>
         <ThemeProvider>
-          <AlertProvider>{props.children}</AlertProvider>
+          <ToastProvider>
+            <AlertProvider>{props.children}</AlertProvider>
+          </ToastProvider>
         </ThemeProvider>
       </AuthProvider>
     </InternalizationProvider>

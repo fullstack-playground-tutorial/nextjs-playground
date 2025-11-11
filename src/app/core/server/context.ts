@@ -1,5 +1,5 @@
 import { AuthService } from "@/app/feature/auth/auth";
-import { AuthClient, createMockValidAccount } from "@/app/feature/auth/service";
+import { AuthClient } from "@/app/feature/auth/service";
 
 import { StoryClient, StoryService } from "@/app/feature/story";
 import { NotificationService } from "@/app/feature/notification/notification";
@@ -213,4 +213,3 @@ await mongoClient.init(async () => {
 const appContext = new ApplicationContext(httpServiceInstance, mongoClient);
 
 export const { getApiEnglishNoteService, getEnglishNoteService,getAuthService, getTopicService,getTopicTagService, getNotificationService, getFriendService, getSearchService, getStoryService } = appContext;
-export const mock = createMockValidAccount();

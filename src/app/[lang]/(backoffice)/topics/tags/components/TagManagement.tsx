@@ -13,6 +13,7 @@ import Card from "../../components/Card";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Tag } from "@/app/feature/topic-tags";
 import { SearchResult } from "@/app/utils/service";
+import Link from "next/link";
 
 type Props = {
   data: SearchResult<Tag>;
@@ -52,11 +53,11 @@ const selectedList: FilterDropdownItem[] = [
 ];
 
 function TagManagement({ hasPermission, limit, currentPage, data }: Props) {
-  const { list, total } = data
+  const { list, total } = data;
   const [state, setState] = useState(initialState);
+  const { replace, push } = useRouter();
+  const basePath = "/topics/tags";
   const searchParams = useSearchParams();
-  const { replace } = useRouter();
-  const pathname = usePathname();
   const handleQueryChange = (q: string) => {
     setState((prev) => ({ ...prev, q: q }));
   };
@@ -70,7 +71,7 @@ function TagManagement({ hasPermission, limit, currentPage, data }: Props) {
   const handlePageSizeSelected = (pageSize: number) => {
     const params = new URLSearchParams(searchParams);
     params.set("limit", pageSize.toString());
-    replace(`${pathname}?${params.toString()}`);
+    replace(`${basePath}?${params.toString()}`);
   };
 
   const handleSearch = (term: string) => {
@@ -82,32 +83,16 @@ function TagManagement({ hasPermission, limit, currentPage, data }: Props) {
       params.delete("q");
     }
 
-    replace(`${pathname}?${params.toString()}`);
-  };
-
-  const handleCreateClick = () => {
-    const params = new URLSearchParams(searchParams);
-    params.set("showModal", "true");
-    params.delete("id");
-    params.set("action", "create");
-    replace(`${pathname}?${params.toString()}`);
+    replace(`${basePath}?${params.toString()}`);
   };
 
   const handleTagEdit = (id: string) => {
-    const params = new URLSearchParams(searchParams);
-    params.set("showModal", "true");
-    params.set("id", id);
-    params.set("action", "edit");
-
-    replace(`${pathname}?${params.toString()}`);
+    push(`${basePath}/${id}/edit`, {scroll: false});
   };
 
   const handleTagDelete = (id: string, title: string) => {
-    const params = new URLSearchParams(searchParams);
-    params.set("showModal", "true");
-    params.set("id", id);
-    params.set("action", "delete");
-    replace(`${pathname}?${params.toString()}`);
+
+    push(`${basePath}/${id}/delete`, {scroll: false});
   };
 
   const pageTotal = useMemo(() => {
@@ -137,13 +122,14 @@ function TagManagement({ hasPermission, limit, currentPage, data }: Props) {
             onSelected={(n) => handlePageSizeSelected(n)}
             onSearch={(term) => handleSearch(term)}
           />
-          <button
+          <Link
+            href={`${basePath}/create`}
             hidden={!writeEnable}
-            onClick={handleCreateClick}
+            scroll={false}
             className="btn btn-sm dark:border dark:border-accent-0 dark:active:border-accent-1 dark:hover:bg-accent-1 dark:hover:text-primary dark:text-accent-0 transition"
           >
             + New Tag
-          </button>
+          </Link>
         </div>
         <div className={`transition-all ${filterVisible ? "mt-2" : "h-0"}`}>
           <FilterBar visible={filterVisible}>
