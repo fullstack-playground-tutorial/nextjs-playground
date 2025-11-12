@@ -6,7 +6,7 @@ import CloseIcon from "./close.svg";
 import { useRouter } from "next/navigation";
 type Props = {
   placeHolder: string;
-  onQueryChange: (q: string) => void;
+  onQueryChange?: (q: string) => void;
   pageSize?: number; // If pageSize equal undefined => turn off page size filter
   onSelected?: (n: number) => void;
   onSearch: (term: string) => void;
@@ -23,7 +23,6 @@ function Search({
 }: Props) {
   const [q, setQ] = useState("");
   const ref = useRef<NodeJS.Timeout>(undefined);
-  const { replace } = useRouter();
 
   const handleChangeQ = (e: React.ChangeEvent<HTMLInputElement>) => {
     setQ(e.target.value);
@@ -43,7 +42,7 @@ function Search({
 
   useEffect(() => {
     ref.current = setTimeout(() => {
-      onQueryChange(q);
+      onQueryChange?.(q);
     }, DEBOUNCE_TIME);
     return () => {
       clearTimeout(ref.current);

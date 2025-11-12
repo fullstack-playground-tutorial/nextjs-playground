@@ -16,7 +16,7 @@ export default function Pagination({
   currentPage = 5,
   onPageChanged,
 }: Props) {
-  const handlePageClick = (n: number) => {
+  const handlePageClick = (n: number) => {    
     onPageChanged(n);
   };
 

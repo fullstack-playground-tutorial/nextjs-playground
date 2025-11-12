@@ -8,7 +8,7 @@ import { HTTPResponse } from "./response";
 interface HttpDefault {
   timeout?: number;
   headers?: HeadersInit;
-  next?: NextFetchRequestConfig; 
+  next?: NextFetchRequestConfig;
   cache?: RequestCache;
 }
 
@@ -72,6 +72,7 @@ export const createHttpClient = async (
       }
 
       if (!res.ok) {
+        // Fail case
         if (res.status == 422) {
           const response = await res.json();
           throw new ResponseError(null, res.status, response);
@@ -81,17 +82,31 @@ export const createHttpClient = async (
           throw new ResponseError(errMessage, res.status, null);
         }
       } else {
+        // Success case
         if (ContentType.isJson(contentType)) {
-          const response = (await res.json()) as T;
+          try {
+            const response = (await res.json()) as T;
+            return {
+              headers: res.headers,
+              body: response,
+              status: res.status,
+            };
+          } catch (error) {
+            // case contentType is application/json but body is text => fallback to text
+            const response = (await res.text()) as T;
+            return {
+              headers: res.headers,
+              body: response,
+              status: res.status,
+            };
+          }
+        } else {
+          const response = (await res.text()) as T;
           return {
             headers: res.headers,
             body: response,
             status: res.status,
           };
-        } else {
-          const errMessage = await res.text();
-          console.error("ERROR RESPONSE FROM CALL API: ", errMessage);
-          throw new ResponseError(errMessage, res.status, null);
         }
       }
     } catch (error) {

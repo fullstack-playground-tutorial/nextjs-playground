@@ -3,7 +3,7 @@ import { SearchBar } from ".";
 import { FilterButton } from "./Filter";
 type Props = {
   placeHolder: string;
-  onQueryChange: (q: string) => void;
+  onQueryChange?: (q: string) => void;
   filterOn: boolean;
   onFilterToggle: () => void;
   pageSize?: number;

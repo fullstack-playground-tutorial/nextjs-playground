@@ -7,13 +7,17 @@ import {
   type FilterDropdownItem,
 } from "@/components/Search";
 import { FilterBar } from "@/components/Search/Filter";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useTransition } from "react";
 import Card from "../../components/Card";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Tag } from "@/app/feature/topic-tags";
 import { SearchResult } from "@/app/utils/service";
 import Link from "next/link";
+import {
+  SkeletonElement,
+  SkeletonWrapper,
+} from "@/components/SkeletionLoading";
 
 type Props = {
   data: SearchResult<Tag>;
@@ -35,19 +39,19 @@ const initialState: InternalState = {
 
 const selectedList: FilterDropdownItem[] = [
   {
-    value: "createdAt",
+    value: "created_at",
     title: "Last used",
   },
   {
-    value: "-createdAt",
+    value: "-created_at",
     title: "Newest",
   },
   {
-    value: "usageCount",
+    value: "usage_count",
     title: "Most used",
   },
   {
-    value: "-usageCount",
+    value: "-usage_count",
     title: "Least used",
   },
 ];
@@ -55,23 +59,39 @@ const selectedList: FilterDropdownItem[] = [
 function TagManagement({ hasPermission, limit, currentPage, data }: Props) {
   const { list, total } = data;
   const [state, setState] = useState(initialState);
+  const [pending, startTransition] = useTransition();
   const { replace, push } = useRouter();
-  const basePath = "/topics/tags";
+  const pathname = usePathname();
+
   const searchParams = useSearchParams();
-  const handleQueryChange = (q: string) => {
-    setState((prev) => ({ ...prev, q: q }));
-  };
 
   const writeEnable = hasPermission;
 
-  const handleSelected = (k: string) => {
-    setState((prev) => ({ ...prev, sort: k }));
+  const handleSortSelected = (k: string) => {
+    const params = new URLSearchParams(searchParams);
+    params.set("sort", k);
+    const newPath = `${pathname}?${params.toString()}`;
+    startTransition(() => {
+      replace(newPath, { scroll: false });
+    });
+  };
+
+  const handlePageChange = (n: number) => {
+    const params = new URLSearchParams(searchParams);
+    params.set("page", n + "");
+    const newPath = `${pathname}?${params.toString()}`; // topics/tags?page=2
+    startTransition(() => {
+      replace(newPath, { scroll: false });
+    });
   };
 
   const handlePageSizeSelected = (pageSize: number) => {
     const params = new URLSearchParams(searchParams);
-    params.set("limit", pageSize.toString());
-    replace(`${basePath}?${params.toString()}`);
+    params.set("limit", pageSize + "");
+    const newPath = `${pathname}?${params.toString()}`; // .../topics/tags?limit=10
+    startTransition(() => {
+      replace(newPath, { scroll: false });
+    });
   };
 
   const handleSearch = (term: string) => {
@@ -82,23 +102,23 @@ function TagManagement({ hasPermission, limit, currentPage, data }: Props) {
     } else {
       params.delete("q");
     }
-
-    replace(`${basePath}?${params.toString()}`);
+    const newPath = `${pathname}?${params.toString()}`;
+    startTransition(() => {
+      replace(newPath, { scroll: false });
+    });
   };
 
   const handleTagEdit = (id: string) => {
-    push(`${basePath}/${id}/edit`, {scroll: false});
+    push(`${pathname}/${id}/edit`, { scroll: false, });
   };
 
-  const handleTagDelete = (id: string, title: string) => {
-
-    push(`${basePath}/${id}/delete`, {scroll: false});
+  const handleTagDelete = (id: string) => {
+    push(`${pathname}/${id}/delete`, { scroll: false });
   };
 
   const pageTotal = useMemo(() => {
-    if (total) return 0;
     return Math.ceil(total / limit);
-  }, [total, limit]);
+  }, [total, limit]);  
 
   const { filterVisible } = state;
   return (
@@ -118,12 +138,11 @@ function TagManagement({ hasPermission, limit, currentPage, data }: Props) {
             pageSize={limit}
             filterOn={filterVisible}
             placeHolder="Filter by tag name ..."
-            onQueryChange={handleQueryChange}
             onSelected={(n) => handlePageSizeSelected(n)}
             onSearch={(term) => handleSearch(term)}
           />
           <Link
-            href={`${basePath}/create`}
+            href={`topics/tags/create`}
             hidden={!writeEnable}
             scroll={false}
             className="btn btn-sm dark:border dark:border-accent-0 dark:active:border-accent-1 dark:hover:bg-accent-1 dark:hover:text-primary dark:text-accent-0 transition"
@@ -137,32 +156,43 @@ function TagManagement({ hasPermission, limit, currentPage, data }: Props) {
               name={"sort"}
               selectedList={selectedList}
               placeHolder="Sort by"
-              onItemSelected={(val) => handleSelected(val)}
+              onItemSelected={(val) => handleSortSelected(val)}
             />
           </FilterBar>
         </div>
         <div className="grid mt-4 md:mt-6 lg:mt-8 xl:mt-10 xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-4 mx-auto">
-          {list.map((item) => (
-            <Card
-              key={item.id}
-              id={item.id}
-              title={item.title}
-              slug={item.slug}
-              description={item.description || ""}
-              count={item.usageCount || 0}
-              tagColor={item.color}
-              onDelete={() => handleTagDelete(item.id, item.title)}
-              onEdit={() => handleTagEdit(item.id)}
-            />
-          ))}
+          {pending
+            ? Array.from({ length: limit }).map((_, i) => {
+                return (
+                  <div className="xl:w-70 xl:h-42 max-h-42 h-auto md:w-65 rounded-xl overflow-hidden">
+                    <SkeletonWrapper key={i}>
+                      <SkeletonElement
+                        width={"100%"}
+                        height={"100%"}
+                      ></SkeletonElement>
+                    </SkeletonWrapper>
+                  </div>
+                );
+              })
+            : list.map((item) => (
+                <Card
+                  key={item.id}
+                  id={item.id}
+                  title={item.title}
+                  slug={item.slug}
+                  description={item.description || ""}
+                  count={item.usageCount || 0}
+                  tagColor={item.color}
+                  onDelete={() => handleTagDelete(item.id)}
+                  onEdit={() => handleTagEdit(item.id)}
+                />
+              ))}
         </div>
         <div className="mt-6 md:mt-8 lg:mt-10 self-center">
           <Pagination
             pageTotal={pageTotal}
             currentPage={currentPage}
-            onPageChanged={(n) =>
-              setState((prev) => ({ ...prev, currentPage: n }))
-            }
+            onPageChanged={handlePageChange}
           />
         </div>
       </div>

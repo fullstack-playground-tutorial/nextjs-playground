@@ -83,7 +83,8 @@ export async function proxy(request: NextRequest) {
   if (!pathnameHasLocale) {
     const acceptLanguage = request.headers.get("accept-language") ?? undefined;
     locale = getLocale(acceptLanguage);
-    const redirectUrl = new URL(`/${locale}${pathname}`, request.url);
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.pathname = `/${locale}${pathname}`;
     return NextResponse.redirect(redirectUrl);
   } else {
     locale = supportedLocales.find((loc) => pathname.startsWith(`/${loc}`));
@@ -101,9 +102,10 @@ export async function proxy(request: NextRequest) {
         return await refreshSession(request);
       } catch (error) {
         console.log("refresh failed: ", error);
-        return NextResponse.redirect(
-          new URL(`/${locale}${defaultPath}`, request.url)
-        );
+        const redirectUrl = request.nextUrl.clone();
+        redirectUrl.pathname = `/${locale}${defaultPath}`;
+
+        return NextResponse.redirect(redirectUrl);
       }
     }
 
