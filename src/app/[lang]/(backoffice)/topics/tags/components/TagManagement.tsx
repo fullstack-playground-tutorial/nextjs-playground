@@ -125,7 +125,7 @@ function TagManagement({ hasPermission, limit, currentPage, data }: Props) {
     <>
       <div className="h-screen flex flex-col items-start max-w-300 mx-auto p-4 mt-2">
         <div className="flex flex-row mb-6 gap-4 w-full">
-          <h1 className="font-semibold dark:text-accent-0">Tag Managment</h1>
+          <h1 className="font-semibold dark:text-accent-0 text-4xl">Tag Managment</h1>
         </div>
         <div className="flex flex-row justify-between items-center gap-4 w-full">
           <SearchComponent

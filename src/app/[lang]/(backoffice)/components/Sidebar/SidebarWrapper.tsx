@@ -30,10 +30,10 @@ export default function SidebarWrapper({
   icons,
   menuSections,
 }: Props) {
-  
   const pathname = usePathname();
   const isSectionActive = (url: string) => {
-    return pathname.startsWith(url);
+    const pathWithoutLocale = pathname.replace(/^\/[a-z]{2}-[A-Z]{2}/, ""); // clear locale segment
+    return pathWithoutLocale == url;
   };
   const [menuExpand, setMenuExpand] = useState(true);
   const [pinnedList, setPinnedList] = useState<MenuSectionInternalProps[]>([]);

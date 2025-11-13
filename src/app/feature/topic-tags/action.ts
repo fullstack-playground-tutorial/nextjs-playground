@@ -1,14 +1,9 @@
 "use server";
 
 import { getTopicTagService } from "@/app/core/server/context";
-import { TagFilter } from "./topic-tags";
-import { refresh, revalidateTag } from "next/cache";
+import { refresh, revalidateTag, updateTag } from "next/cache";
 import { UpsertActionState } from "@/app/[lang]/(backoffice)/topics/tags/components/TagForm";
 import { ActionState } from "@/app/[lang]/(backoffice)/topics/tags/components/DeleteForm";
-
-export const searchTags = async (filter: TagFilter) => {
-  return getTopicTagService().search(filter);
-};
 
 export const deleteTag = async (id: string): Promise<ActionState> => {
   try {
@@ -16,12 +11,10 @@ export const deleteTag = async (id: string): Promise<ActionState> => {
     if (res > 0) {
       return {
         successMsg: "successfully deleted tag #" + id,
-        error: undefined,
       };
     } else {
       return {
         successMsg: "not found tag with id #" + id,
-        error: undefined,
       };
     }
   } catch (error) {
@@ -77,11 +70,11 @@ export const upsertTag = async (
   try {
     if (id) {
       await editTag(id, formData);
-      revalidateTag("topics_tag", "max");
+      updateTag("topics_tag");
       return { ...prevState, successMessage: "successfully edited tag #" + id };
     } else {
       await addTag(formData);
-      revalidateTag("topics_tag", "max");
+      updateTag("topics_tag");
       return { ...prevState, successMessage: "successfully created tag." };
     }
   } catch (error: any) {
