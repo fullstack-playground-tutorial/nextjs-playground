@@ -1,5 +1,5 @@
-"use client"
-import { Topic } from "@/app/feature/topic";
+"use client";
+import { deleteTopic, Topic } from "@/app/feature/topic";
 import TopicCard from "../../components/TopicCard";
 import {
   SkeletonElement,
@@ -8,31 +8,58 @@ import {
 import { use, useTransition } from "react";
 import { SearchResult } from "@/app/utils/service";
 import useToast from "@/app/components/Toast";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 type Props = {
   pageSize: number;
   searchResult: Promise<SearchResult<Topic>>;
   searchQ: string;
-  onDeleteTopic: (id: string) => Promise<void>;
-  loadMore: () => void;
+  currentPage: number;
 };
 
-export default function Topics({ searchResult, searchQ, pageSize, onDeleteTopic, loadMore }: Props) {
+export default function Topics({
+  searchResult,
+  searchQ,
+  pageSize,
+  currentPage,
+}: Props) {
   const toast = useToast();
-  const [pending, startTransition] = useTransition()
+  const searchParams = useSearchParams();
+  const { replace, back } = useRouter();
+  const pathname = usePathname();
+  const [pending, startTransition] = useTransition();
   const { total, list: topics } = use(searchResult);
   const handleDeleteTopic = (id: string) => {
-    startTransition(async ()=>{
-        await onDeleteTopic(id);
-        toast.addToast("success", `Successfully deleted topic ${id}`)
-    })
-  }
+    startTransition(async () => {
+      try {
+        const res = await deleteTopic(id);
+        if (res > 0) {
+          toast.addToast("success", `Successfully deleted topic ${id}`);
+          back();
+        } else {
+          toast.addToast("error", "not found topic with id:" + id);
+        }
+      } catch (error: any) {
+        toast.addToast("error", error.message);
+      }
+    });
+  };
+
+  const loadMore = () => {
+    const params = new URLSearchParams(searchParams);
+    params.set("page", currentPage + 1 + "");
+    startTransition(() => {
+      replace(pathname + "?" + params.toString());
+    });
+  };
+
   const filteredTopics =
     topics.filter(
       (t) =>
         t.title?.toLowerCase().includes(searchQ.toLowerCase()) ||
         t.authorName?.toLowerCase().includes(searchQ.toLowerCase())
     ) || [];
+
   return (
     <>
       {/* Grid */}
@@ -64,7 +91,7 @@ export default function Topics({ searchResult, searchQ, pageSize, onDeleteTopic,
               title={title || ""}
               summary={summary || ""}
               author={authorName || ""}
-              publishedAt={publishedAt ?? new Date()}
+              publishedAt={publishedAt}
               tags={tags ?? []}
               status={status || "draft"}
               onDelete={handleDeleteTopic}
@@ -87,6 +114,7 @@ export default function Topics({ searchResult, searchQ, pageSize, onDeleteTopic,
       {topics != undefined && total > topics.length && (
         <div className="flex justify-center mt-6">
           <button
+            type="button"
             className="btn btn-md dark:bg-accent-0 dark:text-primary hover:dark:bg-accent-1 transition-colors rounded-md font-medium"
             disabled={pending}
             onClick={loadMore}

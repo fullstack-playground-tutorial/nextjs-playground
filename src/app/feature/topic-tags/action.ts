@@ -1,7 +1,7 @@
 "use server";
 
 import { getTopicTagService } from "@/app/core/server/context";
-import { refresh, revalidateTag, updateTag } from "next/cache";
+import { refresh, updateTag } from "next/cache";
 import { UpsertActionState } from "@/app/[lang]/(backoffice)/topics/tags/components/TagForm";
 import { ActionState } from "@/app/[lang]/(backoffice)/topics/tags/components/DeleteForm";
 

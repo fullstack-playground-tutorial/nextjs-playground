@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { useState } from "react";
 import TopicIcon from "@/assets/images/icons/topic.svg";
 import EditIcon from "@/assets/images/icons/edit.svg";
@@ -13,7 +13,7 @@ type Props = {
   title: string;
   summary: string;
   author: string;
-  publishedAt: Date;
+  publishedAt?: Date;
   tags: Tag[];
   status: TopicStatus;
   onDelete?: (id: string) => void;
@@ -45,10 +45,14 @@ export default function TopicCard({
         return "";
     }
   };
+
+  const handleOnDelete = (e: React.MouseEvent) => {
+    onDelete?.(id);
+  };
   return (
     <div
       key={id}
-      className="dark:bg-surface-1 border dark:border-border rounded-md shadow dark:hover:border-border-strong overflow-hidden"
+      className="dark:bg-surface-1 border dark:border-border rounded-md shadow dark:hover:border-border-strong overflow-hidden flex flex-col"
     >
       <div className="w-full h-40 relative">
         <img
@@ -68,12 +72,16 @@ export default function TopicCard({
         </div>
       </div>
 
-      <div className="p-4 flex flex-col gap-2">
+      <div className="p-4 flex flex-col gap-2 flex-1">
         <h2 className="text-lg font-bold text-[#e0e0e0]">{title}</h2>
-        <p className="dark:text-secondary text-sm line-clamp-3">{summary}</p>
+        <p className="dark:text-secondary text-sm line-clamp-3 flex-1">{summary}</p>
         <div className="flex justify-between items-center text-sm text-secondary">
           <span>{author}</span>
-          <span>{publishedAt.toDateString()}</span>
+          <span>
+            {publishedAt !== undefined && publishedAt !== null
+              ? new Date(publishedAt).toLocaleDateString()
+              : "unknown"}
+          </span>
         </div>
 
         <div className="flex flex-row justify-between items-center mt-2">
@@ -137,7 +145,7 @@ export default function TopicCard({
                 className="w-full text-left px-2 py-1 text-sm
                 items-center dark:enabled:hover:bg-surface-4 transition-colors
                 cursor-pointer dark:enabled:hover:*:fill-accent-0 dark:not-enabled:*:fill-secondary"
-                onClick={() => onDelete?.(id)}
+                onClick={(e) => handleOnDelete(e)}
               >
                 <BinIcon className="dark:fill-primary size-5" />
               </button>
