@@ -74,12 +74,14 @@ export default function TopicCard({
 
       <div className="p-4 flex flex-col gap-2 flex-1">
         <h2 className="text-lg font-bold text-[#e0e0e0]">{title}</h2>
-        <p className="dark:text-secondary text-sm line-clamp-3 flex-1">{summary}</p>
+        <p className="dark:text-secondary text-sm line-clamp-3 flex-1">
+          {summary}
+        </p>
         <div className="flex justify-between items-center text-sm text-secondary">
           <span>{author}</span>
           <span>
             {publishedAt !== undefined && publishedAt !== null
-              ? new Date(publishedAt).toLocaleDateString()
+              ? new Date(publishedAt).toLocaleDateString("en-GB")
               : "unknown"}
           </span>
         </div>
@@ -118,27 +120,34 @@ export default function TopicCard({
               <Link
                 href={`/topics/topic-management/${id}/review`}
                 title="Review"
-                aria-disabled={status === "draft"}
+                aria-disabled={status === "draft" ? "true" : "false"}
                 tabIndex={status === "draft" ? -1 : undefined}
                 className={`w-full text-left px-2 py-1 text-sm
-                items-center dark:enabled:hover:bg-surface-4 transition-colors
-                cursor-pointer dark:enabled:hover:*:fill-accent-0 dark:not-enabled:*:fill-secondary ${
-                  status === "draft" ? "pointer-events-none" : ""
-                }`}
+                items-center transition-colors
+                ${
+                  status === "draft"
+                    ? "pointer-events-none dark:*:fill-secondary"
+                    : "dark:hover:bg-surface-4 dark:*:fill-primary dark:hover:*:fill-accent-0"
+                }
+                `}
               >
                 <ApprovalIcon className="dark:fill-primary size-5" />
               </Link>
               <Link
                 href={`/topics/topic-management/${id}/edit`}
                 title="Edit"
-                aira-disabled={status === "approve"}
+                aira-disabled={status === "approve" ? "true" : "false"}
+                tabIndex={status === "approve" ? -1 : undefined}
                 className={`w-full text-left px-2 py-1 text-sm
-                items-center dark:enabled:hover:bg-surface-4 transition-colors
-                cursor-pointer dark:enabled:hover:*:fill-accent-0 dark:not-enabled:*:fill-secondary ${
-                  status === "draft" ? "pointer-events-none" : ""
-                }`}
+                items-center transition-colors
+                ${
+                  status === "approve"
+                    ? "pointer-events-none dark:*:fill-secondary"
+                    : "dark:hover:bg-surface-4 dark:*:fill-primary dark:hover:*:fill-accent-0"
+                }
+                `}
               >
-                <EditIcon className="dark:fill-primary size-5" />
+                <EditIcon className="size-5" />
               </Link>
               <button
                 title="delete"
@@ -153,10 +162,10 @@ export default function TopicCard({
                 href={`/topics/topic-management/${id}`}
                 title="View detail"
                 className="w-full text-left px-2 py-1 text-sm
-                items-center dark:enabled:hover:bg-surface-4 transition-colors
-                cursor-pointer dark:enabled:hover:*:fill-accent-0 dark:not-enabled:*:fill-secondary"
+                items-center dark:hover:bg-surface-4 transition-colors
+                cursor-pointer dark:hover:*:fill-accent-0"
               >
-                <TopicIcon className="dark:fill-primary size-5" />
+                <TopicIcon className="dark:fill-primary size-5 transition-colors" />
               </Link>
             </div>
           </div>

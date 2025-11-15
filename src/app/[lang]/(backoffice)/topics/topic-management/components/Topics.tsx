@@ -29,6 +29,7 @@ export default function Topics({
   const pathname = usePathname();
   const [pending, startTransition] = useTransition();
   const { total, list: topics } = use(searchResult);
+  
   const handleDeleteTopic = (id: string) => {
     startTransition(async () => {
       try {
@@ -69,7 +70,7 @@ export default function Topics({
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
+      <div className="grid mt-4 md:mt-6 lg:mt-8 xl:mt-10 xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-4 mx-auto">
         {filteredTopics.map(
           ({
             id,
