@@ -1,6 +1,5 @@
 "use client";
 import CustomSwitch from "@/app/components/ThemeToggle";
-import { ThemeContext } from "@/app/core/client/context/theme/ThemeContext";
 import { Vocabulary } from "@/app/feature/english-note/english-note";
 import {
   ChangeEvent,
@@ -22,7 +21,6 @@ type InternalState = {
 };
 
 export const SearchFrom = () => {
-  const { theme, changeTheme } = useContext(ThemeContext);
 
   const [state, setState] = useState<InternalState>({
     keyword: "",
@@ -112,14 +110,7 @@ export const SearchFrom = () => {
         </h1>
 
         <div className="flex-col flex gap-2">
-          <CustomSwitch
-            onToggle={() => {
-              changeTheme(
-                theme === "dark-theme" ? "light-theme" : "dark-theme"
-              );
-            }}
-            checked={theme !== "dark-theme"}
-          />
+          
           <div className="flex flex-col rounded-md overflow-hidden border-app">
             <input
               type="text"

@@ -18,11 +18,12 @@ import {
   EnglishNoteClient,
 } from "@/app/feature/english-note/service";
 import { EnglishNoteMongoRepository } from "@/app/feature/english-note/repository";
-import { MongoDBClient } from "@/app/lib/mongodb";
-import mongoClient from "@/app/lib/mongodb";
 import { HTTPService } from "@/app/utils/http";
 import { createTopicService, TopicService } from "@/app/feature/topic";
-import { createTopicTagService, TopicTagService } from "@/app/feature/topic-tags";
+import {
+  createTopicTagService,
+  TopicTagService,
+} from "@/app/feature/topic-tags";
 import { httpServiceInstance } from "./http-config";
 
 class ApplicationContext {
@@ -31,21 +32,17 @@ class ApplicationContext {
   private notificationService?: NotificationService;
   private searchService?: SearchService;
   private friendService?: FriendService;
-  private apiEnglishNoteService?: ApiEnglishNoteService;
+  // private apiEnglishNoteService?: ApiEnglishNoteService;
   private englishNoteService?: EnglishNoteService;
   private topicService?: TopicService;
-  private topicTagService?:TopicTagService;
+  private topicTagService?: TopicTagService;
 
-  constructor(
-    private httpService: HTTPService,
-    private mongoDBClient: MongoDBClient
-  ) {
+  constructor(private httpService: HTTPService) {
     this.getAuthService = this.getAuthService.bind(this);
     this.getStoryService = this.getStoryService.bind(this);
     this.getNotificationService = this.getNotificationService.bind(this);
     this.getFriendService = this.getFriendService.bind(this);
     this.getEnglishNoteService = this.getEnglishNoteService.bind(this);
-    this.getApiEnglishNoteService = this.getApiEnglishNoteService.bind(this);
     this.getTopicService = this.getTopicService.bind(this);
     this.getTopicTagService = this.getTopicTagService.bind(this);
   }
@@ -112,7 +109,7 @@ class ApplicationContext {
       );
     }
     return this.topicTagService;
-  }
+  };
   getEnglishNoteService = () => {
     if (!this.englishNoteService) {
       this.englishNoteService = new EnglishNoteClient(
@@ -123,93 +120,102 @@ class ApplicationContext {
     return this.englishNoteService;
   };
 
-  getApiEnglishNoteService = () => {
-    if (!this.apiEnglishNoteService) {
-      const englishNoteRepo = new EnglishNoteMongoRepository(
-        this.mongoDBClient,
-        "english-note"
-      );
+  // getApiEnglishNoteService = () => {
+  //   if (!this.apiEnglishNoteService) {
+  //     const englishNoteRepo = new EnglishNoteMongoRepository(
+  //       this.mongoDBClient,
+  //       "english-note"
+  //     );
 
-      this.apiEnglishNoteService = new ApiEnglishNoteClient(englishNoteRepo);
-    }
-    return this.apiEnglishNoteService;
-  };
+  //     this.apiEnglishNoteService = new ApiEnglishNoteClient(englishNoteRepo);
+  //   }
+  //   return this.apiEnglishNoteService;
+  // };
 }
 
-await mongoClient.init(async () => {
-  const db = mongoClient.db("english-note");
+// await mongoClient.init(async () => {
+//   const db = mongoClient.db("english-note");
 
-  await db.createCollection("users", {
-    validator: {
-      $jsonSchema: {
-        bsonType: "object",
-        required: ["userId"],
-        additionalProperties: false,
-        properties: {
-          _id: {},
-          userId: {
-            bsonType: "string",
-            description: "no blank",
-          },
-        },
-      },
-    },
-    validationLevel: "strict",
-    validationAction: "error",
-  });
+//   await db.createCollection("users", {
+//     validator: {
+//       $jsonSchema: {
+//         bsonType: "object",
+//         required: ["userId"],
+//         additionalProperties: false,
+//         properties: {
+//           _id: {},
+//           userId: {
+//             bsonType: "string",
+//             description: "no blank",
+//           },
+//         },
+//       },
+//     },
+//     validationLevel: "strict",
+//     validationAction: "error",
+//   });
 
-  await db.createCollection("words", {
-    validator: {
-      $jsonSchema: {
-        bsonType: "object",
-        required: ["word", "definition"],
-        additionalProperties: false,
-        properties: {
-          _id: {},
-          word: {
-            bsonType: "string",
-            description: "no blank",
-          },
-          definition: {
-            bsonType: "string",
-            description: "no blank",
-          },
-        },
-      },
-    },
-    validationLevel: "strict",
-    validationAction: "error",
-  });
+//   await db.createCollection("words", {
+//     validator: {
+//       $jsonSchema: {
+//         bsonType: "object",
+//         required: ["word", "definition"],
+//         additionalProperties: false,
+//         properties: {
+//           _id: {},
+//           word: {
+//             bsonType: "string",
+//             description: "no blank",
+//           },
+//           definition: {
+//             bsonType: "string",
+//             description: "no blank",
+//           },
+//         },
+//       },
+//     },
+//     validationLevel: "strict",
+//     validationAction: "error",
+//   });
 
-  await db.createCollection("searches", {
-    validator: {
-      $jsonSchema: {
-        bsonType: "object",
-        required: ["userId", "word", "searchCount"],
-        additionalProperties: false,
-        properties: {
-          _id: {},
-          userId: {
-            bsonType: "string",
-            description: "reference user.",
-          },
-          word: {
-            bsonType: "string",
-            description: "reference word.",
-          },
-          searchCount: {
-            bsonType: "int",
-            minimum: 0,
-            description: "must greater or equal 0",
-          },
-        },
-      },
-    },
-    validationLevel: "strict",
-    validationAction: "error",
-  });
-});
+//   await db.createCollection("searches", {
+//     validator: {
+//       $jsonSchema: {
+//         bsonType: "object",
+//         required: ["userId", "word", "searchCount"],
+//         additionalProperties: false,
+//         properties: {
+//           _id: {},
+//           userId: {
+//             bsonType: "string",
+//             description: "reference user.",
+//           },
+//           word: {
+//             bsonType: "string",
+//             description: "reference word.",
+//           },
+//           searchCount: {
+//             bsonType: "int",
+//             minimum: 0,
+//             description: "must greater or equal 0",
+//           },
+//         },
+//       },
+//     },
+//     validationLevel: "strict",
+//     validationAction: "error",
+//   });
+// });
 
-const appContext = new ApplicationContext(httpServiceInstance, mongoClient);
+const appContext = new ApplicationContext(httpServiceInstance);
 
-export const { getApiEnglishNoteService, getEnglishNoteService,getAuthService, getTopicService,getTopicTagService, getNotificationService, getFriendService, getSearchService, getStoryService } = appContext;
+export const {
+  getEnglishNoteService,
+  getAuthService,
+  getTopicService,
+  getTopicTagService,
+  getNotificationService,
+  getFriendService,
+  getSearchService,
+  getStoryService,
+} = appContext;

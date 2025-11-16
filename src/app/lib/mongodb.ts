@@ -31,8 +31,8 @@ export class MongoDBClient {
   }
 }
 
-const mongoClient = new MongoDBClient(
-  new MongoClient(process.env.MONGODB_URI ?? "")
-);
+// const mongoClient = new MongoDBClient(
+//   new MongoClient(process.env.MONGODB_URI ?? "")
+// );
 
-export default mongoClient;
+// export default mongoClient;
