@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { useEffect, useState, useTransition } from "react";
 import BackArrow from "@/assets/images/icons/back_arrow.svg";
 import { Topic, TopicStatus, updateTopic } from "@/app/feature/topic";
@@ -7,12 +7,14 @@ import {
   SkeletonElement,
   SkeletonWrapper,
 } from "@/components/SkeletionLoading";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { User } from "@/app/feature/auth";
 import { getTopicTagService } from "@/app/core/server/context";
 import FloatInput from "../../../components/FloatInput";
 import FloatTextarea from "../../../components/FloatTextarea";
 import AutoComplete from "../../../components/AutoComplete";
+import { LexicalEditor } from "lexical";
+import LexicalEditorComponent from "../../../components/LexicalEditor";
 
 type InternalState = {
   title: string;
@@ -181,29 +183,32 @@ const ActionButtons = ({
 };
 
 type Props = {
-  id: string;
+  id?: string;
   user: User;
-  topic: Topic;
+  topic?: Topic;
+  tagSuggestions?: Tag[];
 };
 
-export default function TopicForm({ id, user, topic }: Props) {
+export default function TopicForm({ id, user, topic, tagSuggestions }: Props) {
   const [state, setState] = useState<InternalState>({
     ...initialState,
-    thumbnailUrl: topic.thumbnailUrl || "",
-    title: topic.title || "",
-    content: topic.content || "",
-    tags: topic.tags || [],
-    slug: topic.slug || "",
-    summary: topic.summary || "",
-    status: topic.status,
+    thumbnailUrl: topic?.thumbnailUrl || "",
+    title: topic?.title || "",
+    content: topic?.content || "",
+    tags: topic?.tags || [],
+    slug: topic?.slug || "",
+    summary: topic?.summary || "",
+    status: topic?.status,
   });
 
+  const urlSearchParam = useSearchParams();
   const pathname = usePathname();
   const mode = topicMode(pathname, id);
   const [pending, startTransition] = useTransition();
   const userId = user?.id;
   const authorName = user?.username || user?.email;
   const router = useRouter();
+  const [debouncedValue, setDebouncedValue] = useState(state.tagQ);
 
   const updateState = (val: Partial<InternalState>) => {
     setState((prev) => ({ ...prev, ...val }));
@@ -215,16 +220,21 @@ export default function TopicForm({ id, user, topic }: Props) {
   }, [state.title]);
 
   useEffect(() => {
-    startTransition(async () => {
-      const res = await getTopicTagService().search(
-        { keyword: state.tagQ },
-        { tags: ["topic-tag-search"] },
-        false,
-        false
-      );
-      updateState({ suggestions: res.list });
-    });
+    const handler = setTimeout(() => {
+      setDebouncedValue(state.tagQ);
+    }, 400);
+    return () => clearTimeout(handler);
   }, [state.tagQ]);
+
+  useEffect(() => {
+    const newSearchParam = new URLSearchParams(urlSearchParam);
+    if (state.tagQ) {
+      newSearchParam.set("tag_q", state.tagQ);
+    } else {
+      newSearchParam.delete("tag_q");
+    }
+    router.replace(`${pathname}?${newSearchParam.toString()}`);
+  }, [debouncedValue]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -262,7 +272,7 @@ export default function TopicForm({ id, user, topic }: Props) {
 
     startTransition(async () => {
       try {
-        await updateTopic(id, { status: "approve" });
+        await updateTopic(id!, { status: "approve" });
       } catch (err) {
         console.error(err);
         updateState({ loadingButton: undefined });
@@ -279,7 +289,7 @@ export default function TopicForm({ id, user, topic }: Props) {
       loadingButton: "reject",
     });
     try {
-      await updateTopic(id, { status: "reject" });
+      await updateTopic(id!, { status: "reject" });
     } catch (err) {
       console.error(err);
       updateState({ loadingButton: undefined });
@@ -293,7 +303,6 @@ export default function TopicForm({ id, user, topic }: Props) {
     thumbnailUrl,
     slug,
     tags,
-    suggestions,
     status,
     tagQ,
     loadingButton,
@@ -351,7 +360,9 @@ export default function TopicForm({ id, user, topic }: Props) {
                     {slug.length != 0 ? (
                       "https://localhost:5137/topics/" + slug
                     ) : (
-                      <span>{"https://example/some-thing-like-this</span"}</span>
+                      <span>
+                        {"https://example/some-thing-like-this</span"}
+                      </span>
                     )}
                   </a>
                 </>
@@ -367,7 +378,7 @@ export default function TopicForm({ id, user, topic }: Props) {
                     updateState({ tags: newSelected })
                   }
                   disable={mode === "view" || mode === "review"}
-                  suggestions={suggestions}
+                  suggestions={tagSuggestions || []}
                   maxTags={4}
                   q={tagQ}
                   selected={tags}
@@ -420,7 +431,7 @@ export default function TopicForm({ id, user, topic }: Props) {
               //     licenseKey={import.meta.env.VITE_CKEDITOR_LICENSE_KEY}
               //     disable={mode === "view" || mode === "review"}
               //   />
-              <></>
+              <LexicalEditorComponent placeholder={"Write new Topic!"}/>
             ) : (
               <SkeletonWrapper className="rounded-lg w-full">
                 <SkeletonElement width="100%" height="100%" />

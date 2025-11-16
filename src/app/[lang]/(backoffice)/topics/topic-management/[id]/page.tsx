@@ -21,5 +21,5 @@ export default async function Page({
   if (!userInfo) {
     redirect("/");
   }
-  return <TopicForm id={""} user={userInfo.user} topic={topic} />;
+  return <TopicForm id={id} user={userInfo.user} topic={topic} />;
 }

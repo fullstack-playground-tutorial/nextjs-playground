@@ -7,6 +7,8 @@ import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
+import ToolbarPlugin from "./ToolbarPlugin";
+import TreeViewPlugin from "./TreeViewPlugin";
 
 const theme = {
   // Theme styling goes here
@@ -24,7 +26,7 @@ type Props = {
     placeholder: string
 }
 
-export default function Editor({placeholder}: Props) {
+export default function LexicalEditorComponent({placeholder}: Props) {
   const initialConfig = {
     namespace: "MyEditor",
     theme,
@@ -33,17 +35,26 @@ export default function Editor({placeholder}: Props) {
 
   return (
     <LexicalComposer initialConfig={initialConfig}>
-      <RichTextPlugin
-        contentEditable={
-          <ContentEditable
-            aria-placeholder={placeholder}
-            placeholder={<div>placeholder</div>}
+       <div className="editor-container">
+        <ToolbarPlugin />
+        <div className="editor-inner">
+          <RichTextPlugin
+            contentEditable={
+              <ContentEditable
+                className="editor-input"
+                aria-placeholder={placeholder}
+                placeholder={
+                  <div className="editor-placeholder">{placeholder}</div>
+                }
+              />
+            }
+            ErrorBoundary={LexicalErrorBoundary}
           />
-        }
-        ErrorBoundary={LexicalErrorBoundary}
-      />
-      <HistoryPlugin />
-      <AutoFocusPlugin />
+          <HistoryPlugin />
+          <AutoFocusPlugin />
+          <TreeViewPlugin />
+        </div>
+      </div>
     </LexicalComposer>
   );
 }

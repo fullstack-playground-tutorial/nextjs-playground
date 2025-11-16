@@ -88,7 +88,7 @@ function AutoComplete<
       .filter((s) => !selected.includes(s))
       .filter((s) => s.title.toLowerCase().includes(q.toLowerCase()));
   }, [selected, q]);
-
+  
   return (
     <div
       className="relative w-full h-full cursor-text"
