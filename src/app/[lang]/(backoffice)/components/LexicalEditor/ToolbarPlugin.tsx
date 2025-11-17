@@ -1,14 +1,19 @@
-/**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- *
- */
-import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
-import {mergeRegister} from '@lexical/utils';
+// src/app/[lang]/(backoffice)/components/LexicalEditor/ToolbarPlugin.tsx
+import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import { mergeRegister } from "@lexical/utils";
+import UndoIcon from "./icons/undo.svg";
+import RedoIcon from "./icons/redo.svg";
+import BoldIcon from "./icons/bold.svg";
+import ItalicIcon from "./icons/italic.svg";
+import UnderlinedIcon from "./icons/underlined.svg";
+import StrikethroughIcon from "./icons/strikethrough.svg";
+import AlignCenterIcon from "./icons/align_center.svg";
+import AlignLeftIcon from "./icons/align_left.svg";
+import AlignRightIcon from "./icons/align_right.svg";
+import AlignJustifyIcon from "./icons/align_justify.svg";
 import {
   $getSelection,
+  $isNodeSelection,
   $isRangeSelection,
   CAN_REDO_COMMAND,
   CAN_UNDO_COMMAND,
@@ -18,8 +23,10 @@ import {
   REDO_COMMAND,
   SELECTION_CHANGE_COMMAND,
   UNDO_COMMAND,
-} from 'lexical';
-import {useCallback, useEffect, useRef, useState} from 'react';
+} from "lexical";
+import { useCallback, useEffect, useRef, useState } from "react";
+import ImagePlugin from "./ImagePlugin";
+import { $createImageNode, ImageNode } from "./ImageNode";
 
 function Divider() {
   return <div className="divider" />;
@@ -39,21 +46,21 @@ export default function ToolbarPlugin() {
     const selection = $getSelection();
     if ($isRangeSelection(selection)) {
       // Update text format
-      setIsBold(selection.hasFormat('bold'));
-      setIsItalic(selection.hasFormat('italic'));
-      setIsUnderline(selection.hasFormat('underline'));
-      setIsStrikethrough(selection.hasFormat('strikethrough'));
+      setIsBold(selection.hasFormat("bold"));
+      setIsItalic(selection.hasFormat("italic"));
+      setIsUnderline(selection.hasFormat("underline"));
+      setIsStrikethrough(selection.hasFormat("strikethrough"));
     }
   }, []);
 
   useEffect(() => {
     return mergeRegister(
-      editor.registerUpdateListener(({editorState}) => {
+      editor.registerUpdateListener(({ editorState }) => {
         editorState.read(
           () => {
             $updateToolbar();
           },
-          {editor},
+          { editor }
         );
       }),
       editor.registerCommand(
@@ -62,7 +69,7 @@ export default function ToolbarPlugin() {
           $updateToolbar();
           return false;
         },
-        COMMAND_PRIORITY_LOW,
+        COMMAND_PRIORITY_LOW
       ),
       editor.registerCommand(
         CAN_UNDO_COMMAND,
@@ -70,7 +77,7 @@ export default function ToolbarPlugin() {
           setCanUndo(payload);
           return false;
         },
-        COMMAND_PRIORITY_LOW,
+        COMMAND_PRIORITY_LOW
       ),
       editor.registerCommand(
         CAN_REDO_COMMAND,
@@ -78,97 +85,157 @@ export default function ToolbarPlugin() {
           setCanRedo(payload);
           return false;
         },
-        COMMAND_PRIORITY_LOW,
-      ),
+        COMMAND_PRIORITY_LOW
+      )
     );
   }, [editor, $updateToolbar]);
 
+  const setAlignment = (alignment: "left" | "center" | "right" | "justify") => {
+    editor.update(() => {
+      const selection = $getSelection();
+      if ($isNodeSelection(selection)) {
+        const node = selection.getNodes()[0];
+        if (node instanceof ImageNode) {
+          // Tạo node mới với alignment mới
+          const newNode = $createImageNode({
+            src: node._src,
+            alt: node._alt,
+            width: node._width,
+            height: node._height,
+            maxWidth: node._maxWidth,
+            alignment: alignment, // set alignment mới
+          });
+  
+          // Replace node cũ bằng node mới → force re-render
+          node.replace(newNode);
+        }
+      }
+    });
+  };
+  
+
   return (
-    <div className="toolbar" ref={toolbarRef}>
+    <div
+      className="flex flex-row h-8 w-full bg-surface-0 border-border border-t border-x items-center rounded-t-md"
+      ref={toolbarRef}
+    >
       <button
+        type="button"
         disabled={!canUndo}
         onClick={() => {
           editor.dispatchCommand(UNDO_COMMAND, undefined);
         }}
-        className="toolbar-item spaced"
-        aria-label="Undo">
-        <i className="format undo" />
+        className="size-8 flex items-center justify-center dark:*:fill-tertiary-0  hover:*:fill-accent-0 cursor-pointer"
+        aria-label="Undo"
+      >
+        <UndoIcon className="size-5 transition-colors" />
       </button>
       <button
+        type="button"
         disabled={!canRedo}
         onClick={() => {
           editor.dispatchCommand(REDO_COMMAND, undefined);
         }}
-        className="toolbar-item"
-        aria-label="Redo">
-        <i className="format redo" />
+        className="size-8 flex items-center justify-center dark:*:fill-tertiary-0 hover:*:fill-accent-0 cursor-pointer"
+        aria-label="Redo"
+      >
+        <RedoIcon className="size-5 transition-colors" />
       </button>
       <Divider />
       <button
+        type="button"
         onClick={() => {
-          editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'bold');
+          editor.dispatchCommand(FORMAT_TEXT_COMMAND, "bold");
         }}
-        className={'toolbar-item spaced ' + (isBold ? 'active' : '')}
-        aria-label="Format Bold">
-        <i className="format bold" />
+        className={
+          "size-8 flex items-center justify-center cursor-pointer dark:*:fill-tertiary-0 hover:*:fill-accent-0" +
+          (isBold ? "dark:*:fill-accent-0" : "")
+        }
+        aria-label="Format Bold"
+      >
+        <BoldIcon className="size-5 transition-colors" />
       </button>
       <button
+        type="button"
         onClick={() => {
-          editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'italic');
+          editor.dispatchCommand(FORMAT_TEXT_COMMAND, "italic");
         }}
-        className={'toolbar-item spaced ' + (isItalic ? 'active' : '')}
-        aria-label="Format Italics">
-        <i className="format italic" />
+        className={
+          "size-8 flex items-center justify-center cursor-pointer dark:*:fill-tertiary-0 hover:*:fill-accent-0" +
+          (isItalic ? "dark:*:fill-accent-0" : "")
+        }
+        aria-label="Format Italics"
+      >
+        <ItalicIcon className="size-5 transition-colors" />
       </button>
       <button
+        type="button"
         onClick={() => {
-          editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'underline');
+          editor.dispatchCommand(FORMAT_TEXT_COMMAND, "underline");
         }}
-        className={'toolbar-item spaced ' + (isUnderline ? 'active' : '')}
-        aria-label="Format Underline">
-        <i className="format underline" />
+        className={
+          "size-8 flex items-center justify-center cursor-pointer dark:*:fill-tertiary-0 hover:*:fill-accent-0" +
+          (isUnderline ? "dark:*:fill-accent-0" : "")
+        }
+        aria-label="Format Underline"
+      >
+        <UnderlinedIcon className="size-5 transition-colors" />
       </button>
       <button
+        type="button"
         onClick={() => {
-          editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'strikethrough');
+          editor.dispatchCommand(FORMAT_TEXT_COMMAND, "strikethrough");
         }}
-        className={'toolbar-item spaced ' + (isStrikethrough ? 'active' : '')}
-        aria-label="Format Strikethrough">
-        <i className="format strikethrough" />
+        className={
+          "size-8 flex items-center justify-center cursor-pointer dark:*:fill-tertiary-0 hover:*:fill-accent-0" +
+          (isStrikethrough ? "dark:*:fill-accent-0" : "")
+        }
+        aria-label="Format Strikethrough"
+      >
+        <StrikethroughIcon className="size-5 transition-colors" />
       </button>
       <Divider />
       <button
+        type="button"
         onClick={() => {
-          editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'left');
+          setAlignment("left");
         }}
-        className="toolbar-item spaced"
-        aria-label="Left Align">
-        <i className="format left-align" />
+        className="dark:text-secondary size-8 cursor-pointer dark:*:fill-tertiary-0 hover:*:fill-accent-0"
+        aria-label="Left Align"
+      >
+        <AlignLeftIcon className="size-5 transition-colors" />
       </button>
       <button
+        type="button"
         onClick={() => {
-          editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'center');
+          setAlignment("center");
         }}
-        className="toolbar-item spaced"
-        aria-label="Center Align">
-        <i className="format center-align" />
+        className="dark:text-secondary size-8 cursor-pointer dark:*:fill-tertiary-0 hover:*:fill-accent-0"
+        aria-label="Center Align"
+      >
+        <AlignCenterIcon className="size-5 transition-colors" />
       </button>
       <button
+        type="button"
         onClick={() => {
-          editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'right');
+          setAlignment("right");
         }}
-        className="toolbar-item spaced"
-        aria-label="Right Align">
-        <i className="format right-align" />
+        className="dark:text-secondary size-8 cursor-pointer dark:*:fill-tertiary-0 hover:*:fill-accent-0"
+        aria-label="Right Align"
+      >
+        <AlignRightIcon className="size-5 transition-colors" />
       </button>
       <button
+        type="button"
         onClick={() => {
-          editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'justify');
+          setAlignment("justify");
         }}
-        className="toolbar-item"
-        aria-label="Justify Align">
-        <i className="format justify-align" />
-      </button>{' '}
+        className="dark:text-secondary size-8 cursor-pointer dark:*:fill-tertiary-0 hover:*:fill-accent-0"
+        aria-label="Justify Align"
+      >
+        <AlignJustifyIcon className="size-5 transition-colors" />
+      </button>{" "}
+      <ImagePlugin />
     </div>
   );
 }

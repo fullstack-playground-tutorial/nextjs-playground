@@ -423,7 +423,7 @@ export default function TopicForm({ id, user, topic, tagSuggestions }: Props) {
               </SkeletonWrapper>
             )}
           </div>
-          <div className="w-full min-h-80 rounded-lg overflow-hidden">
+          <div className="w-full min-h-80 rounded-md overflow-hidden">
             {!pending ? (
               //   <CKEditorComponent
               //     content={content}

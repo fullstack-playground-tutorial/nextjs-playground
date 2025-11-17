@@ -24,18 +24,16 @@ export default function Loading() {
               </SkeletonWrapper>
             </div>
           </div>
-          <p
+          <div
             className={`text-xs text-tertiary-0 w-full min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-start mt-2 `}
           >
-            <>
               <span className="font-bold text-secondary shrink-0">
                 Topic URL:
               </span>{" "}
               <div className="underline cursor-pointer italic overflow-hidden text-ellipsis whitespace-nowrap">
                 <span>{"https://example/some-thing-like-this</span"}</span>
               </div>
-            </>
-          </p>
+          </div>
         </div>
         <div className="flex flex-row items-center gap-4 flex-1 focus-within:[&>label]:dark:text-accent-0 h-12">
           <div className="w-full h-12">

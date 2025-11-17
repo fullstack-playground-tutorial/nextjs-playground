@@ -1,7 +1,7 @@
 "use client"
 type Props = {
   name: string;
-  value: string;
+  value: string | undefined;
   label: string;
   disable: boolean;
   onChange: (
