@@ -21,6 +21,7 @@
   --ck-color-button-on-active-background: var(
     --editor-color-button-on-active-background
   );
+  --ck-color-split-button-hover-background: var(--editor-color-split-button-hover-background);
   --ck-focus-outer-shadow: var(--editor-focus-outer-shadow);
   --ck-color-button-on-background: var(--editor-color-button-on-background);
   --ck-color-button-on-color: var(--editor-color-button-on-color);

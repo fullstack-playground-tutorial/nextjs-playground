@@ -1,18 +1,20 @@
 "use client";
-import { useEffect, useState, useTransition } from "react";
+import { useActionState, useEffect, useState, useTransition } from "react";
 import BackArrow from "@/assets/images/icons/back_arrow.svg";
-import { Topic, TopicStatus, updateTopic } from "@/app/feature/topic";
-import { Tag } from "@/app/feature/topic-tags";
 import {
-  SkeletonElement,
-  SkeletonWrapper,
-} from "@/components/SkeletionLoading";
+  createTopic,
+  Topic,
+  TopicStatus,
+  updateTopic,
+} from "@/app/feature/topic";
+import { Tag } from "@/app/feature/topic-tags";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { User } from "@/app/feature/auth";
 import FloatInput from "../../../components/FloatInput";
 import FloatTextarea from "../../../components/FloatTextarea";
 import AutoComplete from "../../../components/AutoComplete";
 import dynamic from "next/dynamic";
+import useToast from "@/components/Toast";
 
 const CKEditorComponent = dynamic(
   () => import("../../../components/CKEditor"),
@@ -20,16 +22,9 @@ const CKEditorComponent = dynamic(
 );
 
 type InternalState = {
-  title: string;
-  content: string;
-  tags: Tag[];
-  slug: string;
-  summary: string;
-  thumbnailUrl: string;
+  topic: Topic;
   tagQ: string;
-  status?: TopicStatus;
   suggestions: Tag[];
-  loadingButton?: TopicStatus;
 };
 
 export type ActionProperites = {
@@ -55,16 +50,18 @@ const slugify = (text: string) => {
   ); // gộp nhiều dấu - liên tiếp
 };
 
-const initialState: InternalState = {
-  title: "",
-  content: "",
-  slug: "",
-  summary: "",
-  thumbnailUrl: "",
-  tags: [],
+let initialState: InternalState = {
+  topic: {
+    id: "",
+    title: "",
+    content: "",
+    slug: "",
+    summary: "",
+    thumbnailUrl: "",
+    tags: [],
+  },
   suggestions: [],
   tagQ: "",
-  loadingButton: undefined,
 };
 
 const topicMode = (pathname: string, id?: string) => {
@@ -77,9 +74,7 @@ const topicMode = (pathname: string, id?: string) => {
 
 const ActionButtons = ({
   mode,
-  isFetching,
-  loadingButton,
-  mutationPending,
+  mutationPendings,
   status,
   onCancel,
   onSubmit,
@@ -88,10 +83,8 @@ const ActionButtons = ({
   onReject,
 }: {
   mode: "create" | "edit" | "review" | "view" | "unknown";
-  isFetching: boolean;
-  mutationPending: boolean;
+  mutationPendings: Record<"draft" | "submit" | "approve" | "reject", boolean>;
   status?: TopicStatus;
-  loadingButton?: TopicStatus;
   onCancel?: () => void;
   onSubmit?: () => void;
   onSaveDraft?: () => void;
@@ -138,18 +131,6 @@ const ActionButtons = ({
 
   if (mode == "view") return <></>;
 
-  if (isFetching) {
-    return (
-      <div className="mx-auto mt-6 mb-4 flex flex-row gap-3">
-        {modeActionConfig[mode].map((_, idx) => (
-          <SkeletonWrapper className="rounded-md" key={idx}>
-            <SkeletonElement width="80px" height="40px" />
-          </SkeletonWrapper>
-        ))}
-      </div>
-    );
-  }
-  
   return (
     <>
       <div className="mt-6 mb-4 mx-auto flex flex-row gap-3">
@@ -160,7 +141,7 @@ const ActionButtons = ({
             <button
               key={k}
               disabled={
-                (mutationPending && loadingButton == k) ||
+                mutationPendings[k] ||
                 (status === "approve" && k === "approve") ||
                 (status === "reject" && k === "reject")
               }
@@ -168,13 +149,13 @@ const ActionButtons = ({
               className={`btn btn-sm cursor-pointer transition-colors ${className}`}
               onClick={onClick}
             >
-              {mutationPending && loadingButton == k ? waitingLabel : label}
+              {mutationPendings[k] ? waitingLabel : label}
             </button>
           );
         })}
 
         <button
-          disabled={mutationPending}
+          disabled={Object.values(mutationPendings).some((v) => v === true)}
           type="button"
           className="btn btn-sm dark:border-secondary dark:border dark:text-primary hover:dark:bg-secondary cursor-pointer transition-colors"
           onClick={onCancel}
@@ -194,35 +175,41 @@ type Props = {
 };
 
 export default function TopicForm({ id, user, topic, tagSuggestions }: Props) {
-  const [state, setState] = useState<InternalState>({
-    ...initialState,
-    thumbnailUrl: topic?.thumbnailUrl || "",
-    title: topic?.title || "",
-    content: topic?.content || "",
-    tags: topic?.tags || [],
-    slug: topic?.slug || "",
-    summary: topic?.summary || "",
-    status: topic?.status,
-  });
+  if (topic) {
+    initialState = {
+      ...initialState,
+      topic: {
+        ...topic,
+        thumbnailUrl: topic?.thumbnailUrl || "",
+        title: topic?.title || "",
+        content: topic?.content || "",
+        tags: topic?.tags || [],
+        slug: topic?.slug || "",
+        summary: topic?.summary || "",
+        status: topic?.status,
+      },
+    };
+  }
 
-  const licenseKey = process.env.NEXT_PUBLIC_CKEDITOR_LICENSE_KEY || ""
+  const [state, setState] = useState<InternalState>(initialState);
+
+  const licenseKey = process.env.NEXT_PUBLIC_CKEDITOR_LICENSE_KEY || "";
   const urlSearchParam = useSearchParams();
   const pathname = usePathname();
   const mode = topicMode(pathname, id);
-  const [pending, startTransition] = useTransition();
+  const [submitting, startSubmitting] = useTransition();
+  const [approving, startApproving] = useTransition();
+  const [rejecting, startRejecting] = useTransition();
+  const [drafting, startDrafting] = useTransition();
   const userId = user?.id;
   const authorName = user?.username || user?.email;
   const router = useRouter();
   const [debouncedValue, setDebouncedValue] = useState(state.tagQ);
-
-  const updateState = (val: Partial<InternalState>) => {
-    setState((prev) => ({ ...prev, ...val }));
-  };
-
+  const toast = useToast();
   useEffect(() => {
-    const titleSlug = slugify(state.title);
+    const titleSlug = slugify(state.topic.title);
     setState((prev) => ({ ...prev, slug: titleSlug }));
-  }, [state.title]);
+  }, [state.topic.title]);
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -240,6 +227,22 @@ export default function TopicForm({ id, user, topic, tagSuggestions }: Props) {
     }
     router.replace(`${pathname}?${newSearchParam.toString()}`);
   }, [debouncedValue]);
+
+  const updateState = (val: Partial<InternalState>) => {
+    setState((prev) => ({ ...prev, ...val }));
+  };
+
+  function getChangedFields(initialObj: any, currentObj: any) {
+    const changed: Record<string, any> = {};
+
+    for (const key of Object.keys(currentObj)) {
+      if (currentObj[key] !== initialObj[key]) {
+        changed[key] = currentObj[key];
+      }
+    }
+
+    return changed;
+  }
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -259,11 +262,59 @@ export default function TopicForm({ id, user, topic, tagSuggestions }: Props) {
   const handleCancel = () => {
     return router.back();
   };
-  const handleSubmit = async (status: TopicStatus) => {
-    if (!userId) {
-      console.error("No user id found in cookies. Aborting submit.");
-      return;
-    }
+
+  const handleDraft = async () => {
+    startDrafting(async () => {
+      
+      if (mode == "create") {
+        try {
+          const { successMsg } = await createTopic({
+            ...state.topic,
+            status: "draft",
+          });
+          toast.addToast("success", successMsg);
+        } catch (error: any) {
+          toast.addToast("error", error.message);
+        }
+      } else if (mode == "edit") {
+        const changedFields = getChangedFields(initialState.topic, state.topic);
+        try {
+          const { successMsg } = await updateTopic(id!, {
+            ...changedFields,
+            status: "draft",
+          });
+          toast.addToast("success", successMsg);
+        } catch (error: any) {
+          toast.addToast("error", error.message);
+        }
+      }
+    });
+  };
+  const handleSubmit = async () => {
+    startSubmitting(async () => {
+      if (mode == "create") {
+        try {
+          const { successMsg } = await createTopic({
+            ...state.topic,
+            status: "submit",
+          });
+          toast.addToast("success", successMsg);
+        } catch (error: any) {
+          toast.addToast("error", error.message);
+        }
+      } else if (mode == "edit") {
+        const changedFields = getChangedFields(initialState.topic, state.topic);
+        try {
+          const { successMsg } = await updateTopic(id!, {
+            ...changedFields,
+            status: "submit",
+          });
+          toast.addToast("success", successMsg);
+        } catch (error: any) {
+          toast.addToast("error", error.message);
+        }
+      }
+    });
   };
 
   const handleApprove = async () => {
@@ -271,47 +322,38 @@ export default function TopicForm({ id, user, topic, tagSuggestions }: Props) {
       console.error("No user id found in cookies. Aborting submit.");
       return;
     }
-    updateState({
-      loadingButton: "approve",
-    });
-
-    startTransition(async () => {
+    startApproving(async () => {
       try {
-        await updateTopic(id!, { status: "approve" });
+        try {
+          const { successMsg } = await updateTopic(id!, {
+            status: "approve",
+          });
+          toast.addToast("success", successMsg);
+        } catch (error: any) {
+          toast.addToast("error", error.message);
+        }
       } catch (err) {
         console.error(err);
-        updateState({ loadingButton: undefined });
       }
     });
   };
 
   const handleReject = async () => {
-    if (!userId) {
-      console.error("No user id found in cookies. Aborting submit.");
-      return;
-    }
-    updateState({
-      loadingButton: "reject",
+    startRejecting(async () => {
+      try {
+        const { successMsg } = await updateTopic(id!, {
+          status: "reject",
+        });
+        toast.addToast("success", successMsg);
+      } catch (error: any) {
+        toast.addToast("error", error.message);
+      }
     });
-    try {
-      await updateTopic(id!, { status: "reject" });
-    } catch (err) {
-      console.error(err);
-      updateState({ loadingButton: undefined });
-    }
   };
 
-  const {
-    title,
-    content,
-    summary,
-    thumbnailUrl,
-    slug,
-    tags,
-    status,
-    tagQ,
-    loadingButton,
-  } = state;
+  const { tagQ, topic: topicInternal } = state;
+  const { title, content, summary, thumbnailUrl, slug, tags, status } =
+    topicInternal;
   return (
     <>
       <div className="flex flex-col h-screen items-start mx-auto max-w-300 p-6">
@@ -337,19 +379,13 @@ export default function TopicForm({ id, user, topic, tagSuggestions }: Props) {
           <div className="flex flex-row flex-wrap mb-4 gap-4">
             <div className="flex flex-col items-start flex-1 min-w-0">
               <div className="w-full h-12">
-                {!pending ? (
-                  <FloatInput
-                    onChange={handleChange}
-                    name={"title"}
-                    value={title}
-                    disable={mode === "view" || mode === "review"}
-                    label={"Title"}
-                  />
-                ) : (
-                  <SkeletonWrapper className="rounded-md">
-                    <SkeletonElement width="100%" height="100%" />
-                  </SkeletonWrapper>
-                )}
+                <FloatInput
+                  onChange={handleChange}
+                  name={"title"}
+                  value={title}
+                  disable={mode === "view" || mode === "review"}
+                  label={"Title"}
+                />
               </div>
               <p
                 className={`text-xs text-tertiary-0 w-full min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-start mt-2 `}
@@ -375,80 +411,59 @@ export default function TopicForm({ id, user, topic, tagSuggestions }: Props) {
             </div>
 
             <div className="flex flex-row items-center gap-4 flex-1 focus-within:[&>label]:dark:text-accent-0 h-12">
-              {!pending ? (
-                <AutoComplete<Tag>
-                  name={"tags"}
-                  label={"Tag"}
-                  onTagChange={(newSelected) =>
-                    updateState({ tags: newSelected })
-                  }
-                  disable={mode === "view" || mode === "review"}
-                  suggestions={tagSuggestions || []}
-                  maxTags={4}
-                  q={tagQ}
-                  selected={tags}
-                  onQChange={handleQChange}
-                />
-              ) : (
-                <SkeletonWrapper className="rounded-md">
-                  <SkeletonElement width="100%" height="100%" />
-                </SkeletonWrapper>
-              )}
+              <AutoComplete<Tag>
+                name={"tags"}
+                label={"Tag"}
+                onTagChange={(newSelected) =>
+                  updateState({ topic: { ...state.topic, tags: newSelected } })
+                }
+                disable={mode === "view" || mode === "review"}
+                suggestions={tagSuggestions || []}
+                maxTags={4}
+                q={tagQ}
+                selected={tags}
+                onQChange={handleQChange}
+              />
             </div>
           </div>
           <div className="flex flex-row items-center gap-4 mb-4 focus-within:[&>label]:dark:text-accent-0">
             <div className="w-full h-12">
-              {!pending ? (
-                <FloatInput
-                  disable={mode === "view" || mode === "review"}
-                  onChange={handleChange}
-                  name={"thumbnailUrl"}
-                  value={thumbnailUrl}
-                  label={"ThumbnailURL"}
-                />
-              ) : (
-                <SkeletonWrapper className="rounded-md">
-                  <SkeletonElement width="100%" height="100%" />
-                </SkeletonWrapper>
-              )}
+              <FloatInput
+                disable={mode === "view" || mode === "review"}
+                onChange={handleChange}
+                name={"thumbnailUrl"}
+                value={thumbnailUrl}
+                label={"ThumbnailURL"}
+              />
             </div>
           </div>
           <div className="w-full h-30 mb-4">
-            {!pending ? (
-              <FloatTextarea
-                disable={mode === "view" || mode === "review"}
-                onChange={handleChange}
-                name={"summary"}
-                value={summary}
-                label={"Summary"}
-              />
-            ) : (
-              <SkeletonWrapper className="rounded-md">
-                <SkeletonElement width="100%" height="100%" />
-              </SkeletonWrapper>
-            )}
+            <FloatTextarea
+              disable={mode === "view" || mode === "review"}
+              onChange={handleChange}
+              name={"summary"}
+              value={summary}
+              label={"Summary"}
+            />
           </div>
           <div className="w-full min-h-80 dark:border dark:border-border rounded-md overflow-hidden">
-            {!pending ? (
-                <CKEditorComponent
-                  content={content}
-                  onChange={handleEditorChange}
-                  licenseKey={licenseKey}
-                  disable={mode === "view" || mode === "review"}
-                />
-            ) : (
-              <SkeletonWrapper className="rounded-lg w-full">
-                <SkeletonElement width="100%" height="100%" />
-              </SkeletonWrapper>
-            )}
+            <CKEditorComponent
+              content={content}
+              onChange={handleEditorChange}
+              licenseKey={licenseKey}
+              disable={mode === "view" || mode === "review"}
+            />
           </div>
           <ActionButtons
             mode={mode}
-            isFetching={pending}
-            loadingButton={loadingButton}
-            mutationPending={pending}
-            onSaveDraft={() => handleSubmit("draft")}
-            onSubmit={() => handleSubmit("submit")}
+            mutationPendings={{
+              draft: drafting,
+              submit: submitting,
+              reject: rejecting,
+              approve: approving,
+            }}
+            onSaveDraft={() => handleDraft()}
+            onSubmit={() => handleSubmit()}
             onCancel={handleCancel}
             onApprove={handleApprove}
             status={status}

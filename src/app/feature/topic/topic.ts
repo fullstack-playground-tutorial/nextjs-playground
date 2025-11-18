@@ -3,14 +3,14 @@ import { Tag } from "../topic-tags";
 
 export interface Topic {
     id: string;
-    title?: string;
-    slug?: string;
-    summary?: string;
+    title: string;
+    slug: string;
+    summary: string;
     authorName?: string;
     authorId?: string;
-    tags?: Tag[]; // tags for search
-    thumbnailUrl?: string;
-    content?: string;
+    tags: Tag[]; // tags for search
+    thumbnailUrl: string;
+    content: string;
     createdAt?: Date;
     updatedAt?: Date;
     publishedAt?: Date;

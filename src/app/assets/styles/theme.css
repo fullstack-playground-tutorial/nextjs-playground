@@ -44,6 +44,7 @@
     --editor-color-button-default-active-background: var(--color-surface-3);
     --editor-color-button-default-active-color: var(--color-surface-3);
     --editor-color-button-on-active-background: var(--color-surface-3);
+    --editor-color-split-button-hover-background: var(--color-surface-2);
     --editor-focus-outer-shadow: var(--color-accent-0);
     --editor-color-toolbar-background: var(--color-surface-0);
 
@@ -104,6 +105,7 @@
     --editor-color-button-default-active-background: var(--color-surface-3);
     --editor-color-button-default-active-color: var(--color-surface-3);
     --editor-color-button-on-active-background: var(--color-surface-3);
+    --editor-color-split-button-hover-background: var(--color-surface-2);
     --editor-focus-outer-shadow: var(--color-accent-0);
     --editor-color-toolbar-background: var(--color-surface-0);
 
@@ -208,6 +210,7 @@
         --editor-color-button-default-active-background: var(--color-surface-3);
         --editor-color-button-default-active-color: var(--color-surface-3);
         --editor-color-button-on-active-background: var(--color-surface-3);
+        --editor-color-split-button-hover-background: var(--color-surface-2);
         --editor-focus-outer-shadow: var(--color-accent-0);
         --editor-color-toolbar-background: var(--color-surface-0);
 
@@ -261,6 +264,7 @@
     --editor-color-button-default-active-background: var(--color-surface-3);
     --editor-color-button-default-active-color: var(--color-surface-3);
     --editor-color-button-on-active-background: var(--color-surface-3);
+    --editor-color-split-button-hover-background: var(--color-surface-2);
     --editor-focus-outer-shadow: var(--color-accent-0);
     --editor-color-toolbar-background: var(--color-surface-0);
 
