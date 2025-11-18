@@ -91,6 +91,7 @@ export default function ToolbarPlugin() {
   }, [editor, $updateToolbar]);
 
   const setAlignment = (alignment: "left" | "center" | "right" | "justify") => {
+
     editor.update(() => {
       const selection = $getSelection();
       if ($isNodeSelection(selection)) {
@@ -98,11 +99,11 @@ export default function ToolbarPlugin() {
         if (node instanceof ImageNode) {
           // Tạo node mới với alignment mới
           const newNode = $createImageNode({
-            src: node._src,
-            alt: node._alt,
-            width: node._width,
-            height: node._height,
-            maxWidth: node._maxWidth,
+            src: node.__src,
+            alt: node.__alt,
+            width: node.__width,
+            height: node.__height,
+            maxWidth: node.__maxWidth,
             alignment: alignment, // set alignment mới
           });
   

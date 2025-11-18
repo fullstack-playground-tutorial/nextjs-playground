@@ -4,8 +4,17 @@ import CustomSwitch from "@/app/components/ThemeToggle";
 import StoryPost from "../../(backoffice)/components/Story/StoryPost";
 import { MouseEvent, useRef, useState } from "react";
 import "./ImagePan.css";
+import dynamic from "next/dynamic";
+
+const CKEditorComponent = dynamic(
+  () => import("../../(backoffice)/components/CKEditor"),
+  { ssr: false }
+);
+
 type Position = { x: number; y: number };
 export default function Page() {
+  const licenseKey =process.env.NEXT_PUBLIC_CKEDITOR_LICENSE_KEY || ''
+  
   const [checked, setChecked] = useState<boolean>(false);
   const [position, setPosition] = useState<Position>({
     x: 0,
@@ -29,8 +38,8 @@ export default function Page() {
 
     const containerRect = container.getBoundingClientRect();
 
-    const imageWidth = image.clientWidth ;
-    const imageHeight = image.clientHeight ;
+    const imageWidth = image.clientWidth;
+    const imageHeight = image.clientHeight;
 
     // Position's mouse in container.
     const mouseX = e.clientX - containerRect.left;
@@ -39,7 +48,7 @@ export default function Page() {
     // Movement limit of image.
     const maxX = imageWidth - container.clientWidth;
     const maxY = imageHeight - container.clientHeight;
-    
+
     // Convert mouse position in container to percent unit.
     const xPercentage =
       (mouseX - buffer) / (container.clientWidth - buffer * 2);
@@ -52,6 +61,8 @@ export default function Page() {
 
     setPosition({ x: offsetX, y: offsetY });
   };
+
+  const [content, setContent] = useState("");
   return (
     <div className="flex flex-col ">
       <StoryPost></StoryPost>
@@ -75,6 +86,14 @@ export default function Page() {
           src="https://picsum.photos/500/450"
           alt=""
           ref={imageRef as any}
+        />
+      </div>
+      <div className="w-full min-h-80 rounded-md overflow-hidden">
+        <CKEditorComponent
+          content={content}
+          onChange={(c) => setContent(c)}
+          licenseKey={licenseKey}
+          disable={false}
         />
       </div>
     </div>

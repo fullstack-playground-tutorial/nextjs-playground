@@ -9,12 +9,15 @@ import {
 } from "@/components/SkeletionLoading";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { User } from "@/app/feature/auth";
-import { getTopicTagService } from "@/app/core/server/context";
 import FloatInput from "../../../components/FloatInput";
 import FloatTextarea from "../../../components/FloatTextarea";
 import AutoComplete from "../../../components/AutoComplete";
-import { LexicalEditor } from "lexical";
-import LexicalEditorComponent from "../../../components/LexicalEditor";
+import dynamic from "next/dynamic";
+
+const CKEditorComponent = dynamic(
+  () => import("../../../components/CKEditor"),
+  { ssr: false }
+);
 
 type InternalState = {
   title: string;
@@ -146,6 +149,7 @@ const ActionButtons = ({
       </div>
     );
   }
+  
   return (
     <>
       <div className="mt-6 mb-4 mx-auto flex flex-row gap-3">
@@ -201,6 +205,7 @@ export default function TopicForm({ id, user, topic, tagSuggestions }: Props) {
     status: topic?.status,
   });
 
+  const licenseKey = process.env.NEXT_PUBLIC_CKEDITOR_LICENSE_KEY || ""
   const urlSearchParam = useSearchParams();
   const pathname = usePathname();
   const mode = topicMode(pathname, id);
@@ -423,15 +428,14 @@ export default function TopicForm({ id, user, topic, tagSuggestions }: Props) {
               </SkeletonWrapper>
             )}
           </div>
-          <div className="w-full min-h-80 rounded-md overflow-hidden">
+          <div className="w-full min-h-80 dark:border dark:border-border rounded-md overflow-hidden">
             {!pending ? (
-              //   <CKEditorComponent
-              //     content={content}
-              //     onChange={handleEditorChange}
-              //     licenseKey={import.meta.env.VITE_CKEDITOR_LICENSE_KEY}
-              //     disable={mode === "view" || mode === "review"}
-              //   />
-              <LexicalEditorComponent placeholder={"Write new Topic!"}/>
+                <CKEditorComponent
+                  content={content}
+                  onChange={handleEditorChange}
+                  licenseKey={licenseKey}
+                  disable={mode === "view" || mode === "review"}
+                />
             ) : (
               <SkeletonWrapper className="rounded-lg w-full">
                 <SkeletonElement width="100%" height="100%" />

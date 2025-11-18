@@ -29,7 +29,7 @@
     --color-accent-1: var(--color-orange-600);
     --color-accent-2: var(--color-orange-700);
   
-    /* --editor-color-focus-border: transparent;
+    --editor-color-focus-border: transparent;
     --editor-content-font-family: "Lato";
     --editor-color-base-background: var(--color-surface-1);
     --editor-color-base-border: transparent;
@@ -44,7 +44,8 @@
     --editor-color-button-default-active-background: var(--color-surface-3);
     --editor-color-button-default-active-color: var(--color-surface-3);
     --editor-color-button-on-active-background: var(--color-surface-3);
-    --editor-focus-outer-shadow: var(--color-accent-0); */
+    --editor-focus-outer-shadow: var(--color-accent-0);
+    --editor-color-toolbar-background: var(--color-surface-0);
 
 
     /* glass */
@@ -88,7 +89,7 @@
     --color-accent-1: var(--color-orange-600);
     --color-accent-2: var(--color-orange-700);
   
-    /* --editor-color-focus-border: transparent;
+    --editor-color-focus-border: transparent;
     --editor-content-font-family: "Lato";
     --editor-color-base-background: var(--color-surface-1);
     --editor-color-base-border: transparent;
@@ -103,7 +104,8 @@
     --editor-color-button-default-active-background: var(--color-surface-3);
     --editor-color-button-default-active-color: var(--color-surface-3);
     --editor-color-button-on-active-background: var(--color-surface-3);
-    --editor-focus-outer-shadow: var(--color-accent-0); */
+    --editor-focus-outer-shadow: var(--color-accent-0);
+    --editor-color-toolbar-background: var(--color-surface-0);
 
 
     /* glass */
@@ -191,7 +193,7 @@
         --color-accent-1: var(--color-orange-600);
         --color-accent-2: var(--color-orange-700);
       
-        /* --editor-color-focus-border: transparent;
+        --editor-color-focus-border: transparent;
         --editor-content-font-family: "Lato";
         --editor-color-base-background: var(--color-surface-1);
         --editor-color-base-border: transparent;
@@ -206,7 +208,9 @@
         --editor-color-button-default-active-background: var(--color-surface-3);
         --editor-color-button-default-active-color: var(--color-surface-3);
         --editor-color-button-on-active-background: var(--color-surface-3);
-        --editor-focus-outer-shadow: var(--color-accent-0); */
+        --editor-focus-outer-shadow: var(--color-accent-0);
+        --editor-color-toolbar-background: var(--color-surface-0);
+
     }
   }
   
@@ -242,7 +246,7 @@
     --color-accent-1: var(--color-orange-600);
     --color-accent-2: var(--color-orange-700);
   
-    /* --editor-color-focus-border: transparent;
+    --editor-color-focus-border: transparent;
     --editor-content-font-family: "Lato";
     --editor-color-base-background: var(--color-surface-1);
     --editor-color-base-border: transparent;
@@ -257,8 +261,8 @@
     --editor-color-button-default-active-background: var(--color-surface-3);
     --editor-color-button-default-active-color: var(--color-surface-3);
     --editor-color-button-on-active-background: var(--color-surface-3);
-    --editor-focus-outer-shadow: var(--color-accent-0); */
-
+    --editor-focus-outer-shadow: var(--color-accent-0);
+    --editor-color-toolbar-background: var(--color-surface-0);
 
     /* glass */
     --color-glass-700: rgba(255, 255, 255, 0.7);

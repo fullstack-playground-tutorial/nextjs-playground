@@ -10,8 +10,11 @@ import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
 import ToolbarPlugin from "./ToolbarPlugin";
 
-import { EditorThemeClasses } from "lexical";
+import { EditorState, EditorThemeClasses, LexicalEditor } from "lexical";
 import { ImageNode } from "./ImageNode";
+import { useRef, useState } from "react";
+import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
+import EditorOnChangePlugin from "./EditorOnChangePlugin";
 const theme: EditorThemeClasses = {};
 
 // Catch any errors that occur during Lexical updates and log them
@@ -26,12 +29,19 @@ type Props = {
 };
 
 export default function LexicalEditorComponent({ placeholder }: Props) {
+  const [editorStateJSON, setEditorStateJSON] = useState<string>();
   const initialConfig: InitialConfigType = {
+    editorState: editorStateJSON,
     namespace: "MyEditor",
     theme,
     onError,
-    nodes: [ImageNode]
+    nodes: [ImageNode],
   };
+
+  const onChange = (editorState: EditorState) => {
+    const editorStateJSON = editorState.toJSON()
+    setEditorStateJSON(JSON.stringify(editorStateJSON))
+  }
 
   return (
     <div className="h-full w-full">
@@ -52,9 +62,11 @@ export default function LexicalEditorComponent({ placeholder }: Props) {
             }
             ErrorBoundary={LexicalErrorBoundary}
           />
+          
         </div>
         <HistoryPlugin />
         <AutoFocusPlugin />
+        <EditorOnChangePlugin onChange={onChange}/>
       </LexicalComposer>
     </div>
   );
