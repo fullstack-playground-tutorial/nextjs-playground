@@ -7,6 +7,7 @@ import { Topic } from "./topic";
 export const deleteTopic = async (id: string) => {
   try {
     const res = await getTopicService().remove(id);
+    
     if (res > 0) {
       updateTag("topics");
     }

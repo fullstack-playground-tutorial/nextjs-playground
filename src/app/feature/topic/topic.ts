@@ -1,5 +1,6 @@
 import { SearchFilter } from "@/app/utils/service";
 import { Tag } from "../topic-tags";
+import { ActionStatus } from "@/app/[lang]/(backoffice)/components/ActionButtons/ActionButtons";
 
 export interface Topic {
     id: string;
@@ -14,7 +15,7 @@ export interface Topic {
     createdAt?: Date;
     updatedAt?: Date;
     publishedAt?: Date;
-    status?: TopicStatus;
+    status?: ActionStatus;
     views?: number;
     likes?: number;
     commentCount?: number;
@@ -30,13 +31,4 @@ export interface Topic {
   }
   
   export interface TopicFilter {}
-  
-  export type TopicStatus = "submit" | "draft" | "approve" | "reject";
-  export type ActionProperites = {
-    key: TopicStatus;
-    label: string;
-    waitingLabel: string;
-    className: string;
-    onClick?: () => void;
-  };
   

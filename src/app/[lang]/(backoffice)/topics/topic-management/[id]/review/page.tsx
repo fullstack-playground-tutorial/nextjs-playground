@@ -1,7 +1,7 @@
 import { getUser } from "@/app/dal";
-import TopicForm from "../components/TopicForm";
 import { getTopicService } from "@/app/core/server/context";
 import { redirect } from "next/navigation";
+import TopicForm from "../../components/TopicForm";
 
 export default async function Page({
   params,

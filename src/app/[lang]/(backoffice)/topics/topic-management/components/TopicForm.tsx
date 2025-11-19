@@ -1,12 +1,7 @@
 "use client";
-import { useActionState, useEffect, useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import BackArrow from "@/assets/images/icons/back_arrow.svg";
-import {
-  createTopic,
-  Topic,
-  TopicStatus,
-  updateTopic,
-} from "@/app/feature/topic";
+import { createTopic, Topic, updateTopic } from "@/app/feature/topic";
 import { Tag } from "@/app/feature/topic-tags";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { User } from "@/app/feature/auth";
@@ -15,6 +10,10 @@ import FloatTextarea from "../../../components/FloatTextarea";
 import AutoComplete from "../../../components/AutoComplete";
 import dynamic from "next/dynamic";
 import useToast from "@/components/Toast";
+import {
+  ActionButtons,
+  ActionStatus,
+} from "../../../components/ActionButtons/ActionButtons";
 
 const CKEditorComponent = dynamic(
   () => import("../../../components/CKEditor"),
@@ -25,14 +24,6 @@ type InternalState = {
   topic: Topic;
   tagQ: string;
   suggestions: Tag[];
-};
-
-export type ActionProperites = {
-  key: TopicStatus;
-  label: string;
-  waitingLabel: string;
-  className: string;
-  onClick?: () => void;
 };
 
 const slugify = (text: string) => {
@@ -72,109 +63,13 @@ const topicMode = (pathname: string, id?: string) => {
   return "unknown";
 };
 
-const ActionButtons = ({
-  mode,
-  mutationPendings,
-  status,
-  onCancel,
-  onSubmit,
-  onSaveDraft,
-  onApprove,
-  onReject,
-}: {
-  mode: "create" | "edit" | "review" | "view" | "unknown";
-  mutationPendings: Record<"draft" | "submit" | "approve" | "reject", boolean>;
-  status?: TopicStatus;
-  onCancel?: () => void;
-  onSubmit?: () => void;
-  onSaveDraft?: () => void;
-  onReject?: () => void;
-  onApprove?: () => void;
-}) => {
-  const actionButtonProperties: Record<TopicStatus, ActionProperites> = {
-    draft: {
-      key: "draft",
-      label: "Save as Draft",
-      waitingLabel: "Saving...",
-      className: "dark:bg-surface-2 hover:dark:bg-surface-0 dark:text-primary",
-      onClick: onSaveDraft,
-    },
-    submit: {
-      key: "submit",
-      label: "Submit",
-      waitingLabel: "Submitting...",
-      className: "dark:bg-accent-0 hover:dark:bg-accent-1",
-      onClick: onSubmit,
-    },
-    approve: {
-      key: "approve",
-      label: "Approve",
-      waitingLabel: "Approving...",
-      className: "dark:bg-accent-0 hover:dark:bg-accent-1",
-      onClick: onApprove,
-    },
-    reject: {
-      key: "reject",
-      label: "Reject",
-      waitingLabel: "Rejecting...",
-      className: "dark:bg-alert-1 hover:dark:bg-alert-2",
-      onClick: onReject,
-    },
-  };
-
-  const modeActionConfig: Record<string, Array<TopicStatus>> = {
-    create: ["draft", "submit"],
-    edit: ["draft", "submit"],
-    review: ["approve", "reject"],
-    view: [],
-  };
-
-  if (mode == "view") return <></>;
-
-  return (
-    <>
-      <div className="mt-6 mb-4 mx-auto flex flex-row gap-3">
-        {modeActionConfig[mode].map((k) => {
-          const { className, label, waitingLabel, onClick } =
-            actionButtonProperties[k];
-          return (
-            <button
-              key={k}
-              disabled={
-                mutationPendings[k] ||
-                (status === "approve" && k === "approve") ||
-                (status === "reject" && k === "reject")
-              }
-              type="button"
-              className={`btn btn-sm cursor-pointer transition-colors ${className}`}
-              onClick={onClick}
-            >
-              {mutationPendings[k] ? waitingLabel : label}
-            </button>
-          );
-        })}
-
-        <button
-          disabled={Object.values(mutationPendings).some((v) => v === true)}
-          type="button"
-          className="btn btn-sm dark:border-secondary dark:border dark:text-primary hover:dark:bg-secondary cursor-pointer transition-colors"
-          onClick={onCancel}
-        >
-          Cancel
-        </button>
-      </div>
-    </>
-  );
-};
-
 type Props = {
-  id?: string;
   user: User;
   topic?: Topic;
   tagSuggestions?: Tag[];
 };
 
-export default function TopicForm({ id, user, topic, tagSuggestions }: Props) {
+export default function TopicForm({ user, topic, tagSuggestions }: Props) {
   if (topic) {
     initialState = {
       ...initialState,
@@ -196,13 +91,12 @@ export default function TopicForm({ id, user, topic, tagSuggestions }: Props) {
   const licenseKey = process.env.NEXT_PUBLIC_CKEDITOR_LICENSE_KEY || "";
   const urlSearchParam = useSearchParams();
   const pathname = usePathname();
-  const mode = topicMode(pathname, id);
+  const mode = topicMode(pathname, topic?.id);
   const [submitting, startSubmitting] = useTransition();
   const [approving, startApproving] = useTransition();
   const [rejecting, startRejecting] = useTransition();
   const [drafting, startDrafting] = useTransition();
   const userId = user?.id;
-  const authorName = user?.username || user?.email;
   const router = useRouter();
   const [debouncedValue, setDebouncedValue] = useState(state.tagQ);
   const toast = useToast();
@@ -244,11 +138,28 @@ export default function TopicForm({ id, user, topic, tagSuggestions }: Props) {
     return changed;
   }
 
-  const handleChange = (
+  const statusColor = (status: ActionStatus) => {
+    switch (status) {
+      case "submit":
+        return "border-2 border-accent-0 text-accent-0"; // cam
+      case "draft":
+        return "border-2 border-secondary text-secondary"; // xam
+      case "reject":
+        return "border-2 border-alert-1 text-alert-0"; // do
+      case "approve":
+        return "border-2 border-success text-success"; // xanh la
+      default:
+        return "";
+    }
+  };
+
+  const handleTopicChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    updateState({ [name]: value });
+    let newTopic: Topic = { ...state.topic };
+    (newTopic as any)[name] = value;
+    updateState({ topic: newTopic });
   };
 
   const handleEditorChange = (content: string) => {
@@ -265,7 +176,6 @@ export default function TopicForm({ id, user, topic, tagSuggestions }: Props) {
 
   const handleDraft = async () => {
     startDrafting(async () => {
-      
       if (mode == "create") {
         try {
           const { successMsg } = await createTopic({
@@ -273,17 +183,19 @@ export default function TopicForm({ id, user, topic, tagSuggestions }: Props) {
             status: "draft",
           });
           toast.addToast("success", successMsg);
+          router.replace("/topics/topic-management");
         } catch (error: any) {
           toast.addToast("error", error.message);
         }
-      } else if (mode == "edit") {
+      } else if (mode == "edit" && topic?.id) {
         const changedFields = getChangedFields(initialState.topic, state.topic);
         try {
-          const { successMsg } = await updateTopic(id!, {
+          const { successMsg } = await updateTopic(topic.id, {
             ...changedFields,
             status: "draft",
           });
           toast.addToast("success", successMsg);
+          router.replace("/topics/topic-management");
         } catch (error: any) {
           toast.addToast("error", error.message);
         }
@@ -302,14 +214,15 @@ export default function TopicForm({ id, user, topic, tagSuggestions }: Props) {
         } catch (error: any) {
           toast.addToast("error", error.message);
         }
-      } else if (mode == "edit") {
+      } else if (mode == "edit" && topic?.id) {
         const changedFields = getChangedFields(initialState.topic, state.topic);
         try {
-          const { successMsg } = await updateTopic(id!, {
+          const { successMsg } = await updateTopic(topic.id, {
             ...changedFields,
             status: "submit",
           });
           toast.addToast("success", successMsg);
+          router.replace("/topics/topic-management");
         } catch (error: any) {
           toast.addToast("error", error.message);
         }
@@ -318,37 +231,34 @@ export default function TopicForm({ id, user, topic, tagSuggestions }: Props) {
   };
 
   const handleApprove = async () => {
-    if (!userId) {
-      console.error("No user id found in cookies. Aborting submit.");
-      return;
-    }
-    startApproving(async () => {
-      try {
+    if (userId && topic?.id) {
+      startApproving(async () => {
         try {
-          const { successMsg } = await updateTopic(id!, {
+          const { successMsg } = await updateTopic(topic?.id, {
             status: "approve",
+          });
+          toast.addToast("success", successMsg);
+          router.replace("/topics/topic-management");
+        } catch (error: any) {
+          toast.addToast("error", error.message);
+        }
+      });
+    }
+  };
+
+  const handleReject = async () => {
+    if (userId && topic?.id) {
+      startRejecting(async () => {
+        try {
+          const { successMsg } = await updateTopic(topic?.id, {
+            status: "reject",
           });
           toast.addToast("success", successMsg);
         } catch (error: any) {
           toast.addToast("error", error.message);
         }
-      } catch (err) {
-        console.error(err);
-      }
-    });
-  };
-
-  const handleReject = async () => {
-    startRejecting(async () => {
-      try {
-        const { successMsg } = await updateTopic(id!, {
-          status: "reject",
-        });
-        toast.addToast("success", successMsg);
-      } catch (error: any) {
-        toast.addToast("error", error.message);
-      }
-    });
+      });
+    }
   };
 
   const { tagQ, topic: topicInternal } = state;
@@ -357,30 +267,41 @@ export default function TopicForm({ id, user, topic, tagSuggestions }: Props) {
   return (
     <>
       <div className="flex flex-col h-screen items-start mx-auto max-w-300 p-6">
-        <div className="flex flex-row mt-8 mb-6 items-center gap-4 group">
-          <div
-            className="rounded-full shadow size-8 flex items-center justify-center p-2 dark:bg-surface-2 transition cursor-pointer  group-hover:dark:bg-orange-500"
-            onClick={handleCancel}
-          >
-            <BackArrow className="hover:underline group-hover:dark:fill-primary dark:fill-accent-0" />
+        <div className="flex flex-row justify-between mt-8 mb-6 items-center group w-full">
+          <div className="flex flex-row gap-4">
+            <div
+              className="rounded-full shadow size-8 flex items-center justify-center p-2 dark:bg-surface-2 transition cursor-pointer  group-hover:dark:bg-orange-500"
+              onClick={handleCancel}
+            >
+              <BackArrow className="hover:underline group-hover:dark:fill-primary dark:fill-accent-0" />
+            </div>
+            <div className="text-2xl font-semibold dark:text-accent-0 items-center">
+              {mode === "create"
+                ? "Topic Create"
+                : mode === "edit"
+                ? "Topic Edit" + " - " + topic?.id
+                : mode === "review"
+                ? "Topic Review" + " - " + topic?.id
+                : "Topic View" + " - " + topic?.id}{" "}
+            </div>
           </div>
-
-          <div className="text-2xl font-semibold dark:text-accent-0 ">
-            {mode === "create"
-              ? "Topic Create"
-              : mode === "edit"
-              ? "Topic Edit"
-              : mode === "review"
-              ? "Topic Review"
-              : "Topic View"}
-          </div>
+          {status && (
+            <span
+              className={
+                "text-xl dark:bg-surface-1 bordercontent-center shadow px-2 py-1 " +
+                statusColor(status)
+              }
+            >
+              {status}
+            </span>
+          )}
         </div>
         <form className="flex flex-col gap-4 w-full">
           <div className="flex flex-row flex-wrap mb-4 gap-4">
             <div className="flex flex-col items-start flex-1 min-w-0">
               <div className="w-full h-12">
                 <FloatInput
-                  onChange={handleChange}
+                  onChange={handleTopicChange}
                   name={"title"}
                   value={title}
                   disable={mode === "view" || mode === "review"}
@@ -430,7 +351,7 @@ export default function TopicForm({ id, user, topic, tagSuggestions }: Props) {
             <div className="w-full h-12">
               <FloatInput
                 disable={mode === "view" || mode === "review"}
-                onChange={handleChange}
+                onChange={handleTopicChange}
                 name={"thumbnailUrl"}
                 value={thumbnailUrl}
                 label={"ThumbnailURL"}
@@ -440,7 +361,7 @@ export default function TopicForm({ id, user, topic, tagSuggestions }: Props) {
           <div className="w-full h-30 mb-4">
             <FloatTextarea
               disable={mode === "view" || mode === "review"}
-              onChange={handleChange}
+              onChange={handleTopicChange}
               name={"summary"}
               value={summary}
               label={"Summary"}
