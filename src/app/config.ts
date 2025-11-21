@@ -4,6 +4,7 @@ export const backofficeServerHost = "https://localhost:8082";
 export const clientHost = "http://localhost:3000";
 export const config = {
   auth_url: authServerHost + "/v1/auth",
+  role_url: authServerHost + "/v1/roles",
   user_url: authServerHost + "/user",
   search_url: authServerHost + "/search",
   topic_url: backofficeServerHost+ "/topics",

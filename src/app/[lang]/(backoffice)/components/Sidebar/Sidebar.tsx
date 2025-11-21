@@ -46,7 +46,7 @@ function Sidebar({ userInfo, topbar, onToggleViewbar }: Props) {
   const permissions: string[] = userInfo?.permissions ?? [];
   const user = userInfo?.user;
 
-  const checkAuthorized = (perm: string) => {        
+  const checkAuthorized = (perm: string) => {
     const authorized =
       permissions.some((item: string) => item.startsWith(perm)) || false;
 

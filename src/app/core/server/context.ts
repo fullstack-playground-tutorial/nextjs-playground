@@ -25,6 +25,7 @@ import {
   TopicTagService,
 } from "@/app/feature/topic-tags";
 import { httpServiceInstance } from "./http-config";
+import { createRoleService, RoleService } from "@/app/feature/role";
 
 class ApplicationContext {
   private authService?: AuthService;
@@ -36,6 +37,7 @@ class ApplicationContext {
   private englishNoteService?: EnglishNoteService;
   private topicService?: TopicService;
   private topicTagService?: TopicTagService;
+  private roleService?: RoleService;
 
   constructor(private httpService: HTTPService) {
     this.getAuthService = this.getAuthService.bind(this);
@@ -45,6 +47,7 @@ class ApplicationContext {
     this.getEnglishNoteService = this.getEnglishNoteService.bind(this);
     this.getTopicService = this.getTopicService.bind(this);
     this.getTopicTagService = this.getTopicTagService.bind(this);
+    this.getRoleService = this.getRoleService.bind(this);
   }
 
   getAuthService(): AuthService {
@@ -52,6 +55,13 @@ class ApplicationContext {
       this.authService = new AuthClient(this.httpService, config.auth_url);
     }
     return this.authService;
+  }
+
+  getRoleService(): RoleService {
+    if (!this.roleService) {
+      this.roleService = createRoleService(this.httpService, config.role_url);
+    }
+    return this.roleService;
   }
 
   getStoryService(): StoryService {
@@ -218,4 +228,5 @@ export const {
   getFriendService,
   getSearchService,
   getStoryService,
+  getRoleService,
 } = appContext;

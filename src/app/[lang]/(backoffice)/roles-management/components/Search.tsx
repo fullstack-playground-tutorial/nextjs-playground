@@ -9,7 +9,7 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 type Props = {
-  size: number;
+  size?: number;
   keyword: string;
 };
 const selectedList: FilterDropdownItem[] = [
@@ -52,7 +52,7 @@ export default function Search({ size, keyword }: Props) {
     <>
       <div className="flex flex-row justify-between gap-2 sm:gap-4 items-start mb-2">
         <SearchComponent
-          placeHolder={"Search Topic"}
+          placeHolder={"Search Role"}
           filterOn={visibility}
           onFilterToggle={() => setVisibility((prev) => !prev)}
           onSearch={handleSearch}
@@ -63,7 +63,7 @@ export default function Search({ size, keyword }: Props) {
           href={pathname + "/create"}
           className="btn btn-md dark:bg-accent-0 dark:text-primary cursor-pointer transition dark:hover:bg-accent-1 dark:active:bg-accent-1"
         >
-          + New Topic
+          + New Role
         </Link>
       </div>
       <div

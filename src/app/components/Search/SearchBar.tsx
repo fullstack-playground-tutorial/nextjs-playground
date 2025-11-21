@@ -3,8 +3,8 @@ import { useEffect, useRef, useState } from "react";
 import SearchIcon from "./search.svg";
 import PageList from "./PageList";
 import CloseIcon from "./close.svg";
-import { useRouter } from "next/navigation";
 type Props = {
+  keyword?: string;
   placeHolder: string;
   onQueryChange?: (q: string) => void;
   pageSize?: number; // If pageSize equal undefined => turn off page size filter
@@ -15,13 +15,14 @@ type Props = {
 const DEBOUNCE_TIME = 500;
 
 function Search({
+  keyword,
   placeHolder,
   onQueryChange,
   pageSize,
   onSelected,
   onSearch,
 }: Props) {
-  const [q, setQ] = useState("");
+  const [q, setQ] = useState(keyword || "");
   const ref = useRef<NodeJS.Timeout>(undefined);
 
   const handleChangeQ = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -51,9 +52,8 @@ function Search({
   return (
     <div className="flex flex-row">
       <div
-        className={`flex flex-row w-full px-3 py-2 h-10 gap-3 items-center  dark:border-border dark:bg-surface-1 dark:focus-within:bg-surface-0 transition shadow ${
-          pageSize ? " border-y border-l rounded-l-md" : "border rounded-md"
-        }`}
+        className={`flex flex-row w-full px-3 py-2 h-10 gap-3 items-center  dark:border-border dark:bg-surface-1 dark:focus-within:bg-surface-0 transition shadow ${pageSize ? " border-y border-l rounded-l-md" : "border rounded-md"
+          }`}
       >
         <button className="rounded-full w-auto shadow cursor-pointer items-center justify-center group">
           <SearchIcon
@@ -71,9 +71,8 @@ function Search({
           value={q}
         />
         <button
-          className={`rounded-full ${
-            q.length > 0 ? "opacity-100" : "opacity-0"
-          }  dark:bg-surface-0 flex items-center text-xs font-stretch-expanded justify-center cursor-pointer shadow`}
+          className={`rounded-full ${q.length > 0 ? "opacity-100" : "opacity-0"
+            }  dark:bg-surface-0 flex items-center text-xs font-stretch-expanded justify-center cursor-pointer shadow`}
           onClick={handleClear}
         >
           <CloseIcon className="dark:fill-primary dark:hover:fill-accent-0 size-4 line-3" />

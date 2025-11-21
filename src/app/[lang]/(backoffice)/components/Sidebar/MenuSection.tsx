@@ -8,8 +8,8 @@ export type MenuSectionProps = {
   title: string;
   iconName?: string;
   children?:
-    | React.ReactElement<MenuSectionProps>
-    | React.ReactElement<MenuSectionProps>[];
+  | React.ReactElement<MenuSectionProps>
+  | React.ReactElement<MenuSectionProps>[];
   url?: string;
   hidden?: boolean;
   disable?: boolean;
@@ -19,6 +19,7 @@ export type MenuSectionProps = {
 };
 
 type _MenuSectionProps = {
+  iconSets?: Record<string, React.FC<React.SVGProps<SVGSVGElement>>>;
   topbar: boolean;
   menuExpand: boolean;
   path: string[];
@@ -38,6 +39,8 @@ export const MenuSectionInternal = (props: MenuSectionInternalProps) => {
     id,
     title,
     Icon,
+    iconName,
+    iconSets,
     children,
     url,
     permission,
@@ -53,6 +56,8 @@ export const MenuSectionInternal = (props: MenuSectionInternalProps) => {
     checkAuthorized,
   } = props;
 
+  const _Icon = (iconName && iconSets) ? iconSets[iconName] : Icon;
+
   if (props.hidden || (checkAuthorized && !checkAuthorized(permission || ""))) {
     return null;
   }
@@ -60,23 +65,24 @@ export const MenuSectionInternal = (props: MenuSectionInternalProps) => {
   const clonedChildren = !children
     ? undefined
     : React.Children.map(children, (child) => {
-        const isChildPinned = pinnedList.some(
-          (pinnedItem) => pinnedItem.id === child.props.id
-        );
-        return (
-          <MenuSectionInternal
-            {...child.props}
-            topbar={topbar}
-            menuExpand={menuExpand}
-            path={[...path, child.props.id]}
-            pinned={isChildPinned}
-            handlePinnedList={handlePinnedList}
-            pinnedList={pinnedList}
-            isSectionActive={isSectionActive}
-            disable={disable}
-          />
-        );
-      });
+      const isChildPinned = pinnedList.some(
+        (pinnedItem) => pinnedItem.id === child.props.id
+      );
+      return (
+        <MenuSectionInternal
+          {...child.props}
+          iconSets={iconSets}
+          topbar={topbar}
+          menuExpand={menuExpand}
+          path={[...path, child.props.id]}
+          pinned={isChildPinned}
+          handlePinnedList={handlePinnedList}
+          pinnedList={pinnedList}
+          isSectionActive={isSectionActive}
+          disable={disable}
+        />
+      );
+    });
 
   const [dropdown, setDropdown] = useState(false);
 
@@ -90,42 +96,37 @@ export const MenuSectionInternal = (props: MenuSectionInternalProps) => {
 
   return (
     <section
-      className={`flex flex-col w-full z-1 ${
-        !topbar
-          ? menuExpand
-            ? "pl-2"
-            : ""
-          : "section-header items-center justify-center"
-      }`}
+      className={`flex flex-col w-full z-1 ${!topbar
+        ? menuExpand
+          ? "pl-2"
+          : ""
+        : "section-header items-center justify-center"
+        }`}
       key={id}
     >
       <div className="flex flex-row justify-between h-12 group text-sm font-semibold">
         {url ? (
           <Link
             href={url}
-            className={`flex flex-row gap-2 cursor-pointer ${
-              topbar ? "items-center" : "items-end"
-            }`}
+            className={`flex flex-row gap-2 cursor-pointer ${topbar ? "items-center" : "items-end"
+              }`}
           >
             <>
-              {Icon && (
-                <Icon
-                  className={`${
-                    isSectionActive(url)
-                      ? "fill-orange-500 stroke-orange-500"
-                      : "fill-white stroke-white"
-                  } size-6 stroke-2`}
-                />
-              )}
+              {_Icon ?
+                <_Icon
+                  className={`${isSectionActive(url)
+                    ? "fill-orange-500 stroke-orange-500"
+                    : "fill-white stroke-white"
+                    } size-6 stroke-2`}
+                /> : <div className="size-6"></div>
+              }
               <label
-                className={`hover:underline cursor-pointer ${
-                  topbar ? "" : menuExpand ? "" : "hidden"
-                }
-                       ${
-                         isSectionActive(url)
-                           ? "text-orange-500 font-semibold"
-                           : "text-white"
-                       }`}
+                className={`hover:underline cursor-pointer ${topbar ? "" : menuExpand ? "" : "hidden"
+                  }
+                       ${isSectionActive(url)
+                    ? "text-orange-500 font-semibold"
+                    : "text-white"
+                  }`}
               >
                 {title}
               </label>
@@ -133,27 +134,24 @@ export const MenuSectionInternal = (props: MenuSectionInternalProps) => {
           </Link>
         ) : (
           <div
-            className={`flex flex-row gap-2 cursor-pointer hover:underline ${
-              topbar ? "items-center" : "items-end"
-            } font-semibold`}
+            className={`flex flex-row gap-2 cursor-pointer hover:underline ${topbar ? "items-center" : "items-end"
+              } font-semibold`}
             onClick={() =>
               onSectionClick ? onSectionClick() : handleToggleDropdown()
             }
           >
-            {Icon && <Icon className="stroke-white" />}
+            {_Icon ? <_Icon className="size-6 stroke-white" /> : <div className="size-6"></div>}
             <label
-              className={`text-white cursor-pointer truncate text-md max-w-2/3 ${
-                topbar ? "" : menuExpand ? "" : "hidden"
-              }`}
+              className={`text-white cursor-pointer truncate text-md ${topbar ? "" : menuExpand ? "" : "hidden"
+                }`}
             >
               {title}
             </label>
           </div>
         )}
         <div
-          className={`flex flex-row gap-2 ${
-            menuExpand ? "" : "hidden"
-          } items-end stroke-white`}
+          className={`flex flex-row gap-2 ${menuExpand ? "" : "hidden"
+            } items-end stroke-white`}
         >
           {!topbar && (
             <button
@@ -184,13 +182,11 @@ export const MenuSectionInternal = (props: MenuSectionInternalProps) => {
       </div>
       {clonedChildren && (
         <div
-          className={`${
-            topbar
-              ? `section-list bg-gray-800 text-white px-2 shadow-md min-w-[200px] ${
-                  path.length <= 1 ? "top-full" : "left-full"
-                }`
-              : `${dropdown ? "" : "hidden"}`
-          }`}
+          className={`${topbar
+            ? `section-list bg-gray-800 text-white px-2 shadow-md min-w-[200px] ${path.length <= 1 ? "top-full" : "left-full"
+            }`
+            : `${dropdown ? "" : "hidden"}`
+            }`}
         >
           {clonedChildren}
         </div>
