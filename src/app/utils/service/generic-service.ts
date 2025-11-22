@@ -1,7 +1,7 @@
 import { HTTPService } from "../http";
 import { SearchFilter, SearchResult } from "./type";
 
-export interface GenericService<T, F, IdKey extends keyof T> {
+export interface GenericService<T, F, IdKey extends keyof T | undefined> {
   httpService: HTTPService;
   getAll(next?: NextFetchRequestConfig, authSkip?: boolean): Promise<T[]>;
   search(
@@ -16,7 +16,7 @@ export interface GenericService<T, F, IdKey extends keyof T> {
     authSkip?: boolean
   ): Promise<T | undefined>;
   create(
-    data: Omit<T, IdKey>,
+    data: IdKey extends keyof T ? Omit<T, IdKey> : T,
     next?: NextFetchRequestConfig,
     authSkip?: boolean
   ): Promise<number>;
@@ -39,9 +39,13 @@ export interface GenericService<T, F, IdKey extends keyof T> {
   ): Promise<number>;
 }
 
-export const createGenericService = <T extends Object, F extends SearchFilter,IdKey extends keyof T >(
+export const createGenericService = <
+  T extends Object,
+  F extends SearchFilter,
+  IdKey extends keyof T | undefined
+>(
   httpService: HTTPService,
-  url: string,
+  url: string
 ): GenericService<T, F, IdKey> => {
   function buildUrlParams<F extends Record<string, any>>(
     baseUrl: string,
@@ -61,7 +65,7 @@ export const createGenericService = <T extends Object, F extends SearchFilter,Id
     searchGet: boolean = false,
     authSkip: boolean = false
   ) {
-    const options = { next, authSkip};
+    const options = { next, authSkip };
     if (searchGet) {
       const queryURL = buildUrlParams(url + "/search", filter);
       return httpService
@@ -75,7 +79,7 @@ export const createGenericService = <T extends Object, F extends SearchFilter,Id
   }
 
   async function getAll(
-    next: NextFetchRequestConfig = {revalidate: 60},
+    next: NextFetchRequestConfig = { revalidate: 60 },
     authSkip: boolean = false
   ) {
     const res = await httpService.get<T[]>(url, { next, authSkip });
@@ -84,7 +88,7 @@ export const createGenericService = <T extends Object, F extends SearchFilter,Id
 
   async function load(
     id: string,
-    next: NextFetchRequestConfig = {revalidate: 60},
+    next: NextFetchRequestConfig = { revalidate: 60 },
     authSkip: boolean = false
   ) {
     const res = await httpService.get<T>(url + "/" + id, { next, authSkip });
@@ -92,11 +96,14 @@ export const createGenericService = <T extends Object, F extends SearchFilter,Id
   }
 
   async function create(
-    data: Omit<T, IdKey>,
+    data: IdKey extends keyof T ? Omit<T, IdKey> : T,
     next: NextFetchRequestConfig,
     authSkip: boolean = false
   ) {
-    const res = await httpService.post<number, Omit<T, IdKey>>(url, data, {
+    const res = await httpService.post<
+      number,
+      IdKey extends keyof T ? Omit<T, IdKey> : T
+    >(url, data, {
       next,
       authSkip,
     });

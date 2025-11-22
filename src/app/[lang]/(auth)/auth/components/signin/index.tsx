@@ -44,12 +44,10 @@ export const SignInForm = (props: Props) => {
     setState((prev) => ({ ...prev, showSignUp: !prev.showSignUp }));
   };
 
-  useEffect(() => {    
+  useEffect(() => {
     if (loginSuccess) {
-      if(props.modal){
-
+      if (props.modal) {
         router.back();
-    
       } else {
         router.replace("/");
       }
@@ -83,6 +81,7 @@ export const SignInForm = (props: Props) => {
                   type="text"
                   placeholder="Email"
                   name="email"
+                  defaultValue={"john.doe@example.com"}
                   id="email"
                 />
                 {fieldErrors["email"] && (
@@ -99,6 +98,7 @@ export const SignInForm = (props: Props) => {
                   type="password"
                   placeholder="Password"
                   name="password"
+                  defaultValue={"Secret1"}
                   id="password"
                 />
                 {fieldErrors["password"] && (

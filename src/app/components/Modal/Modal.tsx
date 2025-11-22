@@ -8,7 +8,10 @@ interface ModalProps {
   closeOnOverlayClick?: boolean;
 }
 
-export default function Modal({ children, showCloseButton = true }: ModalProps) {
+export default function Modal({
+  children,
+  showCloseButton = true,
+}: ModalProps) {
   const router = useRouter();
 
   const hanldeDialogClick = (e: MouseEvent) => {
@@ -16,7 +19,7 @@ export default function Modal({ children, showCloseButton = true }: ModalProps) 
   };
 
   const handleClose = () => {
-   router.back()
+    router.back();
   };
 
   return (
@@ -24,7 +27,7 @@ export default function Modal({ children, showCloseButton = true }: ModalProps) 
       className={`fixed inset-0 flex flex-col justify-center items-center bg-opacity-50 z-50`}
     >
       <div className="absolute inset-0 dark:bg-black/50" onClick={handleClose}>
-        <div className="relative h-full w-full flex items-center justify-center">
+        <div className="relative h-full w-full flex items-center justify-center pb-20">
           <div
             role="dialog"
             onClick={(e) => hanldeDialogClick(e)}
