@@ -68,6 +68,7 @@ export default function SidebarWrapper({
     return (
       <MenuSectionInternal
         {...props}
+        key={child.key}
         iconSets={icons}
         hidden={props.hidden}
         topbar={topbar}
@@ -96,6 +97,7 @@ export default function SidebarWrapper({
                 pinned={true}
                 pinnedList={pinnedList}
                 iconSets={icons}
+                key={pi.id}
               />
             );
           })}
@@ -106,16 +108,20 @@ export default function SidebarWrapper({
   };
   return (
     <nav
-      className={`flex bg-gray-800 text-primary items-center shadow p-2 z-2 ${topbar
-        ? `flex-row w-full justify-center top-0 ${menuExpand ? "fixed h-[90%]" : "sticky h-auto"
-        }`
-        : `fixed md:sticky flex-col h-screen overflow-y-auto scrollbar transition-all ease-in-out overflow-hidden ${menuExpand ? "w-60" : "w-14"
-        }`
-        }`}
+      className={`flex bg-gray-800 text-primary items-center shadow p-2 z-2 ${
+        topbar
+          ? `flex-row w-full justify-center top-0 ${
+              menuExpand ? "fixed h-[90%]" : "sticky h-auto"
+            }`
+          : `fixed md:sticky flex-col h-screen overflow-y-auto scrollbar transition-all ease-in-out overflow-hidden ${
+              menuExpand ? "w-60" : "w-14"
+            }`
+      }`}
     >
       <button
-        className={`self-start items-center justify-center font-semibold cursor-pointer p-2 ${topbar ? "hidden h-12" : ""
-          } ${!topbar && menuExpand ? "pl-4" : ""}`}
+        className={`self-start items-center justify-center font-semibold cursor-pointer p-2 ${
+          topbar ? "hidden h-12" : ""
+        } ${!topbar && menuExpand ? "pl-4" : ""}`}
         onClick={(e) => handleToggleMenuExpand(e)}
       >
         {menuExpand ? (
@@ -125,8 +131,9 @@ export default function SidebarWrapper({
         )}
       </button>
       <button
-        className={`self-start flex flex-row gap-2 items-center justify-center font-semibold cursor-pointer ${topbar ? "h-12" : "p-2 pl-2"
-          } ${!topbar && menuExpand ? "pl-4" : ""}`}
+        className={`self-start flex flex-row gap-2 items-center justify-center font-semibold cursor-pointer ${
+          topbar ? "h-12" : "p-2 pl-2"
+        } ${!topbar && menuExpand ? "pl-4" : ""}`}
         onClick={(e) => handleToggleViewbar(e)}
       >
         {!topbar ? (
@@ -142,8 +149,9 @@ export default function SidebarWrapper({
         )}
       </button>
       <aside
-        className={`flex ${topbar ? "flex-row gap-4 justify-between" : "flex-col p-2"
-          } w-full`}
+        className={`flex ${
+          topbar ? "flex-row gap-4 justify-between" : "flex-col p-2"
+        } w-full`}
       >
         {renderPinnedList()}
         <UserSection

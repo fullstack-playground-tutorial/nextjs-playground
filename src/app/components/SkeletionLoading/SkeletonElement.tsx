@@ -4,9 +4,15 @@ type Props = {
   width: string;
   height: string;
   borderRadius?: string;
+  className?: string;
 };
 
-export default function SkeletonElement({ width, height, borderRadius = "0px"}: Props) {
+export default function SkeletonElement({
+  width,
+  height,
+  borderRadius = "0px",
+  className,
+}: Props) {
   const styleConf = useMemo<React.CSSProperties>(() => {
     return {
       backgroundColor: "rgba(0,0,0,0.2)",
@@ -17,5 +23,5 @@ export default function SkeletonElement({ width, height, borderRadius = "0px"}: 
     };
   }, [width, height, borderRadius]);
 
-  return <div className="animate-pulse" style={styleConf}></div>;
+  return <div className={"animate-pulse " + className} style={styleConf}></div>;
 }

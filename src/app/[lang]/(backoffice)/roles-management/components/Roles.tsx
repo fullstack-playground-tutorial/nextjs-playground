@@ -237,7 +237,7 @@ export default function Roles({ permissionsWithRoleIds }: Props) {
 
   return (
     <>
-      <div className=" mt-4 md:mt-6 lg:mt-8 xl:mt-10 mx-auto flex flex-col gap-4 justify-center items-start">
+      <div className=" mt-4 md:mt-6 lg:mt-8 xl:mt-10 mx-auto flex flex-col gap-4 justify-center items-start max-w-300">
         <button
           type="button"
           className="btn btn-sm dark:bg-accent-0 dark:hover:bg-accent-1 dark:hover:text-primary hover:bg-surface-1 transition"
