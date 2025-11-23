@@ -1,14 +1,14 @@
 "use client";
-import { use, useEffect, useMemo, useState, useTransition } from "react";
+import { use, useEffect, useMemo, useState } from "react";
 import useToast from "@/app/components/Toast";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import {
   createRole,
-  deleteRole,
   Permission,
   PermissionsWithRoles,
   Role,
-  updateRoles,
+  updateRole,
+  setPermissions,
 } from "@/app/feature/role";
 import { SearchBar } from "@/components/Search";
 import Thead from "./Thead";
@@ -23,14 +23,14 @@ type InternalState = {
   };
   filterPerms: Permission[];
   searchTerm: string;
-  newRole?: Role;
+  newRole: Role;
   showNewRoleCol: boolean;
+  duplicateId: string;
 };
 
 export default function Roles({ permissionsWithRoleIds }: Props) {
   const { roles, permissions } = use(permissionsWithRoleIds);
   const toast = useToast();
-  const { back } = useRouter();
   const [state, setState] = useState<InternalState>({
     draft: {
       roles,
@@ -39,23 +39,18 @@ export default function Roles({ permissionsWithRoleIds }: Props) {
     filterPerms: permissions,
     searchTerm: "",
     showNewRoleCol: false,
+    newRole: { id: "", title: "" },
+    duplicateId: "",
   });
 
-  const { draft, filterPerms, searchTerm, showNewRoleCol } = state;
-
-  const addRoleCols = (index: number) => {
-    setState((prev) => ({
-      ...prev,
-      draft: {
-        ...prev.draft,
-        roles: [
-          ...prev.draft.roles.slice(0, index),
-          { title: "", id: "" },
-          ...prev.draft.roles.slice(index),
-        ],
-      },
-    }));
-  };
+  const {
+    draft,
+    filterPerms,
+    searchTerm,
+    showNewRoleCol,
+    newRole,
+    duplicateId,
+  } = state;
 
   const handleChangeRolePermission = (
     e: React.ChangeEvent,
@@ -104,7 +99,10 @@ export default function Roles({ permissionsWithRoleIds }: Props) {
   const handleSave = async (e: React.MouseEvent) => {
     e.preventDefault();
     try {
-      const { successMsg } = await updateRoles(draft.roles, draft.permissions);
+      const { successMsg } = await setPermissions(
+        draft.roles,
+        draft.permissions
+      );
       toast.addToast("success", successMsg);
     } catch (error) {
       console.log(error);
@@ -112,32 +110,26 @@ export default function Roles({ permissionsWithRoleIds }: Props) {
     }
   };
 
-  const handleRoleEdited = async (id: string, title: string) => {
+  const handleRoleEditing = async (id: string, title: string) => {
     const role = roles.find((r) => r.id === id);
-    const isDraftChanged = role?.title !== title;
-
-    if (!isDraftChanged) {
+    if (!role) {
+      toast.addToast("error", "Role not found");
       return false;
     }
 
-    const newRoles = draft.roles.map((r) => {
-      if (r.id === id) {
-        return {
-          ...r,
-          title,
-        };
-      }
-      return r;
-    });
+    if (role.title == title) {
+      toast.addToast("error", "Role title not changed");
+      return false;
+    }
 
-    setState((prev) => ({
-      ...prev,
-      draft: {
-        ...prev.draft,
-        roles: newRoles,
-      },
-      isRoleDraft: true,
-    }));
+    try {
+      const { successMsg } = await updateRole(id, title);
+      toast.addToast("success", successMsg);
+    } catch (error) {
+      console.log(error);
+      toast.addToast("error", "Update role failed");
+    }
+
     return true;
   };
 
@@ -149,6 +141,7 @@ export default function Roles({ permissionsWithRoleIds }: Props) {
         roles,
         permissions,
       },
+      newRole: { id: "", title: "" },
     }));
   };
 
@@ -175,23 +168,52 @@ export default function Roles({ permissionsWithRoleIds }: Props) {
     );
   }, [draft.permissions]);
 
-  const handleCreateCancel = () => {
-    setState((prev) => ({ ...prev, showNewRoleCol: false }));
+  const handleSetPropertiesCancel = () => {
+    setState((prev) => ({
+      ...prev,
+      showNewRoleCol: false,
+      duplicateId: "",
+      newRole: { id: "", title: "" },
+    }));
   };
 
-  const handleRoleCreate = async (id: string, title: string) => {
+  const handleDuplicate = (roleId: string) => {
+    const role = roles.find((r) => r.id === roleId);
+    if (!role) {
+      toast.addToast("error", "Role not found");
+      return;
+    }
+
+    setState((prev) => ({
+      ...prev,
+      showNewRoleCol: true,
+      newRole: { id: "", title: role.title },
+      duplicateId: role.id,
+    }));
+  };
+
+  const handleRoleCreating = async (id: string, title: string) => {
     const index = state.draft.roles.findIndex((i) => i.id == id);
     if (index != -1) {
       toast.addToast("error", "Role id already exists");
       return false;
     }
 
+    let rolePermissions: string[] = [];
+    if (duplicateId) {
+      const findRole = state.draft.roles.find((r) => r.id === duplicateId);
+      if (findRole && findRole.permissions) {
+        rolePermissions = [...findRole.permissions];
+      }
+    }
+
     try {
-      const { successMsg } = await createRole(id, title);
+      const { successMsg } = await createRole(id, title, rolePermissions);
       toast.addToast("success", successMsg);
       setState((prev) => ({
         ...prev,
         showNewRoleCol: false,
+        newRole: { id: "", title: "" },
         draft: { ...prev.draft, roles: [...prev.draft.roles, { id, title }] },
       }));
       return true;
@@ -220,7 +242,12 @@ export default function Roles({ permissionsWithRoleIds }: Props) {
           type="button"
           className="btn btn-sm dark:bg-accent-0 dark:hover:bg-accent-1 dark:hover:text-primary hover:bg-surface-1 transition"
           onClick={() =>
-            setState((prev) => ({ ...prev, showNewRoleCol: true }))
+            setState((prev) => ({
+              ...prev,
+              showNewRoleCol: true,
+              duplicateId: "",
+              newRole: { id: "", title: "" },
+            }))
           }
         >
           + New Role
@@ -236,11 +263,12 @@ export default function Roles({ permissionsWithRoleIds }: Props) {
               </th>
               {showNewRoleCol && (
                 <Thead
-                  id="new"
+                  id={newRole?.id}
                   title="New"
-                  onSetProperties={handleRoleCreate}
+                  onSetProperties={handleRoleCreating}
                   mode="create"
-                  onCancel={handleCreateCancel}
+                  onCancel={handleSetPropertiesCancel}
+                  onDuplicate={handleDuplicate}
                 />
               )}
               {draft.roles.map(({ id, title }) => (
@@ -248,7 +276,8 @@ export default function Roles({ permissionsWithRoleIds }: Props) {
                   key={id}
                   id={id}
                   title={title}
-                  onSetProperties={handleRoleEdited}
+                  onSetProperties={handleRoleEditing}
+                  onDuplicate={handleDuplicate}
                 />
               ))}
             </tr>
@@ -256,33 +285,37 @@ export default function Roles({ permissionsWithRoleIds }: Props) {
           <tbody>
             {filterPerms.map((p) => (
               <tr className="dark:hover:bg-surface-1" key={p.permissionId}>
-                <th className="px-3 py-2 min-w-16 border border-border text-sm text-left dark:text-primary dark:font-medium">
+                <th className="px-3 py-2 min-w-16 border dark:border-border text-sm text-left dark:text-primary dark:font-medium">
                   {p.title}
                 </th>
                 {showNewRoleCol && (
-                  <td className="px-3 py-2 border border-border text-center">
+                  <td className="px-3 py-2 border dark:border-border text-center">
                     <input
                       type="checkbox"
                       name="new"
                       id="new"
-                      className="size-3 appearance-none dark:checked:bg-accent-1 border border-secondary rounded cursor-pointer"
-                      checked={p.roleIds.includes("new")}
+                      className="size-3 appearance-none dark:checked:bg-accent-1 dark:border dark:border-secondary rounded cursor-pointer"
+                      checked={p.roleIds.includes(duplicateId)}
                       onChange={(e) =>
-                        handleChangeRolePermission(e, "new", p.permissionId)
+                        handleChangeRolePermission(
+                          e,
+                          newRole.id,
+                          p.permissionId
+                        )
                       }
                     />
                   </td>
                 )}
                 {draft.roles.map((r) => (
                   <td
-                    className="px-3 py-2 border border-border text-center"
+                    className="px-3 py-2 border dark:border-border text-center"
                     key={r.id}
                   >
                     <input
                       type="checkbox"
                       name={r.id}
                       id={r.id}
-                      className="size-3 appearance-none dark:checked:bg-accent-1 border border-secondary rounded cursor-pointer"
+                      className="size-3 appearance-none dark:checked:bg-accent-1 dark:border dark:border-secondary rounded cursor-pointer"
                       checked={p.roleIds.includes(r.id)}
                       onChange={(e) =>
                         handleChangeRolePermission(e, r.id, p.permissionId)

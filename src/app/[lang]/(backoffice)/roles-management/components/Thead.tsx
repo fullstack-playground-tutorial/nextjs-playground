@@ -13,6 +13,7 @@ type Props = {
   title: string;
   mode?: "view" | "edit" | "create";
   onSetProperties: (id: string, title: string) => Promise<boolean>;
+  onDuplicate: (id: string) => void;
   onCancel?: () => void;
 };
 
@@ -27,6 +28,7 @@ export default function Thead({
   id,
   title,
   onSetProperties,
+  onDuplicate,
   mode: propsMode,
   onCancel,
 }: Props) {
@@ -44,11 +46,18 @@ export default function Thead({
   ) => {
     setState((prev) => ({ ...prev, title: e.target.value }));
   };
+
   const handleIdChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    setState((prev) => ({ ...prev, id: e.target.value }));
+    setState((prev) => ({ ...prev, id: e.target.value, tooltipShow: false }));
   };
+
+  const handleDuplicate = async (e: React.MouseEvent, id: string) => {
+    e.preventDefault();
+    onDuplicate(id);
+  };
+
   const handleDelete = async (e: React.MouseEvent) => {
     e.preventDefault();
     try {
@@ -121,7 +130,10 @@ export default function Thead({
                 <EditIcon className="dark:fill-primary size-5" />
                 <div>Edit Properties</div>
               </div>
-              <div className="text-sm font-normal gap-2 whitespace-nowrap flex flex-row px-1.5 py-1 transition hover:text-accent-0 hover:*:fill-accent-0 dark:border-border dark:border dark:hover:bg-surface-2 cursor-pointer">
+              <div
+                onClick={(e) => handleDuplicate(e, id)}
+                className="text-sm font-normal gap-2 whitespace-nowrap flex flex-row px-1.5 py-1 transition hover:text-accent-0 hover:*:fill-accent-0 dark:border-border dark:border dark:hover:bg-surface-2 cursor-pointer"
+              >
                 <DuplicateIcon className="dark:fill-primary size-5" />
                 <div>Dublicate Role</div>
               </div>
