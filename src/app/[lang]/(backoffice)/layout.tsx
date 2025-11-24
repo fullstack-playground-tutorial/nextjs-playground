@@ -14,9 +14,7 @@ export default async function HomeLayout({
   let userInfo: UserInfo | undefined = undefined;
   const session = await verifySession();
   if (session == "logined") {
-    userInfo = await getUser();    
-  } else {
-    userInfo = undefined;
+    userInfo = await getUser();
   }
   return (
     <>

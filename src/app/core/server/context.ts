@@ -9,15 +9,8 @@ import { FriendClient } from "@/app/feature/friend/service";
 import { SearchService } from "@/app/feature/search/search";
 import { SearchClient } from "@/app/feature/search/service";
 import { config } from "@/app/config";
-import {
-  ApiEnglishNoteService,
-  EnglishNoteService,
-} from "@/app/feature/english-note/english-note";
-import {
-  ApiEnglishNoteClient,
-  EnglishNoteClient,
-} from "@/app/feature/english-note/service";
-import { EnglishNoteMongoRepository } from "@/app/feature/english-note/repository";
+import { EnglishNoteService } from "@/app/feature/english-note/english-note";
+import { EnglishNoteClient } from "@/app/feature/english-note/service";
 import { HTTPService } from "@/app/utils/http";
 import { createTopicService, TopicService } from "@/app/feature/topic";
 import {
@@ -26,6 +19,7 @@ import {
 } from "@/app/feature/topic-tags";
 import { httpServiceInstance } from "./http-config";
 import { createRoleService, RoleService } from "@/app/feature/role";
+import { createGoldService, GoldService } from "@/app/feature/gold/service";
 
 class ApplicationContext {
   private authService?: AuthService;
@@ -38,6 +32,7 @@ class ApplicationContext {
   private topicService?: TopicService;
   private topicTagService?: TopicTagService;
   private roleService?: RoleService;
+  private goldService?: GoldService;
 
   constructor(private httpService: HTTPService) {
     this.getAuthService = this.getAuthService.bind(this);
@@ -48,6 +43,7 @@ class ApplicationContext {
     this.getTopicService = this.getTopicService.bind(this);
     this.getTopicTagService = this.getTopicTagService.bind(this);
     this.getRoleService = this.getRoleService.bind(this);
+    this.getGoldService = this.getGoldService.bind(this);
   }
 
   getAuthService(): AuthService {
@@ -130,6 +126,12 @@ class ApplicationContext {
     return this.englishNoteService;
   };
 
+  getGoldService = () => {
+    if (!this.goldService) {
+      this.goldService = createGoldService(this.httpService, config.gold_url);
+    }
+    return this.goldService;
+  };
   // getApiEnglishNoteService = () => {
   //   if (!this.apiEnglishNoteService) {
   //     const englishNoteRepo = new EnglishNoteMongoRepository(
@@ -229,4 +231,5 @@ export const {
   getSearchService,
   getStoryService,
   getRoleService,
+  getGoldService,
 } = appContext;
