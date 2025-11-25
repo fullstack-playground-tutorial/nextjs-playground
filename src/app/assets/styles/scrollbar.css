@@ -13,3 +13,8 @@
 .scrollbar::-webkit-scrollbar-thumb:hover {
   @apply bg-[var(--color-accent-2)] rounded-full;
 }
+
+
+.scrollbar-thin::-webkit-scrollbar {
+  @apply h-2;
+}
