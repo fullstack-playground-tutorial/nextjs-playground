@@ -1,6 +1,6 @@
 import { getGoldService } from "@/app/core/server/context";
 import Link from "next/link";
-import GoldBoard from "./(home)/GoldBoard";
+import HomeBoard from "./(home)/HomeBoard";
 
 export default async function Page() {
   const [sjc, png, doji] = await Promise.all([
@@ -18,7 +18,7 @@ export default async function Page() {
   return (
     <div className="flex flex-col items-center justify-center h-full relative">
       <div className="absolute top-0 right-1/2 w-300 translate-x-1/2">
-        <GoldBoard
+        <HomeBoard
           golds={[
             { title: "SJC", price: sjc },
             { title: "PNG", price: png },

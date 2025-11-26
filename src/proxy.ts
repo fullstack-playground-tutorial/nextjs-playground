@@ -93,7 +93,6 @@ export async function proxy(request: NextRequest) {
   const pathType = pathIdentify(pathname, locale);
 
   const session = await verifySession();
-
   // case logined
   if (session) {
     // if token expired => rotate token
