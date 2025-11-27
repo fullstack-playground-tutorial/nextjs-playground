@@ -20,6 +20,12 @@ import {
 import { httpServiceInstance } from "./http-config";
 import { createRoleService, RoleService } from "@/app/feature/role";
 import { createGoldService, GoldService } from "@/app/feature/gold/service";
+import {
+  createPersonalFinanceService,
+  createPFPassbookService,
+  PersonalFinanceService,
+  PFPassbookService,
+} from "@/app/feature/personal-finance/service";
 
 class ApplicationContext {
   private authService?: AuthService;
@@ -33,6 +39,8 @@ class ApplicationContext {
   private topicTagService?: TopicTagService;
   private roleService?: RoleService;
   private goldService?: GoldService;
+  private personalFinanceService?: PersonalFinanceService;
+  private pFPassbookService?: PFPassbookService;
 
   constructor(private httpService: HTTPService) {
     this.getAuthService = this.getAuthService.bind(this);
@@ -44,6 +52,8 @@ class ApplicationContext {
     this.getTopicTagService = this.getTopicTagService.bind(this);
     this.getRoleService = this.getRoleService.bind(this);
     this.getGoldService = this.getGoldService.bind(this);
+    this.getPersonalFinanceService = this.getPersonalFinanceService.bind(this);
+    this.getPFPassbookService = this.getPFPassbookService.bind(this);
   }
 
   getAuthService(): AuthService {
@@ -132,6 +142,27 @@ class ApplicationContext {
     }
     return this.goldService;
   };
+
+  getPersonalFinanceService = () => {
+    if (!this.personalFinanceService) {
+      this.personalFinanceService = createPersonalFinanceService(
+        this.httpService,
+        config.personal_finance_url
+      );
+    }
+    return this.personalFinanceService;
+  };
+
+  getPFPassbookService = () => {
+    if (!this.pFPassbookService) {
+      this.pFPassbookService = createPFPassbookService(
+        this.httpService,
+        config.pfpassbook_url
+      );
+    }
+    return this.pFPassbookService;
+  };
+
   // getApiEnglishNoteService = () => {
   //   if (!this.apiEnglishNoteService) {
   //     const englishNoteRepo = new EnglishNoteMongoRepository(
@@ -232,4 +263,6 @@ export const {
   getStoryService,
   getRoleService,
   getGoldService,
+  getPersonalFinanceService,
+  getPFPassbookService,
 } = appContext;

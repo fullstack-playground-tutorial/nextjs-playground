@@ -4,19 +4,22 @@ import { useParams } from "next/navigation";
 
 type Props = {
   dueDate: Date;
-  depositDate: Date;
-  title: string;
+  startDate: Date;
+  name: string;
   interestRate: number;
   amount: number;
-  packType: "1 week" | "1 month" | "3 month" | "6 month" | "1 year";
+  savingTerm: string;
+  currency: string;
+  penalty: number;
+  status: string;
 };
 
 export default function Pack({
   dueDate,
-  depositDate,
-  title,
+  startDate: depositDate,
+  name: title,
   amount,
-  packType,
+  savingTerm: packType,
   interestRate,
 }: Props) {
   const params = useParams();

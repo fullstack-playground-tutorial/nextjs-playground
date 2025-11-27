@@ -1,7 +1,4 @@
-import {
-  Cookie,
-  StoreRequestCookies,
-} from "./constants";
+import { Cookie, StoreRequestCookies } from "./constants";
 
 export const getSetCookieFromResponse = (headers: Headers) => {
   let tokenObject: StoreRequestCookies = {
@@ -31,8 +28,12 @@ export const getSetCookieFromResponse = (headers: Headers) => {
           elementPart[0] = elementPart[0].trim();
 
           // Convert to camel camelCase
-          const keyProps =
+          let keyProps =
             elementPart[0].charAt(0).toLowerCase() + elementPart[0].slice(1);
+
+          if (keyProps.toLowerCase() === "max-age") {
+            keyProps = "maxAge";
+          }
 
           if (elementPart.length > 1) {
             // case available value (example: Expires=Wed, 21 Oct 2015 07:28:00 GMT)

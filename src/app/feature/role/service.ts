@@ -1,10 +1,13 @@
-import { createGenericService, GenericService } from "@/app/utils/service";
+import {
+  createGenericWithSearchService,
+  CRUDWithSearchService,
+} from "@/app/utils/service";
 import { HTTPService } from "@/app/utils/http";
 import { Permission, PermissionsWithRoles, Role, RoleFilter } from "./role";
 
 // Not passing permissions to patch, use bulk update instead
 export interface RoleService
-  extends GenericService<Role, RoleFilter, undefined> {
+  extends CRUDWithSearchService<Role, RoleFilter, undefined> {
   getPermissionsWithRoles(
     next?: NextFetchRequestConfig,
     authSkip?: boolean
@@ -21,7 +24,7 @@ export const createRoleService = (
   httpService: HTTPService,
   url: string
 ): RoleService => {
-  const sv = createGenericService<Role, RoleFilter, undefined>(
+  const sv = createGenericWithSearchService<Role, RoleFilter, undefined>(
     httpService,
     url
   );

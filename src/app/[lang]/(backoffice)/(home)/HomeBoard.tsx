@@ -3,12 +3,22 @@ import { useState } from "react";
 import GoldTab from "./GoldTab";
 import { Gold } from "./GoldTab";
 import MoneyTab from "./MoneyTab";
+import { UserInfo } from "@/app/feature/auth";
+import { PassBook, PFAccount } from "@/app/feature/personal-finance";
 
 type Props = {
+  personFinanceAccount?: PFAccount;
   golds: Gold[];
+  userInfo?: UserInfo;
+  passBooks?: PassBook[];
 };
 
-export default function HomeBoard({ golds }: Props) {
+export default function HomeBoard({
+  golds,
+  userInfo,
+  passBooks,
+  personFinanceAccount,
+}: Props) {
   const [tab, setShow] = useState("home");
 
   return (
@@ -62,7 +72,12 @@ export default function HomeBoard({ golds }: Props) {
               : "opacity-0 pointer-events-none h-0"
           }dark:bg-surface-1 rounded-lg transition-all flex flex-col gap-2`}
         >
-          <MoneyTab />
+          {userInfo && passBooks && personFinanceAccount && (
+            <MoneyTab
+              passBooks={passBooks}
+              personalFinanceAccount={personFinanceAccount}
+            />
+          )}
         </div>
       </div>
     </>

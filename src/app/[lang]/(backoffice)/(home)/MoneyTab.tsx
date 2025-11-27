@@ -1,59 +1,68 @@
 "use client";
-import React, { useState } from "react";
+import { useState } from "react";
 import Pack from "./Pack";
 import PlusIcon from "@/assets/images/icons/plus.svg";
 import PackForm from "./PackForm";
 import MoneyIcon from "@/assets/images/icons/money_pack.svg";
-type SaveDeposit = {
-  title: string;
-  amount: number;
-  interestRate: number;
-  dueDate: Date;
-  depositDate: Date;
-  packType: "1 week" | "1 month" | "3 month" | "6 month" | "1 year";
+import { PassBook, PFAccount } from "@/app/feature/personal-finance";
+
+type Props = {
+  passBooks: PassBook[];
+  personalFinanceAccount: PFAccount;
 };
 
-export default function MoneyTab() {
+export default function MoneyTab({
+  passBooks: saveDeposits,
+  personalFinanceAccount,
+}: Props) {
   const [isCreating, setIsCreating] = useState(false);
-  const saveDeposits: SaveDeposit[] = [
-    {
-      title: "Save",
-      amount: 1000000,
-      interestRate: 5,
-      dueDate: new Date(2025, 10, 26, 10, 8, 0),
-      depositDate: new Date(2025, 10, 24),
-      packType: "1 week",
-    },
-    {
-      title: "Deposit",
-      amount: 1000000,
-      interestRate: 5,
-      dueDate: new Date(2025, 12, 24),
-      depositDate: new Date(2025, 12, 24),
-      packType: "1 week",
-    },
-  ];
-  const totalMoney = Intl.NumberFormat("vi-VN", {
-    style: "currency",
-    currency: "VND",
-    maximumFractionDigits: 4,
-  }).format(saveDeposits.reduce((acc, item) => acc + item.amount, 0));
+
+  const formatMoney = (money: number) => {
+    return Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+      maximumFractionDigits: 4,
+    }).format(money);
+  };
+
+  const totalMoney =
+    personalFinanceAccount.walletMoney + personalFinanceAccount.investMoney;
+
   return (
     <div className="dark:bg-surface-0 flex flex-col h-full p-4 gap-2">
       <div className="flex items-center">
         <MoneyIcon className="size-6 dark:fill-accent-0 transition-all" />
-        <h2 className="text-xl font-medium dark:text-accent-0">{totalMoney}</h2>
+        <h2 className="text-xl font-medium dark:text-accent-0">
+          Total: {formatMoney(totalMoney)}
+        </h2>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
+            <MoneyIcon className="size-6 dark:fill-green-500 transition-all" />
+            <h2 className="text-xl font-medium dark:text-green-500">
+              Wallet: {formatMoney(personalFinanceAccount.walletMoney)}
+            </h2>
+          </div>
+          <div className="flex items-center gap-2">
+            <MoneyIcon className="size-6 dark:fill-blue-500 transition-all" />
+            <h2 className="text-xl font-medium dark:text-blue-500">
+              Invest: {formatMoney(personalFinanceAccount.investMoney)}
+            </h2>
+          </div>
+        </div>
       </div>
       <div className="text-center grid grid-cols-4 gap-2 size-full h-60">
         {saveDeposits.map((item) => (
           <Pack
-            key={item.title}
+            key={item.name}
             dueDate={item.dueDate}
-            depositDate={item.depositDate}
-            title={item.title}
-            interestRate={item.interestRate}
-            amount={item.amount}
-            packType={item.packType}
+            startDate={item.startDate}
+            name={item.name}
+            interestRate={item.interest}
+            amount={item.deposit}
+            savingTerm={item.savingTerm}
+            currency={item.currency}
+            penalty={item.interestPenalty}
+            status={item.status}
           />
         ))}
         <div

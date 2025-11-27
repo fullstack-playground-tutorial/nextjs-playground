@@ -57,10 +57,16 @@ export async function refreshSession(req: NextRequest) {
     } else {
       res.cookies.set(PassportKeys.accessToken, newAccessToken.value, {
         httpOnly: newAccessToken.httpOnly,
-        path: newAccessToken.pa,
+        path: newAccessToken.path,
         sameSite: newAccessToken.sameSite,
         secure: newAccessToken.secure,
-        expires: Number(newAccessToken.expires),
+        expires:
+          newAccessToken.expires && !isNaN(Date.parse(newAccessToken.expires))
+            ? new Date(newAccessToken.expires)
+            : undefined,
+        maxAge: newAccessToken.maxAge
+          ? Number(newAccessToken.maxAge)
+          : undefined,
       });
     }
   }

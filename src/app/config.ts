@@ -13,6 +13,8 @@ export const config = {
   friend_url: authServerHost + "/friend",
   english_note_url: clientHost + "/api/eng-note",
   gold_url: backofficeServerHost + "/gold",
+  personal_finance_url: backofficeServerHost + "/pfa",
+  pfpassbook_url: backofficeServerHost + "/pfa/passbooks",
   ws: {
     notification_url: wsHost + `/notification/ws`,
   },

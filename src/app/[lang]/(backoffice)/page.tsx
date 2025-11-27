@@ -1,9 +1,14 @@
-import { getGoldService } from "@/app/core/server/context";
+import {
+  getGoldService,
+  getPersonalFinanceService,
+  getPFPassbookService,
+} from "@/app/core/server/context";
 import Link from "next/link";
 import HomeBoard from "./(home)/HomeBoard";
+import { getUser } from "@/app/dal";
 
 export default async function Page() {
-  const [sjc, png, doji] = await Promise.all([
+  const [sjc, png, doji, passBooks, pfa, userInfo] = await Promise.all([
     getGoldService()
       .getGoldPrice("sjc")
       .then((res) => res[0]),
@@ -13,17 +18,23 @@ export default async function Page() {
     getGoldService()
       .getGoldPrice("doji")
       .then((res) => res[0]),
+    getPFPassbookService().getAll(),
+    getPersonalFinanceService().Load(),
+    getUser(),
   ]);
 
   return (
     <div className="flex flex-col items-center justify-center h-full relative">
       <div className="absolute top-0 right-1/2 w-300 translate-x-1/2">
         <HomeBoard
+          userInfo={userInfo}
           golds={[
             { title: "SJC", price: sjc },
             { title: "PNG", price: png },
             { title: "DOJI", price: doji },
           ]}
+          passBooks={passBooks}
+          personFinanceAccount={pfa}
         />
       </div>
 
