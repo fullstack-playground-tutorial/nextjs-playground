@@ -28,7 +28,6 @@ export const createPersonalFinanceService = (
             amount,
           },
           {
-            next: { tags: ["personal-finance"], revalidate: 60 },
             authSkip: false,
           }
         )
@@ -41,7 +40,6 @@ export const createPersonalFinanceService = (
             amount,
           },
           {
-            next: { tags: ["personal-finance"], revalidate: 60 },
             authSkip: false,
           }
         )

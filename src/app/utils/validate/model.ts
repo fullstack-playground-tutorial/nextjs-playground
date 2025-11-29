@@ -1,9 +1,9 @@
-import { SchemaItem } from "./validate"
+import { SchemaItem } from "./validate";
 
 export interface Schema {
-    [key: string]: SchemaItem
+  [key: string]: SchemaItem<any>;
 }
 
 export interface ValidateErrors {
-    [key: string]: string
+  [key: string]: string;
 }

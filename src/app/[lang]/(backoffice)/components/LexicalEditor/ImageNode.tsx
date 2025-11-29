@@ -171,8 +171,6 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
   }
 
   updateDOM(prevNode: ImageNode, dom: HTMLElement): boolean {
-    console.log("dom: ", dom);
-    
     if (prevNode.__alignment !== this.__alignment) {
       if (this.__alignment === "left") dom.style.justifyContent = "flex-start";
       else if (this.__alignment === "right")

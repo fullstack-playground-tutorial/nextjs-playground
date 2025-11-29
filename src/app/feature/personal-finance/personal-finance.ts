@@ -3,14 +3,12 @@ export type PassBook = {
   name: string;
   deposit: number;
   currency: string;
-  savingTerm: string;
   interest: number;
   interestPenalty: number;
+  estimateMoney: number;
   status: string;
   startDate: Date;
   dueDate: Date;
-  createdAt: Date;
-  updatedAt: Date;
 };
 
 export type PFAccount = {

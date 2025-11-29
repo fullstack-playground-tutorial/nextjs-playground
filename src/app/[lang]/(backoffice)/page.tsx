@@ -25,7 +25,15 @@ export default async function Page() {
 
   const userInfo = isLogined ? await getUser() : undefined;
   const passBooks = isLogined
-    ? await getPFPassbookService().getAll()
+    ? await getPFPassbookService()
+        .getAll({
+          tags: ["passbooks"],
+          revalidate: 60,
+        })
+        .then((res) => {
+          console.log(res);
+          return res;
+        })
     : undefined;
   const pfa = isLogined ? await getPersonalFinanceService().Load() : undefined;
 

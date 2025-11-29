@@ -85,7 +85,9 @@ export const createHttpClient = async (
         // Success case
         if (ContentType.isJson(contentType)) {
           try {
-            const response = (await res.json()) as T;
+            const json = await res.text();
+            const response = JSON.parse(json, dateReviver) as T;
+
             return {
               headers: res.headers,
               body: response,
@@ -224,6 +226,18 @@ export const createHttpClient = async (
       ...options,
     };
     return sendRequest<T>(url, { ...options, method: METHOD.DELETE });
+  };
+
+  const dateReviver = (_: string, value: any): any => {
+    if (
+      typeof value === "string" &&
+      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?([+-]\d{2}:\d{2}|Z)$/.test(
+        value
+      )
+    ) {
+      return new Date(value);
+    }
+    return value;
   };
 
   return {

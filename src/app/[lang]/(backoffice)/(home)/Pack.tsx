@@ -8,7 +8,6 @@ type Props = {
   name: string;
   interestRate: number;
   amount: number;
-  savingTerm: string;
   currency: string;
   penalty: number;
   status: string;
@@ -19,12 +18,10 @@ export default function Pack({
   startDate: depositDate,
   name: title,
   amount,
-  savingTerm: packType,
   interestRate,
 }: Props) {
   const params = useParams();
   const lang = (params?.lang as string) || "en-US";
-  const totalTime = dueDate.getTime() - depositDate.getTime();
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
 
   useEffect(() => {
@@ -44,7 +41,13 @@ export default function Pack({
 
   const percentPassed =
     timeLeft !== null
-      ? Math.min(100, Math.max(0, (1 - timeLeft / totalTime) * 100))
+      ? Math.min(
+          100,
+          Math.max(
+            0,
+            (1 - timeLeft / (dueDate.getTime() - depositDate.getTime())) * 100
+          )
+        )
       : 0;
 
   const time =
@@ -58,7 +61,7 @@ export default function Pack({
       : { seconds: 0, minutes: 0, hours: 0, days: 0 };
 
   return (
-    <div className="relative overflow-hidden rounded-lg p-4 text-white dark:bg-surface-1 dark:border dark:border-border">
+    <div className="relative overflow-hidden rounded-lg p-4 text-white dark:bg-surface-1 dark:border dark:border-border  size-full h-60">
       <div
         className="absolute bottom-0 left-0 w-full z-0"
         style={{
@@ -79,10 +82,9 @@ export default function Pack({
             maximumFractionDigits: 4,
           }).format(amount)}
         </p>
-        <p>Deposit: {depositDate.toLocaleDateString(lang)}</p>
-        <p>Due: {dueDate.toLocaleDateString(lang)}</p>
-        <p>Duration: {packType}</p>
-        <p>Interest: {interestRate}%</p>
+        {/* <p>Deposit: {depositDate?.toLocaleDateString(lang)}</p>
+        <p>Due: {dueDate?.toLocaleDateString(lang)}</p> */}
+        <p>Interest: {interestRate}% / year</p>
 
         <p className="mt-2 text-sm opacity-90">
           {timeLeft !== null ? (
