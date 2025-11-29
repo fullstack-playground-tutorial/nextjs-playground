@@ -36,6 +36,7 @@ export default function HomeBoard({
             Gold Price
           </div>
           <div
+            hidden={!userInfo || !passBooks || !personFinanceAccount}
             onClick={() => {
               setShow("money");
             }}

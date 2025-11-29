@@ -5,10 +5,13 @@ import {
 } from "@/app/core/server/context";
 import Link from "next/link";
 import HomeBoard from "./(home)/HomeBoard";
-import { getUser } from "@/app/dal";
+import { getUser, verifySession } from "@/app/dal";
 
 export default async function Page() {
-  const [sjc, png, doji, passBooks, pfa, userInfo] = await Promise.all([
+  const session = await verifySession();
+  const isLogined = session === "logined";
+
+  const [sjc, png, doji] = await Promise.all([
     getGoldService()
       .getGoldPrice("sjc")
       .then((res) => res[0]),
@@ -18,10 +21,13 @@ export default async function Page() {
     getGoldService()
       .getGoldPrice("doji")
       .then((res) => res[0]),
-    getPFPassbookService().getAll(),
-    getPersonalFinanceService().Load(),
-    getUser(),
   ]);
+
+  const userInfo = isLogined ? await getUser() : undefined;
+  const passBooks = isLogined
+    ? await getPFPassbookService().getAll()
+    : undefined;
+  const pfa = isLogined ? await getPersonalFinanceService().Load() : undefined;
 
   return (
     <div className="flex flex-col items-center justify-center h-full relative">

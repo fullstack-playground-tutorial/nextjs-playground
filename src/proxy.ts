@@ -110,7 +110,10 @@ export async function proxy(request: NextRequest) {
         const redirectUrl = request.nextUrl.clone();
         redirectUrl.pathname = `/${locale}${defaultPath}`;
 
-        return NextResponse.redirect(redirectUrl);
+        const res = NextResponse.redirect(redirectUrl);
+        res.cookies.delete(PassportKeys.accessToken);
+        res.cookies.delete(PassportKeys.refreshToken);
+        return res;
       }
     }
 
