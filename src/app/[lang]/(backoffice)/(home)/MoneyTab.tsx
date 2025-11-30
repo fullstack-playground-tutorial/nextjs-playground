@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Pack from "./Pack";
 import PlusIcon from "@/assets/images/icons/plus.svg";
 import MinusIcon from "@/assets/images/icons/minus.svg";
@@ -92,7 +92,8 @@ export default function MoneyTab({
       <div className="text-center grid grid-cols-4 gap-4">
         {saveDeposits.map((item) => (
           <Pack
-            key={item.name}
+            key={item.id}
+            id={item.id}
             dueDate={item.dueDate}
             startDate={item.startDate}
             name={item.name}

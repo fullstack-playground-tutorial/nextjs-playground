@@ -47,11 +47,25 @@ export const createPersonalFinanceService = (
   };
 };
 
-export interface PFPassbookService extends CRUDService<PassBook, "id"> {}
+export interface PFPassbookService extends CRUDService<PassBook, "id"> {
+  Withdraw(id: string): Promise<number>;
+}
 
 export const createPFPassbookService = (
   httpService: HTTPService,
   url: string
 ): PFPassbookService => {
-  return createCRUDService<PassBook, "id">(httpService, url);
+  return {
+    ...createCRUDService<PassBook, "id">(httpService, url),
+    Withdraw: (id: string) =>
+      httpService
+        .post<number, {}>(
+          url + "/" + id + "/withdraw",
+          {},
+          {
+            authSkip: false,
+          }
+        )
+        .then((res) => res.body),
+  };
 };

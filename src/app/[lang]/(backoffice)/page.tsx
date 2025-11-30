@@ -25,21 +25,16 @@ export default async function Page() {
 
   const userInfo = isLogined ? await getUser() : undefined;
   const passBooks = isLogined
-    ? await getPFPassbookService()
-        .getAll({
-          tags: ["passbooks"],
-          revalidate: 60,
-        })
-        .then((res) => {
-          console.log(res);
-          return res;
-        })
+    ? await getPFPassbookService().getAll({
+        tags: ["passbooks"],
+        revalidate: 60,
+      })
     : undefined;
   const pfa = isLogined ? await getPersonalFinanceService().Load() : undefined;
 
   return (
     <div className="flex flex-col items-center justify-center h-full relative">
-      <div className="absolute top-0 right-1/2 w-300 translate-x-1/2">
+      <div className="absolute top-0 right-1/2 translate-x-1/2 w-full">
         <HomeBoard
           userInfo={userInfo}
           golds={[

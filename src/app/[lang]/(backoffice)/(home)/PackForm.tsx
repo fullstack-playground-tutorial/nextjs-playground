@@ -69,6 +69,8 @@ export default function PackForm({ onClose, walletMoney }: Props) {
 
   const handleDepositBlur = () => {
     const parsedValue = parseFloat(state.depositInputVal);
+    console.log(parsedValue);
+
     if (Number.isNaN(parsedValue)) {
       setState((prev) => ({
         ...prev,
@@ -257,6 +259,13 @@ export default function PackForm({ onClose, walletMoney }: Props) {
                 onBlur={handleDepositBlur}
                 className="w-full mt-2 rounded-lg border dark:border-border dark:bg-surface-0 px-4 py-2.5 dark:text-primary placeholder:dark:text-secondary focus:border-accent-0 focus:outline-none focus:ring-1 focus:ring-accent-0 transition-all"
               />
+              <span
+                className={
+                  "dark:text-secondary text-xs mt-2 transition-all italic"
+                }
+              >
+                Maximun deposit: {formatMoney(walletMoney)}
+              </span>
               <span
                 className={
                   "dark:text-alert-1 text-xs mt-2 transition-all" +

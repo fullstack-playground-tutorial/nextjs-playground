@@ -19,11 +19,12 @@ export default function WalletForm({ type, onClose, walletMoney }: Props) {
   const toast = useToast();
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const action = type === "deposit" ? depositAction : withdrawAction;
     startTransition(async () => {
-      const action = type === "deposit" ? depositAction : withdrawAction;
       try {
-        const res = await action(amount);
-        if (res) {
+        let res = 0;
+        res = await action(amount);
+        if (res > 0) {
           onClose();
           toast.addToast("success", "Money deposited successfully");
         }
@@ -34,7 +35,6 @@ export default function WalletForm({ type, onClose, walletMoney }: Props) {
       }
     });
   };
-
   const formatMoney = (money: number) => {
     const n = Intl.NumberFormat("vi-VN", {
       style: "currency",

@@ -19,7 +19,7 @@ export const depositAction = async (amount: number) => {
 export const withdrawAction = async (amount: number) => {
   return getPersonalFinanceService()
     .Withdraw(amount)
-    .then((res) => {
+    .then(async (res) => {
       updateTag("personal-finance");
       return res;
     });
@@ -83,6 +83,17 @@ export const createPassbook = async (
     })
     .then((res) => {
       updateTag("passbooks");
+      updateTag("personal-finance");
       return { result: res, fieldErrors: undefined };
+    });
+};
+
+export const withdrawPassbook = async (passbookId: string) => {
+  return getPFPassbookService()
+    .Withdraw(passbookId)
+    .then((res) => {
+      updateTag("passbooks");
+      updateTag("personal-finance");
+      return res;
     });
 };

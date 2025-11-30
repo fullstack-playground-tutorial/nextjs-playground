@@ -1,8 +1,11 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useTransition } from "react";
 import { useParams } from "next/navigation";
+import { withdrawPassbook } from "@/app/feature/personal-finance/action";
+import useToast from "@/components/Toast";
 
 type Props = {
+  id: string;
   dueDate: Date;
   startDate: Date;
   name: string;
@@ -14,15 +17,32 @@ type Props = {
 };
 
 export default function Pack({
+  id,
   dueDate,
   startDate: depositDate,
   name: title,
   amount,
   interestRate,
+  status,
 }: Props) {
   const params = useParams();
   const lang = (params?.lang as string) || "en-US";
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
+  const toast = useToast();
+  const [pending, startTransition] = useTransition();
+  const handleWithdraw = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    try {
+      startTransition(async () => {
+        const res = await withdrawPassbook(id);
+        if (res > 0) {
+          toast.addToast("success", `withdraw ${title} successfully`);
+        }
+      });
+    } catch (error) {
+      toast.addToast("error", `withdraw ${title} failed`);
+    }
+  };
 
   useEffect(() => {
     setTimeLeft(dueDate.getTime() - Date.now());
@@ -71,7 +91,24 @@ export default function Pack({
           opacity: 0.3,
         }}
       />
-
+      {status === "progress" ? (
+        dueDate.getTime() < Date.now() && (
+          <button
+            disabled={pending}
+            type="button"
+            className={
+              "absolute bottom-2 left-1/2 translate-x-[-50%] z-1 btn btn-sm bg-accent-0 hover:bg-accent-1 shadow transition-all opacity-0 hover:opacity-100"
+            }
+            onClick={handleWithdraw}
+          >
+            {pending ? "Processing..." : "Withdraw"}
+          </button>
+        )
+      ) : (
+        <p className="absolute bottom-2 left-1/2 translate-x-[-50%] dark:border-success dark:text-success font-semibold dark:border-2 px-2 text-sm py-1">
+          Completed
+        </p>
+      )}
       <div className="relative z-10 flex flex-col gap-1">
         <h2 className="font-semibold text-lg">{title}</h2>
         <p>
@@ -82,10 +119,9 @@ export default function Pack({
             maximumFractionDigits: 4,
           }).format(amount)}
         </p>
-        {/* <p>Deposit: {depositDate?.toLocaleDateString(lang)}</p>
-        <p>Due: {dueDate?.toLocaleDateString(lang)}</p> */}
+        <p>Deposit: {depositDate?.toLocaleDateString(lang)}</p>
+        <p>Due: {dueDate?.toLocaleDateString(lang)}</p>
         <p>Interest: {interestRate}% / year</p>
-
         <p className="mt-2 text-sm opacity-90">
           {timeLeft !== null ? (
             <>
