@@ -14,6 +14,7 @@ type Props = {
   currency: string;
   penalty: number;
   status: string;
+  estimateMoneyAfterTax: number;
 };
 
 export default function Pack({
@@ -24,6 +25,8 @@ export default function Pack({
   amount,
   interestRate,
   status,
+  estimateMoneyAfterTax,
+  penalty,
 }: Props) {
   const params = useParams();
   const lang = (params?.lang as string) || "en-US";
@@ -42,6 +45,17 @@ export default function Pack({
     } catch (error) {
       toast.addToast("error", `withdraw ${title} failed`);
     }
+  };
+
+  const formatMoney = (money: number, currency?: string) => {
+    const n = Intl.NumberFormat("vi-VN", {
+      style: currency ? "currency" : "decimal",
+      currency: currency,
+    })
+      .format(money)
+      .replaceAll(".", " ");
+
+    return n;
   };
 
   useEffect(() => {
@@ -81,7 +95,7 @@ export default function Pack({
       : { seconds: 0, minutes: 0, hours: 0, days: 0 };
 
   return (
-    <div className="relative overflow-hidden rounded-lg p-4 text-white dark:bg-surface-1 dark:border dark:border-border  size-full h-60">
+    <div className="relative overflow-hidden rounded-lg p-4 text-white dark:bg-surface-1 dark:border dark:border-border  size-full min-h-70">
       <div
         className="absolute bottom-0 left-0 w-full z-0"
         style={{
@@ -91,24 +105,7 @@ export default function Pack({
           opacity: 0.3,
         }}
       />
-      {status === "progress" ? (
-        dueDate.getTime() < Date.now() && (
-          <button
-            disabled={pending}
-            type="button"
-            className={
-              "absolute bottom-2 left-1/2 translate-x-[-50%] z-1 btn btn-sm bg-accent-0 hover:bg-accent-1 shadow transition-all opacity-0 hover:opacity-100"
-            }
-            onClick={handleWithdraw}
-          >
-            {pending ? "Processing..." : "Withdraw"}
-          </button>
-        )
-      ) : (
-        <p className="absolute bottom-2 left-1/2 translate-x-[-50%] dark:border-success dark:text-success font-semibold dark:border-2 px-2 text-sm py-1">
-          Completed
-        </p>
-      )}
+
       <div className="relative z-10 flex flex-col gap-1">
         <h2 className="font-semibold text-lg">{title}</h2>
         <p>
@@ -122,15 +119,35 @@ export default function Pack({
         <p>Deposit: {depositDate?.toLocaleDateString(lang)}</p>
         <p>Due: {dueDate?.toLocaleDateString(lang)}</p>
         <p>Interest: {interestRate}% / year</p>
+        <p>Penalty: {penalty}% / year</p>
+        <p>Estmate After Tax: {formatMoney(estimateMoneyAfterTax)}</p>
         <p className="mt-2 text-sm opacity-90">
-          {timeLeft !== null ? (
-            <>
-              {time.days}d {time.hours}h {time.minutes}m {time.seconds}s
-            </>
-          ) : (
-            "Loading..."
-          )}
+          {timeLeft !== null &&
+            timeLeft > 0 &&
+            dueDate.getTime() > Date.now() && (
+              <>
+                {time.days}d {time.hours}h {time.minutes}m {time.seconds}s
+              </>
+            )}
         </p>
+        {status === "progress" ? (
+          dueDate.getTime() < Date.now() && (
+            <button
+              disabled={pending}
+              type="button"
+              className={
+                "btn btn-sm bg-accent-0 hover:bg-accent-1 shadow transition-all opacity-0 hover:opacity-100"
+              }
+              onClick={handleWithdraw}
+            >
+              {pending ? "Processing..." : "Withdraw"}
+            </button>
+          )
+        ) : (
+          <p className="mx-auto dark:border-success dark:text-success font-semibold dark:border-2 px-2 text-sm py-1">
+            Completed
+          </p>
+        )}
       </div>
     </div>
   );

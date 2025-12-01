@@ -32,7 +32,7 @@ export default function MoneyTab({
       maximumFractionDigits: 4,
     })
       .format(money)
-      .replace(".", " ");
+      .replaceAll(".", " ");
     return n;
   };
 
@@ -92,6 +92,7 @@ export default function MoneyTab({
       <div className="text-center grid grid-cols-4 gap-4">
         {saveDeposits.map((item) => (
           <Pack
+            estimateMoneyAfterTax={item.estimateMoney}
             key={item.id}
             id={item.id}
             dueDate={item.dueDate}
@@ -106,7 +107,7 @@ export default function MoneyTab({
         ))}
         <div
           onClick={() => setIsCreating(true)}
-          className="h-60 w-full dark:border-4 dark:border-tertiary-0 rounded-md items-center justify-center flex dark:hover:border-accent-0 dark:hover:border-6 cursor-pointer dark:hover:*:fill-accent-0 dark:hover:*:size-28 dark:hover:bg-surface-1 transition-all"
+          className="min-h-80 w-full dark:border-4 dark:border-tertiary-0 rounded-md items-center justify-center flex dark:hover:border-accent-0 dark:hover:border-6 cursor-pointer dark:hover:*:fill-accent-0 dark:hover:*:size-28 dark:hover:bg-surface-1 transition-all"
         >
           <PlusIcon className="size-24 dark:fill-tertiary-0 transition-all" />
         </div>

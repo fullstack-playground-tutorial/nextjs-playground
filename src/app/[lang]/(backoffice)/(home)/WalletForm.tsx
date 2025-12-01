@@ -15,6 +15,7 @@ type Props = {
 
 export default function WalletForm({ type, onClose, walletMoney }: Props) {
   const [amount, setAmount] = useState<number>(0);
+  const [amountInput, setAmountInput] = useState<string>("");
   const [pending, startTransition] = useTransition();
   const toast = useToast();
   const handleSubmit = (e: React.FormEvent) => {
@@ -37,27 +38,30 @@ export default function WalletForm({ type, onClose, walletMoney }: Props) {
   };
   const formatMoney = (money: number) => {
     const n = Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-      maximumFractionDigits: 4,
-    })
-      .format(money)
-      .replace(".", " ");
+      style: "decimal",
+    }).format(money);
     return n;
   };
 
   const onChangeAmount = (e: React.ChangeEvent<HTMLInputElement>) => {
     let valStr = e.target.value;
+    valStr = valStr.replace(/[,.]/g, "");
+
     // clear space
     valStr = valStr.replace(/\s+/g, "");
 
     // Delete all leading 0s except the first one
     valStr = valStr.replace(/^0+(?=\d)/, "");
+    console.log("valStr:", valStr);
+
+    if (valStr === "") {
+      setAmount(0);
+      setAmountInput("0");
+      return;
+    }
 
     const val = Number(valStr);
-
     if (Number.isNaN(val)) {
-      setAmount(0);
       return;
     }
 
@@ -65,10 +69,12 @@ export default function WalletForm({ type, onClose, walletMoney }: Props) {
 
     if (type === "withdraw" && val > walletMoney) {
       setAmount(walletMoney);
+      setAmountInput(formatMoney(walletMoney));
       return;
     }
 
     setAmount(val);
+    setAmountInput(formatMoney(val));
   };
 
   return (
@@ -93,9 +99,7 @@ export default function WalletForm({ type, onClose, walletMoney }: Props) {
             </label>
             <input
               type="text"
-              value={Intl.NumberFormat("vi-VN")
-                .format(amount)
-                .replace(".", " ")}
+              value={amountInput}
               onChange={onChangeAmount}
               placeholder="Enter amount"
               className="w-full rounded-lg border dark:border-border dark:bg-surface-0 px-4 py-2.5 dark:text-primary placeholder:dark:text-secondary focus:border-accent-0 focus:outline-none focus:ring-1 focus:ring-accent-0 transition-all"

@@ -15,12 +15,14 @@ type InternalState = {
   interest: number;
   interestPenalty: number;
   estimateMoney: number;
+  estimateMoneyBeforeTax: number;
   startDate: string;
   dueDate: string;
   isCompoundInterest: boolean;
   depositInputVal: string;
   interestInputVal: string;
   interestPenaltyInputVal: string;
+  personalIncomeTax: number;
   fieldErrors: Record<string, string>;
 };
 
@@ -32,13 +34,15 @@ export default function PackForm({ onClose, walletMoney }: Props) {
     interest: 0,
     interestPenalty: 0,
     estimateMoney: 0,
-    startDate: new Date().toISOString(),
-    dueDate: new Date().toISOString(),
+    startDate: new Date().toISOString().split("T")[0],
+    dueDate: new Date().toISOString().split("T")[0],
     isCompoundInterest: false,
     depositInputVal: "0",
     interestInputVal: "0",
     interestPenaltyInputVal: "0",
     fieldErrors: {},
+    personalIncomeTax: 5,
+    estimateMoneyBeforeTax: 0,
   });
   const [pending, startTransition] = useTransition();
   const toast = useToast();
@@ -46,7 +50,6 @@ export default function PackForm({ onClose, walletMoney }: Props) {
   const formatMoney = (money: number, currency?: string) => {
     const n = Intl.NumberFormat("vi-VN", {
       style: currency ? "currency" : "decimal",
-      maximumFractionDigits: 4,
       currency: currency,
     })
       .format(money)
@@ -188,23 +191,42 @@ export default function PackForm({ onClose, walletMoney }: Props) {
   useEffect(() => {
     const startDate = new Date(state.startDate);
     const dueDate = new Date(state.dueDate);
+
     const interest = state.interest;
     const deposit = state.deposit;
-    const savingDatesNo =
-      (dueDate.getTime() - startDate.getTime()) / 1000 / 60 / 60 / 24;
+    const savingDatesNo = Math.round(
+      (dueDate.getTime() - startDate.getTime()) / 1000 / 60 / 60 / 24
+    );
+
     let estimateMoney = 0;
+    let estimateMoneyBeforeTax = 0;
     if (state.isCompoundInterest) {
-      estimateMoney =
+      estimateMoneyBeforeTax =
         deposit * Math.pow(1 + interest / 100 / 365, savingDatesNo);
     } else {
-      estimateMoney = (deposit * (interest / 100) * savingDatesNo) / 365;
+      console.log("days ", savingDatesNo);
+
+      estimateMoneyBeforeTax =
+        (deposit * (interest / 100) * savingDatesNo) / 365;
     }
+
+    estimateMoney = Math.floor(
+      estimateMoneyBeforeTax -
+        (estimateMoneyBeforeTax * state.personalIncomeTax) / 100
+    );
 
     setState((prev) => ({
       ...prev,
       estimateMoney: estimateMoney,
+      estimateMoneyBeforeTax: estimateMoneyBeforeTax,
     }));
-  }, [state.startDate, state.dueDate, state.interest, state.deposit]);
+  }, [
+    state.startDate,
+    state.dueDate,
+    state.interest,
+    state.deposit,
+    state.personalIncomeTax,
+  ]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
@@ -420,6 +442,32 @@ export default function PackForm({ onClose, walletMoney }: Props) {
           <div className="flex flex-row items-center justify-start gap-2">
             <label className="text-sm font-medium dark:text-primary text-left text-nowrap">
               Estimated Profit:
+            </label>
+            <span className="text-sm font-medium dark:text-primary text-left text-nowrap">
+              {formatMoney(state.estimateMoneyBeforeTax, state.currency)}
+            </span>
+          </div>
+          <div className="flex flex-row content-center items-center justify-start gap-2">
+            <label className="text-sm font-medium dark:text-primary text-left text-nowrap">
+              Personal Income Tax:
+            </label>
+            <input
+              type="number"
+              placeholder="0"
+              value={state.personalIncomeTax}
+              onChange={(e) =>
+                setState((prev) => ({
+                  ...prev,
+                  personalIncomeTax: Number(e.target.value),
+                }))
+              }
+              className="outline-none w-8 text-sm text-center border-b border-accent-0 dark:text-primary transition-all"
+            />
+            <span className="font-semibold text-sm">%</span>
+          </div>
+          <div className="flex flex-row items-center justify-start gap-2">
+            <label className="text-sm font-medium dark:text-primary text-left text-nowrap">
+              After Tax:
             </label>
             <span className="text-sm font-medium dark:text-primary text-left text-nowrap">
               {formatMoney(state.estimateMoney, state.currency)}
