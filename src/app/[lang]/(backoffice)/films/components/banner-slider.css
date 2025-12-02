@@ -1,0 +1,12 @@
+@keyframes animateProgress {
+  0% {
+    height: 0;
+  }
+  100% {
+    height: 100%;
+  }
+}
+
+div.animateProgress::after {
+  animation: animateProgress var(--progress-duration, 10s) forwards;
+}

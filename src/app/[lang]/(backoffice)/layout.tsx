@@ -19,10 +19,10 @@ export default async function HomeLayout({
   return (
     <>
       <Body userInfo={userInfo} children={children} />
-      <BottomBar />
+      {/* <BottomBar />
       <div className="fixed md:hidden bottom-20 right-4 flex flex-col items-end">
         <NotificationComponent notifications={[]} />
-      </div>
+      </div> */}
       <div>{auth}</div>
     </>
   );

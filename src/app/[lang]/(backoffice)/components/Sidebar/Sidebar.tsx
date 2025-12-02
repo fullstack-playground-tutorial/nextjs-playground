@@ -9,7 +9,7 @@ import MobileIcon from "./icons/mobile.svg";
 import HistoryIcon from "./icons/History.svg";
 import RolesIcon from "./icons/roles.svg";
 import LogIcon from "./icons/log.svg";
-import CinematicIcon from "./icons/cinematic.svg";
+import FilmIcon from "./icons/film.svg";
 import LogoutIcon from "./icons/logout.svg";
 import HomeIcon from "./icons/home.svg";
 import UserManagerIcon from "./icons/user_manager.svg";
@@ -35,7 +35,7 @@ const icons: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = {
   HistoryIcon,
   RolesIcon,
   LogIcon,
-  CinematicIcon,
+  FilmIcon,
   LogoutIcon,
   HomeIcon,
   UserManagerIcon,

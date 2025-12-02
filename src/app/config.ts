@@ -15,6 +15,7 @@ export const config = {
   gold_url: backofficeServerHost + "/gold",
   personal_finance_url: backofficeServerHost + "/pfa",
   pfpassbook_url: backofficeServerHost + "/pfa/passbooks",
+  film_url: backofficeServerHost + "/films",
   ws: {
     notification_url: wsHost + `/notification/ws`,
   },

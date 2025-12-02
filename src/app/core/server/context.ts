@@ -26,6 +26,7 @@ import {
   PersonalFinanceService,
   PFPassbookService,
 } from "@/app/feature/personal-finance/service";
+import { createFilmService, FilmService } from "@/app/feature/film";
 
 class ApplicationContext {
   private authService?: AuthService;
@@ -41,6 +42,7 @@ class ApplicationContext {
   private goldService?: GoldService;
   private personalFinanceService?: PersonalFinanceService;
   private pFPassbookService?: PFPassbookService;
+  private filmService?: FilmService;
 
   constructor(private httpService: HTTPService) {
     this.getAuthService = this.getAuthService.bind(this);
@@ -54,6 +56,7 @@ class ApplicationContext {
     this.getGoldService = this.getGoldService.bind(this);
     this.getPersonalFinanceService = this.getPersonalFinanceService.bind(this);
     this.getPFPassbookService = this.getPFPassbookService.bind(this);
+    this.getFilmService = this.getFilmService.bind(this);
   }
 
   getAuthService(): AuthService {
@@ -163,6 +166,13 @@ class ApplicationContext {
     return this.pFPassbookService;
   };
 
+  getFilmService = () => {
+    if (!this.filmService) {
+      this.filmService = createFilmService(this.httpService, config.film_url);
+    }
+    return this.filmService;
+  };
+
   // getApiEnglishNoteService = () => {
   //   if (!this.apiEnglishNoteService) {
   //     const englishNoteRepo = new EnglishNoteMongoRepository(
@@ -265,4 +275,5 @@ export const {
   getGoldService,
   getPersonalFinanceService,
   getPFPassbookService,
+  getFilmService,
 } = appContext;

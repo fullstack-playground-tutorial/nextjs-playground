@@ -11,7 +11,13 @@ const publicRoutes: string[] = [
   "/eng-note",
   "",
 ];
-const protectedRoutes: string[] = ["/chat", "/profile", "/search"];
+const protectedRoutes: string[] = [
+  "/chat",
+  "/profile",
+  "/search",
+  "/topics",
+  "roles-managment",
+];
 const defaultPath = "/";
 function pathIdentify(
   pathname: string,
