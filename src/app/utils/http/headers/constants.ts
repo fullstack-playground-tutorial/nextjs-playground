@@ -60,7 +60,8 @@ export interface Cookie {
   secure?: boolean;
   httpOnly?: boolean;
   expires?: string;
-  sameSite?: "lax" | "strict"  | "none";
+  maxAge?: number;
+  sameSite?: "lax" | "strict" | "none";
   path?: string;
   [key: string]: any;
 }

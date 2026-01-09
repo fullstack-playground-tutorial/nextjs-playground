@@ -24,9 +24,7 @@ export default async function Page({
   return (
     <>
       <TopicForm
-        id={undefined}
         user={user.user}
-        topic={undefined}
         tagSuggestions={list || undefined}
       />
     </>

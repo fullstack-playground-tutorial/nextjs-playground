@@ -9,10 +9,8 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 type Props = {
-  q: string;
   size: number;
-  page: number;
-  sort: string;
+  keyword: string;
 };
 const selectedList: FilterDropdownItem[] = [
   {
@@ -25,7 +23,7 @@ const selectedList: FilterDropdownItem[] = [
   },
 ];
 
-export default function Search({ q, size, page, sort }: Props) {
+export default function Search({ size, keyword }: Props) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const [visibility, setVisibility] = useState(false);
@@ -54,11 +52,12 @@ export default function Search({ q, size, page, sort }: Props) {
     <>
       <div className="flex flex-row justify-between gap-2 sm:gap-4 items-start mb-2">
         <SearchComponent
-          placeHolder={"Search Title or Author"}
+          placeHolder={"Search Topic"}
           filterOn={visibility}
           onFilterToggle={() => setVisibility((prev) => !prev)}
           onSearch={handleSearch}
           pageSize={size}
+          keyword={keyword}
         />
         <Link
           href={pathname + "/create"}

@@ -11,7 +11,13 @@ const publicRoutes: string[] = [
   "/eng-note",
   "",
 ];
-const protectedRoutes: string[] = ["/chat", "/profile", "/search"];
+const protectedRoutes: string[] = [
+  "/chat",
+  "/profile",
+  "/search",
+  "/topics",
+  "roles-managment",
+];
 const defaultPath = "/";
 function pathIdentify(
   pathname: string,
@@ -57,10 +63,16 @@ export async function refreshSession(req: NextRequest) {
     } else {
       res.cookies.set(PassportKeys.accessToken, newAccessToken.value, {
         httpOnly: newAccessToken.httpOnly,
-        path: newAccessToken.pa,
+        path: newAccessToken.path,
         sameSite: newAccessToken.sameSite,
         secure: newAccessToken.secure,
-        expires: Number(newAccessToken.expires),
+        expires:
+          newAccessToken.expires && !isNaN(Date.parse(newAccessToken.expires))
+            ? new Date(newAccessToken.expires)
+            : undefined,
+        maxAge: newAccessToken.maxAge
+          ? Number(newAccessToken.maxAge)
+          : undefined,
       });
     }
   }
@@ -93,7 +105,6 @@ export async function proxy(request: NextRequest) {
   const pathType = pathIdentify(pathname, locale);
 
   const session = await verifySession();
-
   // case logined
   if (session) {
     // if token expired => rotate token
@@ -105,7 +116,10 @@ export async function proxy(request: NextRequest) {
         const redirectUrl = request.nextUrl.clone();
         redirectUrl.pathname = `/${locale}${defaultPath}`;
 
-        return NextResponse.redirect(redirectUrl);
+        const res = NextResponse.redirect(redirectUrl);
+        res.cookies.delete(PassportKeys.accessToken);
+        res.cookies.delete(PassportKeys.refreshToken);
+        return res;
       }
     }
 

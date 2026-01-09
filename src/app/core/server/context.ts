@@ -9,15 +9,8 @@ import { FriendClient } from "@/app/feature/friend/service";
 import { SearchService } from "@/app/feature/search/search";
 import { SearchClient } from "@/app/feature/search/service";
 import { config } from "@/app/config";
-import {
-  ApiEnglishNoteService,
-  EnglishNoteService,
-} from "@/app/feature/english-note/english-note";
-import {
-  ApiEnglishNoteClient,
-  EnglishNoteClient,
-} from "@/app/feature/english-note/service";
-import { EnglishNoteMongoRepository } from "@/app/feature/english-note/repository";
+import { EnglishNoteService } from "@/app/feature/english-note/english-note";
+import { EnglishNoteClient } from "@/app/feature/english-note/service";
 import { HTTPService } from "@/app/utils/http";
 import { createTopicService, TopicService } from "@/app/feature/topic";
 import {
@@ -25,6 +18,15 @@ import {
   TopicTagService,
 } from "@/app/feature/topic-tags";
 import { httpServiceInstance } from "./http-config";
+import { createRoleService, RoleService } from "@/app/feature/role";
+import { createGoldService, GoldService } from "@/app/feature/gold/service";
+import {
+  createPersonalFinanceService,
+  createPFPassbookService,
+  PersonalFinanceService,
+  PFPassbookService,
+} from "@/app/feature/personal-finance/service";
+import { createFilmService, FilmService } from "@/app/feature/film";
 
 class ApplicationContext {
   private authService?: AuthService;
@@ -36,6 +38,11 @@ class ApplicationContext {
   private englishNoteService?: EnglishNoteService;
   private topicService?: TopicService;
   private topicTagService?: TopicTagService;
+  private roleService?: RoleService;
+  private goldService?: GoldService;
+  private personalFinanceService?: PersonalFinanceService;
+  private pFPassbookService?: PFPassbookService;
+  private filmService?: FilmService;
 
   constructor(private httpService: HTTPService) {
     this.getAuthService = this.getAuthService.bind(this);
@@ -45,6 +52,11 @@ class ApplicationContext {
     this.getEnglishNoteService = this.getEnglishNoteService.bind(this);
     this.getTopicService = this.getTopicService.bind(this);
     this.getTopicTagService = this.getTopicTagService.bind(this);
+    this.getRoleService = this.getRoleService.bind(this);
+    this.getGoldService = this.getGoldService.bind(this);
+    this.getPersonalFinanceService = this.getPersonalFinanceService.bind(this);
+    this.getPFPassbookService = this.getPFPassbookService.bind(this);
+    this.getFilmService = this.getFilmService.bind(this);
   }
 
   getAuthService(): AuthService {
@@ -52,6 +64,13 @@ class ApplicationContext {
       this.authService = new AuthClient(this.httpService, config.auth_url);
     }
     return this.authService;
+  }
+
+  getRoleService(): RoleService {
+    if (!this.roleService) {
+      this.roleService = createRoleService(this.httpService, config.role_url);
+    }
+    return this.roleService;
   }
 
   getStoryService(): StoryService {
@@ -118,6 +137,40 @@ class ApplicationContext {
       );
     }
     return this.englishNoteService;
+  };
+
+  getGoldService = () => {
+    if (!this.goldService) {
+      this.goldService = createGoldService(this.httpService, config.gold_url);
+    }
+    return this.goldService;
+  };
+
+  getPersonalFinanceService = () => {
+    if (!this.personalFinanceService) {
+      this.personalFinanceService = createPersonalFinanceService(
+        this.httpService,
+        config.personal_finance_url
+      );
+    }
+    return this.personalFinanceService;
+  };
+
+  getPFPassbookService = () => {
+    if (!this.pFPassbookService) {
+      this.pFPassbookService = createPFPassbookService(
+        this.httpService,
+        config.pfpassbook_url
+      );
+    }
+    return this.pFPassbookService;
+  };
+
+  getFilmService = () => {
+    if (!this.filmService) {
+      this.filmService = createFilmService(this.httpService, config.film_url);
+    }
+    return this.filmService;
   };
 
   // getApiEnglishNoteService = () => {
@@ -218,4 +271,9 @@ export const {
   getFriendService,
   getSearchService,
   getStoryService,
+  getRoleService,
+  getGoldService,
+  getPersonalFinanceService,
+  getPFPassbookService,
+  getFilmService,
 } = appContext;

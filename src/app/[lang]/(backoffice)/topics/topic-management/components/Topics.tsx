@@ -29,7 +29,7 @@ export default function Topics({
   const pathname = usePathname();
   const [pending, startTransition] = useTransition();
   const { total, list: topics } = use(searchResult);
-  
+    
   const handleDeleteTopic = (id: string) => {
     startTransition(async () => {
       try {
@@ -54,12 +54,12 @@ export default function Topics({
     });
   };
 
-  const filteredTopics =
+  const filteredTopics = searchQ.trim().length != 0 ?
     topics.filter(
       (t) =>
         t.title?.toLowerCase().includes(searchQ.toLowerCase()) ||
         t.authorName?.toLowerCase().includes(searchQ.toLowerCase())
-    ) || [];
+    ) : topics;
 
   return (
     <>
@@ -78,7 +78,7 @@ export default function Topics({
             title,
             summary,
             authorName,
-            publishedAt,
+            updatedAt,
             tags,
             status,
           }) => (
@@ -92,7 +92,7 @@ export default function Topics({
               title={title || ""}
               summary={summary || ""}
               author={authorName || ""}
-              publishedAt={publishedAt}
+              updatedAt={updatedAt}
               tags={tags ?? []}
               status={status || "draft"}
               onDelete={handleDeleteTopic}

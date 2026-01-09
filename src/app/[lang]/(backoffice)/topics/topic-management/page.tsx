@@ -40,7 +40,7 @@ export default async function TopicManagement(props: {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 mt-2">
         <h1 className="font-semibold text-accent-0 text-4xl">Topic Management</h1>
       </div>
-      <Search q={q} size={limit} page={currentPage} sort={sort} />
+      <Search size={limit} keyword={q} />
       <Topics
         pageSize={limit}
         searchResult={searchResult}

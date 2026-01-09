@@ -17,9 +17,13 @@ export async function storeCookie(key: string, cookie: Cookie) {
   cookieStore.set(key, cookie.value, {
     httpOnly: cookie.httpOnly,
     secure: cookie.secure,
-    expires: new Date(cookie.expires ?? ""),
+    expires:
+      cookie.expires && !isNaN(Date.parse(cookie.expires))
+        ? new Date(cookie.expires)
+        : undefined,
+    maxAge: cookie.maxAge ? Number(cookie.maxAge) : undefined,
     sameSite: cookie.sameSite,
-    path: cookie.path
+    path: cookie.path,
   });
 }
 

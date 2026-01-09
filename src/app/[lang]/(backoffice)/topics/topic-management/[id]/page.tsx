@@ -1,5 +1,4 @@
 import { getUser } from "@/app/dal";
-import React from "react";
 import TopicForm from "../components/TopicForm";
 import { getTopicService } from "@/app/core/server/context";
 import { redirect } from "next/navigation";
@@ -21,5 +20,5 @@ export default async function Page({
   if (!userInfo) {
     redirect("/");
   }
-  return <TopicForm id={id} user={userInfo.user} topic={topic} />;
+  return <TopicForm user={userInfo.user} topic={topic} />;
 }

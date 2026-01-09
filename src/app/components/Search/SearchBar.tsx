@@ -1,27 +1,28 @@
-"use client"
+"use client";
 import { useEffect, useRef, useState } from "react";
 import SearchIcon from "./search.svg";
 import PageList from "./PageList";
 import CloseIcon from "./close.svg";
-import { useRouter } from "next/navigation";
 type Props = {
+  keyword?: string;
   placeHolder: string;
   onQueryChange?: (q: string) => void;
   pageSize?: number; // If pageSize equal undefined => turn off page size filter
   onSelected?: (n: number) => void;
-  onSearch: (term: string) => void;
+  onSearch?: (term: string) => void;
 };
 
 const DEBOUNCE_TIME = 500;
 
 function Search({
+  keyword,
   placeHolder,
   onQueryChange,
   pageSize,
   onSelected,
   onSearch,
 }: Props) {
-  const [q, setQ] = useState("");
+  const [q, setQ] = useState(keyword || "");
   const ref = useRef<NodeJS.Timeout>(undefined);
 
   const handleChangeQ = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -37,7 +38,7 @@ function Search({
   };
 
   const handleSearchClick = () => {
-    onSearch(q)
+    onSearch?.(q);
   };
 
   useEffect(() => {

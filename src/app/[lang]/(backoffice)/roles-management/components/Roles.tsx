@@ -1,0 +1,352 @@
+"use client";
+import { use, useEffect, useMemo, useState } from "react";
+import useToast from "@/app/components/Toast";
+import { useRouter } from "next/navigation";
+import {
+  createRole,
+  Permission,
+  PermissionsWithRoles,
+  Role,
+  updateRole,
+  setPermissions,
+} from "@/app/feature/role";
+import { SearchBar } from "@/components/Search";
+import Thead from "./Thead";
+type Props = {
+  permissionsWithRoleIds: Promise<PermissionsWithRoles>;
+};
+
+type InternalState = {
+  draft: {
+    roles: Role[];
+    permissions: Permission[];
+  };
+  filterPerms: Permission[];
+  searchTerm: string;
+  newRole: Role;
+  showNewRoleCol: boolean;
+  duplicateId: string;
+};
+
+export default function Roles({ permissionsWithRoleIds }: Props) {
+  const { roles, permissions } = use(permissionsWithRoleIds);
+  const toast = useToast();
+  const [state, setState] = useState<InternalState>({
+    draft: {
+      roles,
+      permissions,
+    },
+    filterPerms: permissions,
+    searchTerm: "",
+    showNewRoleCol: false,
+    newRole: { id: "", title: "" },
+    duplicateId: "",
+  });
+
+  const {
+    draft,
+    filterPerms,
+    searchTerm,
+    showNewRoleCol,
+    newRole,
+    duplicateId,
+  } = state;
+
+  const handleChangeRolePermission = (
+    e: React.ChangeEvent,
+    roleId: string,
+    permissionId: string
+  ) => {
+    const newPerms = draft.permissions.map((p) => {
+      if (p.permissionId === permissionId) {
+        return {
+          ...p,
+          roleIds: p.roleIds.includes(roleId)
+            ? p.roleIds.filter((id) => id !== roleId)
+            : [...p.roleIds, roleId],
+        };
+      }
+      return p;
+    });
+    setState((prev) => ({
+      ...prev,
+      draft: {
+        ...prev.draft,
+        permissions: newPerms,
+      },
+    }));
+  };
+
+  const handleOnQueryChange = (term: string) => {
+    if (term.trim() !== "") {
+      const filteredPerms = draft.permissions.filter((p) =>
+        p.title.toLowerCase().includes(term.toLowerCase())
+      );
+      setState((prev) => ({
+        ...prev,
+        filterPerms: filteredPerms,
+        searchTerm: term,
+      }));
+    } else {
+      setState((prev) => ({
+        ...prev,
+        filterPerms: draft.permissions,
+        searchTerm: term,
+      }));
+    }
+  };
+
+  const handleSave = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    try {
+      const { successMsg } = await setPermissions(
+        draft.roles,
+        draft.permissions
+      );
+      toast.addToast("success", successMsg);
+    } catch (error) {
+      console.log(error);
+      toast.addToast("error", "Update roles failed");
+    }
+  };
+
+  const handleRoleEditing = async (id: string, title: string) => {
+    const role = roles.find((r) => r.id === id);
+    if (!role) {
+      toast.addToast("error", "Role not found");
+      return false;
+    }
+
+    if (role.title == title) {
+      toast.addToast("error", "Role title not changed");
+      return false;
+    }
+
+    try {
+      const { successMsg } = await updateRole(id, title);
+      toast.addToast("success", successMsg);
+    } catch (error) {
+      console.log(error);
+      toast.addToast("error", "Update role failed");
+    }
+
+    return true;
+  };
+
+  const handleCancel = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setState((prev) => ({
+      ...prev,
+      draft: {
+        roles,
+        permissions,
+      },
+      newRole: { id: "", title: "" },
+    }));
+  };
+
+  useEffect(() => {
+    setState((prev) => ({
+      ...prev,
+      draft: {
+        roles,
+        permissions,
+      },
+    }));
+  }, [roles, permissions]);
+
+  const isPermsDraftChanging = useMemo(() => {
+    if (draft.permissions.length !== permissions.length) {
+      return true;
+    }
+
+    return draft.permissions.some(
+      (p) =>
+        p.roleIds.length !==
+        permissions.find((perm) => perm.permissionId === p.permissionId)
+          ?.roleIds.length
+    );
+  }, [draft.permissions]);
+
+  const handleSetPropertiesCancel = () => {
+    setState((prev) => ({
+      ...prev,
+      showNewRoleCol: false,
+      duplicateId: "",
+      newRole: { id: "", title: "" },
+    }));
+  };
+
+  const handleDuplicate = (roleId: string) => {
+    const role = roles.find((r) => r.id === roleId);
+    if (!role) {
+      toast.addToast("error", "Role not found");
+      return;
+    }
+
+    setState((prev) => ({
+      ...prev,
+      showNewRoleCol: true,
+      newRole: { id: "", title: role.title },
+      duplicateId: role.id,
+    }));
+  };
+
+  const handleRoleCreating = async (id: string, title: string) => {
+    const index = state.draft.roles.findIndex((i) => i.id == id);
+    if (index != -1) {
+      toast.addToast("error", "Role id already exists");
+      return false;
+    }
+
+    let rolePermissions: string[] = [];
+    if (duplicateId) {
+      const findRole = state.draft.roles.find((r) => r.id === duplicateId);
+      if (findRole && findRole.permissions) {
+        rolePermissions = [...findRole.permissions];
+      }
+    }
+
+    try {
+      const { successMsg } = await createRole(id, title, rolePermissions);
+      toast.addToast("success", successMsg);
+      setState((prev) => ({
+        ...prev,
+        showNewRoleCol: false,
+        newRole: { id: "", title: "" },
+        draft: { ...prev.draft, roles: [...prev.draft.roles, { id, title }] },
+      }));
+      return true;
+    } catch (error) {
+      console.log(error);
+      toast.addToast("error", "Create role failed");
+      return false;
+    }
+  };
+
+  useEffect(() => {
+    if (searchTerm.trim() !== "") {
+      const filteredPerms = draft.permissions.filter((p) =>
+        p.title.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setState((prev) => ({ ...prev, filterPerms: filteredPerms }));
+    } else {
+      setState((prev) => ({ ...prev, filterPerms: draft.permissions }));
+    }
+  }, [draft.permissions, searchTerm]);
+
+  return (
+    <>
+      <div className=" mt-4 md:mt-6 lg:mt-8 xl:mt-10 mx-auto flex flex-col gap-4 justify-center items-start max-w-300">
+        <button
+          type="button"
+          className="btn btn-sm dark:bg-accent-0 dark:hover:bg-accent-1 dark:hover:text-primary hover:bg-surface-1 transition"
+          onClick={() =>
+            setState((prev) => ({
+              ...prev,
+              showNewRoleCol: true,
+              duplicateId: "",
+              newRole: { id: "", title: "" },
+            }))
+          }
+        >
+          + New Role
+        </button>
+        <table className="table-fixed border-collapse border border-border-subtle w-full overflow-x-auto">
+          <thead>
+            <tr>
+              <th className="p-2 min-w-16 border border-border">
+                <SearchBar
+                  placeHolder={"Search Permission"}
+                  onQueryChange={handleOnQueryChange}
+                />
+              </th>
+              {showNewRoleCol && (
+                <Thead
+                  id={newRole?.id}
+                  title="New"
+                  onSetProperties={handleRoleCreating}
+                  mode="create"
+                  onCancel={handleSetPropertiesCancel}
+                  onDuplicate={handleDuplicate}
+                />
+              )}
+              {draft.roles.map(({ id, title }) => (
+                <Thead
+                  key={id}
+                  id={id}
+                  title={title}
+                  onSetProperties={handleRoleEditing}
+                  onDuplicate={handleDuplicate}
+                />
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {filterPerms.map((p) => (
+              <tr className="dark:hover:bg-surface-1" key={p.permissionId}>
+                <th className="px-3 py-2 min-w-16 border dark:border-border text-sm text-left dark:text-primary dark:font-medium">
+                  {p.title}
+                </th>
+                {showNewRoleCol && (
+                  <td className="px-3 py-2 border dark:border-border text-center">
+                    <input
+                      type="checkbox"
+                      name="new"
+                      id="new"
+                      className="size-3 appearance-none dark:checked:bg-accent-1 dark:border dark:border-secondary rounded cursor-pointer"
+                      checked={p.roleIds.includes(duplicateId)}
+                      onChange={(e) =>
+                        handleChangeRolePermission(
+                          e,
+                          newRole.id,
+                          p.permissionId
+                        )
+                      }
+                    />
+                  </td>
+                )}
+                {draft.roles.map((r) => (
+                  <td
+                    className="px-3 py-2 border dark:border-border text-center"
+                    key={r.id}
+                  >
+                    <input
+                      type="checkbox"
+                      name={r.id}
+                      id={r.id}
+                      className="size-3 appearance-none dark:checked:bg-accent-1 dark:border dark:border-secondary rounded cursor-pointer"
+                      checked={p.roleIds.includes(r.id)}
+                      onChange={(e) =>
+                        handleChangeRolePermission(e, r.id, p.permissionId)
+                      }
+                    />
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <div
+          className="flex flex-row gap-2 mt-4 items-center w-full justify-center"
+          hidden={!isPermsDraftChanging}
+        >
+          <button
+            type="button"
+            className="btn btn-sm dark:border dark:border-border-subtle dark:text-primary dark:hover:bg-secondary transition"
+            onClick={handleCancel}
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            className="btn btn-sm dark:bg-accent-1 dark:text-primary dark:hover:bg-accent-0 transition"
+            onClick={handleSave}
+          >
+            Save
+          </button>
+        </div>
+      </div>
+    </>
+  );
+}

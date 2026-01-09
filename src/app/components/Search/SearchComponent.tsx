@@ -2,15 +2,17 @@
 import { SearchBar } from ".";
 import { FilterButton } from "./Filter";
 type Props = {
+  keyword?: string;
   placeHolder: string;
   onQueryChange?: (q: string) => void;
   filterOn: boolean;
   onFilterToggle: () => void;
   pageSize?: number;
   onSelected?: (n: number) => void;
-  onSearch: (term:string) => void;
+  onSearch: (term: string) => void;
 };
 function SearchComponent({
+  keyword,
   placeHolder,
   onQueryChange,
   filterOn,
@@ -22,6 +24,7 @@ function SearchComponent({
   return (
     <div className="flex flex-row gap-2">
       <SearchBar
+        keyword={keyword}
         placeHolder={placeHolder}
         onQueryChange={onQueryChange}
         onSelected={onSelected}

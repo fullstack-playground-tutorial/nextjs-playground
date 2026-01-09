@@ -1,5 +1,5 @@
 "use client";
-import {UserInfo } from "@/app/feature/auth";
+import { UserInfo } from "@/app/feature/auth";
 import Sidebar from "./Sidebar/Sidebar";
 import { useState } from "react";
 

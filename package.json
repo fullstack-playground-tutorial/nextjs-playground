@@ -9,7 +9,9 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ckeditor/ckeditor5-react": "^11.0.0",
     "@lexical/react": "^0.38.2",
+    "chart.js": "^4.5.1",
     "lexical": "^0.38.2",
     "mongodb": "^6.15.0",
     "next": "^16.1.1",

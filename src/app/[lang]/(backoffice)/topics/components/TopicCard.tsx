@@ -4,18 +4,18 @@ import TopicIcon from "@/assets/images/icons/topic.svg";
 import EditIcon from "@/assets/images/icons/edit.svg";
 import BinIcon from "@/assets/images/icons/bin.svg";
 import ApprovalIcon from "@/assets/images/icons/approval.svg";
-import { TopicStatus } from "@/app/feature/topic";
 import Link from "next/link";
 import { Tag } from "@/app/feature/topic-tags";
+import { ActionStatus } from "../../components/ActionButtons/ActionButtons";
 type Props = {
   id: string;
   thumbnail: string;
   title: string;
   summary: string;
   author: string;
-  publishedAt?: Date;
+  updatedAt?: Date;
   tags: Tag[];
-  status: TopicStatus;
+  status: ActionStatus;
   onDelete?: (id: string) => void;
 };
 
@@ -25,13 +25,13 @@ export default function TopicCard({
   title,
   summary,
   author,
-  publishedAt,
+  updatedAt: publishedAt,
   tags,
   status,
   onDelete,
 }: Props) {
   const [showDropdown, setShowDropdown] = useState(false);
-  const statusColor = (status: TopicStatus) => {
+  const statusColor = (status: ActionStatus) => {
     switch (status) {
       case "submit":
         return "border-2 border-accent-0 text-accent-0"; // cam
@@ -52,7 +52,7 @@ export default function TopicCard({
   return (
     <div
       key={id}
-      className="dark:bg-surface-1 border dark:border-border rounded-md shadow dark:hover:border-border-strong overflow-hidden flex flex-col"
+      className="dark:bg-surface-1 border dark:border-border rounded-md shadow dark:hover:border-border-strong overflow-hidden flex flex-col h-100"
     >
       <div className="w-full h-40 relative">
         <img
@@ -80,7 +80,7 @@ export default function TopicCard({
         <div className="flex justify-between items-center text-sm text-secondary">
           <span>{author}</span>
           <span>
-            {publishedAt !== undefined && publishedAt !== null
+            {publishedAt
               ? new Date(publishedAt).toLocaleDateString("en-GB")
               : "unknown"}
           </span>

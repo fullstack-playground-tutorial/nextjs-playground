@@ -1,0 +1,61 @@
+import {
+  createGenericWithSearchService,
+  CRUDWithSearchService,
+} from "@/app/utils/service";
+import { HTTPService } from "@/app/utils/http";
+import { Permission, PermissionsWithRoles, Role, RoleFilter } from "./role";
+
+// Not passing permissions to patch, use bulk update instead
+export interface RoleService
+  extends CRUDWithSearchService<Role, RoleFilter, undefined> {
+  getPermissionsWithRoles(
+    next?: NextFetchRequestConfig,
+    authSkip?: boolean
+  ): Promise<PermissionsWithRoles>;
+  setPermissions(
+    roles: Role[],
+    permissions: Permission[],
+    next?: NextFetchRequestConfig,
+    authSkip?: boolean
+  ): Promise<number>;
+}
+
+export const createRoleService = (
+  httpService: HTTPService,
+  url: string
+): RoleService => {
+  const sv = createGenericWithSearchService<Role, RoleFilter, undefined>(
+    httpService,
+    url
+  );
+  const getPermissionsWithRoles = async (
+    next?: NextFetchRequestConfig,
+    authSkip?: boolean
+  ): Promise<PermissionsWithRoles> => {
+    return httpService
+      .get<PermissionsWithRoles>(url, { next, authSkip })
+      .then((res) => res.body);
+  };
+  const bulkUpdateRoles = async (
+    roles: Role[],
+    permissions: Permission[],
+    next?: NextFetchRequestConfig,
+    authSkip?: boolean
+  ): Promise<number> => {
+    return httpService
+      .post<number, PermissionsWithRoles>(
+        url + "/bulk",
+        { roles, permissions },
+        {
+          next,
+          authSkip,
+        }
+      )
+      .then((res) => res.body);
+  };
+  return {
+    ...sv,
+    getPermissionsWithRoles: getPermissionsWithRoles,
+    setPermissions: bulkUpdateRoles,
+  };
+};

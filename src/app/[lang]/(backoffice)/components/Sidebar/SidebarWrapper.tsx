@@ -61,14 +61,15 @@ export default function SidebarWrapper({
   const clonedChildren = React.Children.map(menuSections, (child) => {
     if (!React.isValidElement(child)) return null;
     const props = child.props as MenuSectionProps;
-    const Icon = props.iconName ? icons[props.iconName] : undefined;
+
     const isPinned = pinnedList.some(
       (pinnedItem) => pinnedItem.id === props.id
     );
     return (
       <MenuSectionInternal
         {...props}
-        Icon={Icon}
+        key={child.key}
+        iconSets={icons}
         hidden={props.hidden}
         topbar={topbar}
         menuExpand={menuExpand}
@@ -95,6 +96,8 @@ export default function SidebarWrapper({
                 handlePinnedList={handlePinnedList}
                 pinned={true}
                 pinnedList={pinnedList}
+                iconSets={icons}
+                key={pi.id}
               />
             );
           })}

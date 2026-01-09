@@ -14,17 +14,15 @@ export default async function HomeLayout({
   let userInfo: UserInfo | undefined = undefined;
   const session = await verifySession();
   if (session == "logined") {
-    userInfo = await getUser();    
-  } else {
-    userInfo = undefined;
+    userInfo = await getUser();
   }
   return (
     <>
       <Body userInfo={userInfo} children={children} />
-      <BottomBar />
+      {/* <BottomBar />
       <div className="fixed md:hidden bottom-20 right-4 flex flex-col items-end">
         <NotificationComponent notifications={[]} />
-      </div>
+      </div> */}
       <div>{auth}</div>
     </>
   );

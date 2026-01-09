@@ -1,19 +1,21 @@
-import { $getRoot, $getSelection } from "lexical";
-import { useEffect } from "react";
-
+// src/app/[lang]/(backoffice)/components/LexicalEditor/LexicalEditor.tsx
 import { AutoFocusPlugin } from "@lexical/react/LexicalAutoFocusPlugin";
-import { LexicalComposer } from "@lexical/react/LexicalComposer";
+import {
+  InitialConfigType,
+  LexicalComposer,
+} from "@lexical/react/LexicalComposer";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
 import ToolbarPlugin from "./ToolbarPlugin";
-import TreeViewPlugin from "./TreeViewPlugin";
 
-const theme = {
-  // Theme styling goes here
-  //...
-};
+import { EditorState, EditorThemeClasses, LexicalEditor } from "lexical";
+import { ImageNode } from "./ImageNode";
+import { useRef, useState } from "react";
+import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
+import EditorOnChangePlugin from "./EditorOnChangePlugin";
+const theme: EditorThemeClasses = {};
 
 // Catch any errors that occur during Lexical updates and log them
 // or throw them as needed. If you don't throw them, Lexical will
@@ -23,38 +25,49 @@ function onError(error: any) {
 }
 
 type Props = {
-    placeholder: string
-}
+  placeholder: string;
+};
 
-export default function LexicalEditorComponent({placeholder}: Props) {
-  const initialConfig = {
+export default function LexicalEditorComponent({ placeholder }: Props) {
+  const [editorStateJSON, setEditorStateJSON] = useState<string>();
+  const initialConfig: InitialConfigType = {
+    editorState: editorStateJSON,
     namespace: "MyEditor",
     theme,
     onError,
+    nodes: [ImageNode],
   };
 
+  const onChange = (editorState: EditorState) => {
+    const editorStateJSON = editorState.toJSON()
+    setEditorStateJSON(JSON.stringify(editorStateJSON))
+  }
+
   return (
-    <LexicalComposer initialConfig={initialConfig}>
-       <div className="editor-container">
+    <div className="h-full w-full">
+      <LexicalComposer initialConfig={initialConfig}>
         <ToolbarPlugin />
-        <div className="editor-inner">
+        <div className="h-full w-full relative min-h-50">
           <RichTextPlugin
             contentEditable={
               <ContentEditable
-                className="editor-input"
-                aria-placeholder={placeholder}
+                className="rounded-b-sm dark:bg-surface-1 dark:border-border dark:border-x dark:border-b shadow min-h-50 px-3 py-2 outline-none text-sm"
+                aria-placeholder={"Enter some text..."}
                 placeholder={
-                  <div className="editor-placeholder">{placeholder}</div>
+                  <div className=" absolute top-0 left-0 w-full h-full pointer-events-none px-3 py-2 text-secondary">
+                    Enter some text...
+                  </div>
                 }
               />
             }
             ErrorBoundary={LexicalErrorBoundary}
           />
-          <HistoryPlugin />
-          <AutoFocusPlugin />
-          <TreeViewPlugin />
+          
         </div>
-      </div>
-    </LexicalComposer>
+        <HistoryPlugin />
+        <AutoFocusPlugin />
+        <EditorOnChangePlugin onChange={onChange}/>
+      </LexicalComposer>
+    </div>
   );
 }

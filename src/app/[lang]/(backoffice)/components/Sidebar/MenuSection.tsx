@@ -19,6 +19,7 @@ export type MenuSectionProps = {
 };
 
 type _MenuSectionProps = {
+  iconSets?: Record<string, React.FC<React.SVGProps<SVGSVGElement>>>;
   topbar: boolean;
   menuExpand: boolean;
   path: string[];
@@ -38,6 +39,8 @@ export const MenuSectionInternal = (props: MenuSectionInternalProps) => {
     id,
     title,
     Icon,
+    iconName,
+    iconSets,
     children,
     url,
     permission,
@@ -53,6 +56,8 @@ export const MenuSectionInternal = (props: MenuSectionInternalProps) => {
     checkAuthorized,
   } = props;
 
+  const _Icon = iconName && iconSets ? iconSets[iconName] : Icon;
+
   if (props.hidden || (checkAuthorized && !checkAuthorized(permission || ""))) {
     return null;
   }
@@ -66,6 +71,7 @@ export const MenuSectionInternal = (props: MenuSectionInternalProps) => {
         return (
           <MenuSectionInternal
             {...child.props}
+            iconSets={iconSets}
             topbar={topbar}
             menuExpand={menuExpand}
             path={[...path, child.props.id]}
@@ -108,14 +114,16 @@ export const MenuSectionInternal = (props: MenuSectionInternalProps) => {
             }`}
           >
             <>
-              {Icon && (
-                <Icon
+              {_Icon ? (
+                <_Icon
                   className={`${
                     isSectionActive(url)
-                      ? "fill-orange-500 stroke-orange-500"
-                      : "fill-white stroke-white"
+                      ? "dark:fill-accent-0 dark:stroke-accent-0 "
+                      : "dark:fill-primary dark:stroke-priamry"
                   } size-6 stroke-2`}
                 />
+              ) : (
+                <div className="size-6"></div>
               )}
               <label
                 className={`hover:underline cursor-pointer ${
@@ -140,9 +148,13 @@ export const MenuSectionInternal = (props: MenuSectionInternalProps) => {
               onSectionClick ? onSectionClick() : handleToggleDropdown()
             }
           >
-            {Icon && <Icon className="stroke-white" />}
+            {_Icon ? (
+              <_Icon className="size-6 stroke-white" />
+            ) : (
+              <div className="size-6"></div>
+            )}
             <label
-              className={`text-white cursor-pointer truncate text-md max-w-2/3 ${
+              className={`text-white cursor-pointer truncate text-md ${
                 topbar ? "" : menuExpand ? "" : "hidden"
               }`}
             >

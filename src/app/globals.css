@@ -1,6 +1,15 @@
 
 @import "./assets/styles/styles.css";
 
+@layer base {
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+}
+
+
 :root {
   background: var(--color-surface-0);
   font-family: Roboto, Poppins, system-ui, Avenir, Helvetica, Arial, sans-serif;
