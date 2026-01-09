@@ -3,6 +3,7 @@ import NotificationComponent from "./components/Notification/Notification";
 import { Body } from "./components/Body";
 import { getUser, verifySession } from "@/app/dal";
 import { UserInfo } from "@/app/feature/auth";
+import ParticleBackground from "./components/ParticleBackground";
 
 export default async function HomeLayout({
   children,
@@ -18,6 +19,7 @@ export default async function HomeLayout({
   }
   return (
     <>
+      <ParticleBackground />
       <Body userInfo={userInfo} children={children} />
       {/* <BottomBar />
       <div className="fixed md:hidden bottom-20 right-4 flex flex-col items-end">
