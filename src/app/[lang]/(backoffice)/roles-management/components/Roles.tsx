@@ -29,7 +29,11 @@ type InternalState = {
 };
 
 export default function Roles({ permissionsWithRoleIds }: Props) {
-  const { roles, permissions } = use(permissionsWithRoleIds);
+  const { roles, permissions: _permissions } = use(permissionsWithRoleIds);
+  const permissions = useMemo(
+    () => _permissions.map((p) => ({ ...p, roleIds: p.roleIds ?? [] })),
+    [_permissions]
+  );
   const toast = useToast();
   const [state, setState] = useState<InternalState>({
     draft: {
@@ -156,9 +160,13 @@ export default function Roles({ permissionsWithRoleIds }: Props) {
   }, [roles, permissions]);
 
   const isPermsDraftChanging = useMemo(() => {
+    if (!draft.permissions || !permissions) {
+      return false;
+    }
     if (draft.permissions.length !== permissions.length) {
       return true;
     }
+
 
     return draft.permissions.some(
       (p) =>
@@ -166,7 +174,7 @@ export default function Roles({ permissionsWithRoleIds }: Props) {
         permissions.find((perm) => perm.permissionId === p.permissionId)
           ?.roleIds.length
     );
-  }, [draft.permissions]);
+  }, [draft.permissions, permissions]);
 
   const handleSetPropertiesCancel = () => {
     setState((prev) => ({

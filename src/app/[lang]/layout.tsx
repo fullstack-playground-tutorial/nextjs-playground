@@ -15,7 +15,7 @@ export default async function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body>
+      <body suppressHydrationWarning>
         <Providers>
           <Suspense fallback={<Loading />}>{children}</Suspense>
         </Providers>
