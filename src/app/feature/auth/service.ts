@@ -106,6 +106,7 @@ export class AuthClient implements AuthService {
 
       return res.body ?? -1;
     } catch (err: unknown) {
+
       throw err;
     }
   }

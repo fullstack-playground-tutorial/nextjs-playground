@@ -35,7 +35,7 @@ export default async function TopicManagement(props: {
     sort: sort
   })
   return (
-    <div className="p-4 dark:bg-surface-0 h-screen dark:text-primary max-w-300 mx-auto flex flex-col">
+    <div className="p-4 h-screen dark:text-primary max-w-300 mx-auto flex flex-col">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 mt-2">
         <h1 className="font-semibold text-accent-0 text-4xl">Topic Management</h1>

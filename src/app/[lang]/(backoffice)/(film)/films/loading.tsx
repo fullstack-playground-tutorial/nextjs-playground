@@ -2,7 +2,7 @@ import {
   SkeletonElement,
   SkeletonWrapper,
 } from "@/components/SkeletionLoading";
-import FilmIcon from "../components/Sidebar/icons/film.svg";
+import FilmIcon from "../../components/Sidebar/icons/film.svg";
 
 export default function Loading() {
   return (

@@ -1,5 +1,5 @@
 import { SearchBar } from "@/components/Search";
-import FilmIcon from "../components/Sidebar/icons/film.svg";
+import FilmIcon from "../../components/Sidebar/icons/film.svg";
 import { Breadcrumb } from "./components/Breadcrumb";
 
 import WrapperItem from "./components/WrapperItem";

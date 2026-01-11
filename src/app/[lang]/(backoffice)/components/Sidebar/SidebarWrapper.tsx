@@ -108,50 +108,44 @@ export default function SidebarWrapper({
   };
   return (
     <nav
-      className={`flex bg-gray-800 text-primary items-center shadow p-2 z-2 ${
-        topbar
-          ? `flex-row w-full justify-center top-0 ${
-              menuExpand ? "fixed h-[90%]" : "sticky h-auto"
-            }`
-          : `fixed md:sticky flex-col h-screen overflow-y-auto scrollbar transition-all ease-in-out overflow-hidden ${
-              menuExpand ? "w-60" : "w-14"
-            }`
-      }`}
+      className={`flex bg-white dark:bg-surface-0 border-r dark:border-border items-center shadow-sm p-4 z-20 transition-all duration-300 ${topbar
+        ? `flex-row w-full justify-center top-0 border-b dark:border-border ${menuExpand ? "fixed h-[90%]" : "sticky h-auto"
+        }`
+        : `fixed md:sticky flex-col h-screen overflow-y-auto scrollbar transition-all ease-in-out overflow-hidden pb-4 ${menuExpand ? "w-72" : "w-20"
+        }`
+        }`}
     >
       <button
-        className={`self-start items-center justify-center font-semibold cursor-pointer p-2 ${
-          topbar ? "hidden h-12" : ""
-        } ${!topbar && menuExpand ? "pl-4" : ""}`}
+        className={`self-start items-center justify-center font-semibold cursor-pointer p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-surface-2 transition-colors mb-4 ${topbar ? "hidden h-12" : ""
+          } ${!topbar && menuExpand ? "ml-0" : "mx-auto"}`}
         onClick={(e) => handleToggleMenuExpand(e)}
       >
         {menuExpand ? (
-          <CloseIcon className="stroke-white mx-auto" />
+          <CloseIcon className="stroke-gray-600 dark:stroke-secondary hover:stroke-gray-900 dark:hover:stroke-primary size-6" />
         ) : (
-          <MenuIcon className="stroke-white mx-auto" />
+          <MenuIcon className="stroke-gray-600 dark:stroke-secondary hover:stroke-gray-900 dark:hover:stroke-primary size-6" />
         )}
       </button>
       <button
-        className={`self-start flex flex-row gap-2 items-center justify-center font-semibold cursor-pointer ${
-          topbar ? "h-12" : "p-2 pl-2"
-        } ${!topbar && menuExpand ? "pl-4" : ""}`}
+        className={`self-start flex flex-row gap-3 items-center justify-center font-semibold cursor-pointer rounded-lg hover:bg-gray-100 dark:hover:bg-surface-2 transition-colors ${topbar ? "h-12 px-4" : "p-2 w-full"
+          } ${!topbar && menuExpand ? "px-3 justify-start" : "justify-center"}`}
         onClick={(e) => handleToggleViewbar(e)}
       >
         {!topbar ? (
           <>
-            <SidebarIcon className="stroke-white mx-auto" />
-            {menuExpand && <span>Sidebar</span>}
+            <SidebarIcon className="stroke-gray-600 dark:stroke-secondary size-6 shrink-0" />
+            {menuExpand && <span className="text-gray-600 dark:text-secondary whitespace-nowrap">Sidebar</span>}
           </>
         ) : (
           <>
-            <TopbarIcon className="stroke-white mx-auto" />
-            {menuExpand && <span>Topbar</span>}
+            <TopbarIcon className="stroke-gray-600 dark:stroke-secondary size-6 shrink-0" />
+            {menuExpand && <span className="text-gray-600 dark:text-secondary whitespace-nowrap">Topbar</span>}
           </>
         )}
       </button>
       <aside
-        className={`flex ${
-          topbar ? "flex-row gap-4 justify-between" : "flex-col p-2"
-        } w-full`}
+        className={`flex ${topbar ? "flex-row gap-4 justify-between" : "flex-col gap-1 w-full mt-2"
+          }`}
       >
         {renderPinnedList()}
         <UserSection
