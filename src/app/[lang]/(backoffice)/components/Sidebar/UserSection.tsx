@@ -15,21 +15,19 @@ export type UserSectionProps = {
 export const UserSection = (_props: UserSectionProps) => {
   const { name, email, avatarUrl, menuExpanded, isSectionActive, topbar } =
     _props;
-    
+
   return (
     <section
       key={"user-section"}
-      className={`flex flex-col w-full z-1 ${
-        !topbar ? (menuExpanded ? "pl-2" : "") : "section-header"
-      }`}
+      className={`flex flex-col w-full z-1 ${!topbar ? (menuExpanded ? "pl-2" : "items-center") : "section-header"
+        }`}
     >
-      <div className={`flex flex-row h-12 cursor-pointer items-center group`}>
+      <div className={`flex flex-row h-12 cursor-pointer items-center group p-2`}>
         {name || email ? (
           <Link
             href={"/profile"}
-            className={`flex flex-row gap-2 cursor-pointer ${
-              topbar ? "items-center" : "items-end"
-            }`}
+            className={`flex flex-row gap-2 cursor-pointer ${topbar ? "items-center" : "items-end"
+              }`}
           >
             {avatarUrl && avatarUrl.length > 0 ? (
               <img
@@ -39,11 +37,10 @@ export const UserSection = (_props: UserSectionProps) => {
               />
             ) : (
               <AvatarIcon
-                className={`${
-                  isSectionActive("/login")
-                    ? "fill-orange-500 stroke-orange-500"
-                    : "fill-white stroke-white"
-                } size-6 stroke-2`}
+                className={`${isSectionActive("/login")
+                  ? "fill-orange-500 stroke-orange-500"
+                  : "fill-white stroke-white"
+                  } size-6 stroke-2`}
               />
             )}
             {menuExpanded && (
@@ -53,16 +50,14 @@ export const UserSection = (_props: UserSectionProps) => {
         ) : (
           <Link
             href="/auth"
-            className={`flex flex-row gap-2 cursor-pointer text-sm font-semibold ${
-              topbar ? "items-center" : "items-end"
-            } w-full h-full`}
+            className={`flex flex-row gap-2 cursor-pointer text-sm font-semibold ${topbar ? "items-center" : "items-end"
+              } w-full h-full`}
           >
             <LoginIcon
-              className={`size-6 stroke-2 ${
-                isSectionActive("/login")
-                  ? "fill-orange-500 stroke-orange-500"
-                  : "fill-white stroke-white"
-              }`}
+              className={`size-6 stroke-2 ${isSectionActive("/login")
+                ? "fill-orange-500 stroke-orange-500"
+                : "fill-white stroke-white"
+                }`}
             />
             {menuExpanded && (
               <span className="text-white group-hover:underline">Login</span>
