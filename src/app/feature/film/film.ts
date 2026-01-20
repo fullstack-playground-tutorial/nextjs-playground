@@ -9,8 +9,8 @@ export type Interest = {
 export type Film = {
   id: string;
   title: string;
-  subTitle: string;
-  sources: Source[];
+  subTitle?: string;
+  slug: string;
   description?: string;
   logoUrl?: string;
   imageURLs: string[];
@@ -18,8 +18,8 @@ export type Film = {
   newestEpisode: number;
   publishedAt?: Date;
   interests: Interest[];
-  trailer?: Episode;
-  episodes?: Episode[];
+  interestIds: string[];
+  trailerURL?: string;
 };
 
 export type Source = {
