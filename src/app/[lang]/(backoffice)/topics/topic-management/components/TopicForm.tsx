@@ -2,7 +2,7 @@
 import { useEffect, useState, useTransition } from "react";
 import BackArrow from "@/assets/images/icons/back_arrow.svg";
 import { createTopic, Topic, updateTopic } from "@/app/feature/topic";
-import { Tag } from "@/app/feature/topic-tags";
+import { Tag } from "@/app/feature/tags";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { User } from "@/app/feature/auth";
 import FloatInput from "../../../components/FloatInput";
@@ -279,10 +279,10 @@ export default function TopicForm({ user, topic, tagSuggestions }: Props) {
               {mode === "create"
                 ? "Topic Create"
                 : mode === "edit"
-                ? "Topic Edit" + " - " + topic?.id
-                : mode === "review"
-                ? "Topic Review" + " - " + topic?.id
-                : "Topic View" + " - " + topic?.id}{" "}
+                  ? "Topic Edit" + " - " + topic?.id
+                  : mode === "review"
+                    ? "Topic Review" + " - " + topic?.id
+                    : "Topic View" + " - " + topic?.id}{" "}
             </div>
           </div>
           {status && (

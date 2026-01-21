@@ -9,6 +9,7 @@ export const config = {
   search_url: authServerHost + "/search",
   topic_url: backofficeServerHost + "/topics",
   topic_tag_url: backofficeServerHost + "/topics/tags",
+  film_interest_url: backofficeServerHost + "/films/interests",
   notification_url: authServerHost + "/notification",
   friend_url: authServerHost + "/friend",
   english_note_url: clientHost + "/api/eng-note",

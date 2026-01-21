@@ -5,7 +5,7 @@ import EditIcon from "@/assets/images/icons/edit.svg";
 import BinIcon from "@/assets/images/icons/bin.svg";
 import ApprovalIcon from "@/assets/images/icons/approval.svg";
 import Link from "next/link";
-import { Tag } from "@/app/feature/topic-tags";
+import { Tag } from "@/app/feature/tags";
 import { ActionStatus } from "../../components/ActionButtons/ActionButtons";
 type Props = {
   id: string;
@@ -98,11 +98,10 @@ export default function TopicCard({
           {/* Dropdown (basic) */}
           <div className="relative">
             <button
-              className={`px-2 py-1 dark:border rounded-md text-sm w-full text-center transition cursor-pointer ${
-                showDropdown
+              className={`px-2 py-1 dark:border rounded-md text-sm w-full text-center transition cursor-pointer ${showDropdown
                   ? "dark:text-accent-0 dark:bg-surface-1 dark:border-border-strong dark:font-semibold"
                   : "dark:text-primary dark:bg-surface-2 dark:border-border "
-              }`}
+                }`}
               onClick={() => setShowDropdown((prev) => !prev)}
             >
               Actions
@@ -110,11 +109,10 @@ export default function TopicCard({
             {/* Dropdown items (hidden on default) */}
             <div
               className={`absolute top-0 right-full mr-1 h-full flex flex-row items-center justify-center dark:bg-surface-1 border dark:border-border rounded-md shadow-md z-10 transition-all
-    ${
-      showDropdown
-        ? "opacity-100 translate-x-0"
-        : "opacity-0 translate-x-2 pointer-events-none"
-    }
+    ${showDropdown
+                  ? "opacity-100 translate-x-0"
+                  : "opacity-0 translate-x-2 pointer-events-none"
+                }
 `}
             >
               <Link
@@ -124,11 +122,10 @@ export default function TopicCard({
                 tabIndex={status === "draft" ? -1 : undefined}
                 className={`w-full text-left px-2 py-1 text-sm
                 items-center transition-colors
-                ${
-                  status === "draft"
+                ${status === "draft"
                     ? "pointer-events-none dark:*:fill-secondary"
                     : "dark:hover:bg-surface-4 dark:*:fill-primary dark:hover:*:fill-accent-0"
-                }
+                  }
                 `}
               >
                 <ApprovalIcon className="dark:fill-primary size-5" />
@@ -140,11 +137,10 @@ export default function TopicCard({
                 tabIndex={status === "approve" ? -1 : undefined}
                 className={`w-full text-left px-2 py-1 text-sm
                 items-center transition-colors
-                ${
-                  status === "approve"
+                ${status === "approve"
                     ? "pointer-events-none dark:*:fill-secondary"
                     : "dark:hover:bg-surface-4 dark:*:fill-primary dark:hover:*:fill-accent-0"
-                }
+                  }
                 `}
               >
                 <EditIcon className="size-5" />

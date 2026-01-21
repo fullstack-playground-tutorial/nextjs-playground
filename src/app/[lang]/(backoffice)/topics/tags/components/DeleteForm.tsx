@@ -1,7 +1,7 @@
 // src/app/[lang]/(backoffice)/topics/tags/components/DeleteForm.tsx
 "use client";
 import BinIcon from "@/assets/images/icons/bin.svg";
-import { deleteTag } from "@/app/feature/topic-tags";
+import { deleteTag } from "@/app/feature/tags";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import useToast from "@/components/Toast";
@@ -29,7 +29,7 @@ export default function DeleteForm({ id }: Props) {
         const res = await deleteTag(id);
         if (res.successMsg) {
           toast.addToast("success", res.successMsg);
-          router.push("/topics/tags", )
+          router.push("/topics/tags",)
         }
       });
     } catch (error: any) {

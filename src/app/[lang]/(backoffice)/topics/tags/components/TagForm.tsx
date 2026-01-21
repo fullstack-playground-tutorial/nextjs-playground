@@ -1,6 +1,6 @@
 //src/app/[lang]/(backoffice)/topics/tags/components/TagForm.tsx
 "use client";
-import { Tag, upsertTag } from "@/app/feature/topic-tags";
+import { Tag, upsertTag } from "@/app/feature/tags";
 import useToast from "@/components/Toast";
 import { useRouter } from "next/navigation";
 import { use, useActionState, useEffect } from "react";
@@ -134,8 +134,8 @@ export default function TagForm({ tagPromise }: Props) {
                     ? "Edit"
                     : "Editing ..."
                   : !pending
-                  ? "Create"
-                  : "Creating ..."}
+                    ? "Create"
+                    : "Creating ..."}
               </button>
             </div>
           </form>

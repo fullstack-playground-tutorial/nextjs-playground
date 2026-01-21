@@ -14,9 +14,9 @@ import { EnglishNoteClient } from "@/app/feature/english-note/service";
 import { HTTPService } from "@/app/utils/http";
 import { createTopicService, TopicService } from "@/app/feature/topic";
 import {
-  createTopicTagService,
-  TopicTagService,
-} from "@/app/feature/topic-tags";
+  createTagService,
+  TagService,
+} from "@/app/feature/tags";
 import { httpServiceInstance } from "./http-config";
 import { createRoleService, RoleService } from "@/app/feature/role";
 import { createGoldService, GoldService } from "@/app/feature/gold/service";
@@ -37,7 +37,9 @@ class ApplicationContext {
   // private apiEnglishNoteService?: ApiEnglishNoteService;
   private englishNoteService?: EnglishNoteService;
   private topicService?: TopicService;
-  private topicTagService?: TopicTagService;
+  private topicTagService?: TagService;
+  private filmInterestService?: TagService;
+
   private roleService?: RoleService;
   private goldService?: GoldService;
   private personalFinanceService?: PersonalFinanceService;
@@ -122,13 +124,24 @@ class ApplicationContext {
 
   getTopicTagService = () => {
     if (!this.topicTagService) {
-      this.topicTagService = createTopicTagService(
+      this.topicTagService = createTagService(
         this.httpService,
         config.topic_tag_url
       );
     }
     return this.topicTagService;
   };
+
+  getFilmInterestService = () => {
+    if (!this.filmInterestService) {
+      this.filmInterestService = createTagService(
+        this.httpService,
+        config.film_interest_url
+      );
+    }
+    return this.filmInterestService;
+  }
+
   getEnglishNoteService = () => {
     if (!this.englishNoteService) {
       this.englishNoteService = new EnglishNoteClient(
@@ -276,4 +289,5 @@ export const {
   getPersonalFinanceService,
   getPFPassbookService,
   getFilmService,
+  getFilmInterestService
 } = appContext;

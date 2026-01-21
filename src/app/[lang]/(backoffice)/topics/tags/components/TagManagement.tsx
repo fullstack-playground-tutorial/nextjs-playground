@@ -11,7 +11,7 @@ import { useMemo, useState, useTransition } from "react";
 import Card from "../../components/Card";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Tag } from "@/app/feature/topic-tags";
+import { Tag } from "@/app/feature/tags";
 import { SearchResult } from "@/app/utils/service";
 import Link from "next/link";
 import {
@@ -145,7 +145,7 @@ function TagManagement({ hasPermission, limit, currentPage, data }: Props) {
             href={`/topics/tags/create`}
             hidden={!writeEnable}
             scroll={false}
-            className="btn btn-sm dark:border dark:border-accent-0 dark:active:border-accent-1 dark:hover:bg-accent-1 dark:hover:text-primary dark:text-accent-0 transition"
+            className="btn btn-sm dark:border dark:border-accent-0 dark:active:border-accent-1 content-center dark:hover:bg-accent-1 dark:hover:text-primary dark:text-accent-0 transition"
           >
             + New Tag
           </Link>

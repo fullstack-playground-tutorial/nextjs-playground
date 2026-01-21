@@ -5,12 +5,12 @@ import {
 import { Tag, TagFilter } from "./topic-tags";
 import { HTTPService } from "@/app/utils/http";
 
-export interface TopicTagService
+export interface TagService
   extends CRUDWithSearchService<Tag, TagFilter, "id"> {}
 
-export function createTopicTagService(
+export function createTagService(
   httpService: HTTPService,
   url: string
-): TopicTagService {
+): TagService {
   return createGenericWithSearchService(httpService, url);
 }

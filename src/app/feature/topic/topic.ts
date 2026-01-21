@@ -1,5 +1,5 @@
 import { SearchFilter } from "@/app/utils/service";
-import { Tag } from "../topic-tags";
+import { Tag } from "../tags";
 import { ActionStatus } from "@/app/[lang]/(backoffice)/components/ActionButtons/ActionButtons";
 
 export interface Topic {
