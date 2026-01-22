@@ -1,9 +1,9 @@
-import TagForm from "../../../components/TagForm";
-import DeleteForm from "../../../components/DeleteForm";
-import { getTopicTagService } from "@/app/core/server/context";
+import { getFilmInterestService } from "@/app/core/server/context";
 import { Suspense } from "react";
-import TagFormLoading from "../../../components/TagFormLoading";
 import Modal from "@/components/Modal";
+import FormLoading from "../../../components/FormLoading";
+import InterestForm from "../../../components/InterestForm";
+import DeleteForm from "../../../components/DeleteForm";
 import { CACHE_TAG } from "@/app/utils/cache/tag";
 
 export default async function Page({
@@ -16,17 +16,17 @@ export default async function Page({
 }) {
   const { action, id } = await params;
   if (action == "edit") {
-    const tag = getTopicTagService().load(id, { tags: [CACHE_TAG.TOPIC_TAGS], revalidate: 3600 });
+    const interest = getFilmInterestService().load(id, { tags: [CACHE_TAG.FILM_INTEREST], revalidate: 3600 });
     return (
       <Suspense
         fallback={
           <Modal>
-            <TagFormLoading />
+            <FormLoading />
           </Modal>
         }
       >
         <Modal>
-          <TagForm tagPromise={tag} />
+          <InterestForm interestPromise={interest} />
         </Modal>
       </Suspense>
     );

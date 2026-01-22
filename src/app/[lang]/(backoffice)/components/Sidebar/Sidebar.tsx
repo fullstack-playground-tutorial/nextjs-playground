@@ -13,6 +13,7 @@ import FilmIcon from "./icons/film.svg";
 import LogoutIcon from "./icons/logout.svg";
 import HomeIcon from "./icons/home.svg";
 import UserManagerIcon from "./icons/user_manager.svg";
+import TagIcon from "./icons/tag.svg";
 import SidebarWrapper from "./SidebarWrapper";
 import { MenuSection, MenuSectionProps } from "./MenuSection";
 import { logout, Module, UserInfo } from "@/app/feature/auth";
@@ -39,6 +40,7 @@ const icons: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = {
   LogoutIcon,
   HomeIcon,
   UserManagerIcon,
+  TagIcon
 };
 
 function Sidebar({ userInfo, topbar, onToggleViewbar }: Props) {

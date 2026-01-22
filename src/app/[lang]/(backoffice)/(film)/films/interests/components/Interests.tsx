@@ -143,7 +143,7 @@ function InterestsManagement({ hasPermission, limit, currentPage, data }: Props)
                         onSearch={(term) => handleSearch(term)}
                     />
                     <Link
-                        href={`/topics/tags/create`}
+                        href={`/films/interests/create`}
                         hidden={!writeEnable}
                         scroll={false}
                         className="btn btn-sm dark:border dark:border-accent-0 content-center dark:active:border-accent-1 dark:hover:bg-accent-1 dark:hover:text-primary dark:text-accent-0 transition"

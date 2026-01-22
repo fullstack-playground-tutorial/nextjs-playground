@@ -3,6 +3,7 @@ import { hasPermission } from "@/app/dal";
 import { redirect } from "next/navigation";
 import { getFilmInterestService, getTopicTagService } from "@/app/core/server/context";
 import InterestsManagement from "./components/Interests";
+import { CACHE_TAG } from "@/app/utils/cache/tag";
 
 export default async function Page(props: {
     searchParams?: Promise<{
@@ -35,9 +36,10 @@ export default async function Page(props: {
                 offset: (currentPage - 1) * limit,
                 limit: limit,
             },
-            { revalidate: 3600, tags: ["film_interests"] }
+            { revalidate: 3600, tags: [CACHE_TAG.FILM_INTERESTS] }
         )
         .catch((e) => {
+            console.log("e", e);
             throw e;
         });
 
