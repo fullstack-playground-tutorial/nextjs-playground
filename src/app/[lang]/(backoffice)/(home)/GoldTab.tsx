@@ -14,7 +14,7 @@ type Props = {
 export default function GoldTab({ golds }: Props) {
   const table = () => {
     const allKeys = golds
-      .map((item) => Object.keys(item.price))
+      .map((item) => (item.price ? Object.keys(item.price) : []))
       .flat()
       .filter((k) => k.startsWith("buy_"))
       .map((k) => k.replace("buy_", ""))
@@ -57,13 +57,13 @@ export default function GoldTab({ golds }: Props) {
                       key={key}
                       className="px-4 py-2 dark:border dark:border-border"
                     >
-                      {isNaN(Number(item.price[key]))
+                      {isNaN(Number(item.price?.[key]))
                         ? "-"
                         : Intl.NumberFormat("vi-VN", {
-                            style: "currency",
-                            currency: "VND",
-                            maximumFractionDigits: 4,
-                          }).format(item.price[key])}
+                          style: "currency",
+                          currency: "VND",
+                          maximumFractionDigits: 4,
+                        }).format(item.price[key])}
                     </td>
                   );
                 })}
@@ -79,13 +79,13 @@ export default function GoldTab({ golds }: Props) {
                       key={key}
                       className="px-4 py-2 dark:border dark:border-border"
                     >
-                      {isNaN(Number(item.price[key]))
+                      {isNaN(Number(item.price?.[key]))
                         ? "-"
                         : Intl.NumberFormat("vi-VN", {
-                            style: "currency",
-                            currency: "VND",
-                            maximumFractionDigits: 4,
-                          }).format(item.price[key])}
+                          style: "currency",
+                          currency: "VND",
+                          maximumFractionDigits: 4,
+                        }).format(item.price[key])}
                     </td>
                   );
                 })}

@@ -1,6 +1,7 @@
-export const CACHE_TAG ={
+export const CACHE_TAG = {
     TOPIC_TAGS: "topic_tags",
-    TOPIC_TAG:"topic_tag",
+    TOPIC_TAG: "topic_tag",
     FILM_INTERESTS: "film_interests",
     FILM_INTEREST: "film_interest",
+    INTEREST_SUGGESTIONS: "interest_suggestions",
 }

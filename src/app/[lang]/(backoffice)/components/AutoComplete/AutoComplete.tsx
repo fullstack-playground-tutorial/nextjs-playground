@@ -87,8 +87,8 @@ function AutoComplete<
     return suggestions
       .filter((s) => !selected.includes(s))
       .filter((s) => s.title.toLowerCase().includes(q.toLowerCase()));
-  }, [selected, q]);
-  
+  }, [suggestions, selected, q]);
+
   return (
     <div
       className="relative w-full h-full cursor-text"
@@ -129,9 +129,8 @@ function AutoComplete<
       </div>
 
       <div
-        className={`absolute transition-colors z-1 shadow dark:bg-surface-1 overflow-hidden text-sm ${
-          q.length > 0 ? "opacity-100" : "opacity-0 pointer-events-none"
-        } flex flex-col items-center justify-center rounded-md border dark:border-border shadow top-[calc(100%+8px)] left-0 w-full`}
+        className={`absolute transition-colors z-1 shadow dark:bg-surface-1 overflow-hidden text-sm ${q.length > 0 ? "opacity-100" : "opacity-0 pointer-events-none"
+          } flex flex-col items-center justify-center rounded-md border dark:border-border shadow top-[calc(100%+8px)] left-0 w-full`}
       >
         {filteredTags.length > 0 ? (
           filteredTags.map((item) => (

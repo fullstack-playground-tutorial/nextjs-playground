@@ -15,7 +15,7 @@ export type Film = {
   logoUrl?: string;
   imageURLs: string[];
   numberOfEpisodes?: number;
-  newestEpisode: number;
+  newestEpisode?: number;
   publishedAt?: Date;
   interests: Interest[];
   interestIds: string[];
@@ -26,14 +26,14 @@ export type Source = {
   id: string;
   title: string;
   sourceType:
-    | "youtube"
-    | "vimeo"
-    | "mp4"
-    | "hls"
-    | "dash"
-    | "webm"
-    | "mov"
-    | "m3u8";
+  | "youtube"
+  | "vimeo"
+  | "mp4"
+  | "hls"
+  | "dash"
+  | "webm"
+  | "mov"
+  | "m3u8";
   publishedAt?: Date;
   tracks?: { [key: string]: Track };
   sourceUrls: { [key: string]: string };
@@ -45,14 +45,14 @@ export type Episode = {
   subTitle: string;
   description?: string;
   sourceType:
-    | "youtube"
-    | "vimeo"
-    | "mp4"
-    | "hls"
-    | "dash"
-    | "webm"
-    | "mov"
-    | "m3u8";
+  | "youtube"
+  | "vimeo"
+  | "mp4"
+  | "hls"
+  | "dash"
+  | "webm"
+  | "mov"
+  | "m3u8";
   thumbnailUrl?: string;
   publishedAt?: Date;
   tracks?: { [key: string]: Track };
