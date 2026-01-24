@@ -44,6 +44,10 @@ export const httpServiceInstance = await createHttpClient(
           ...req.headers,
           [HeaderType.cookie]: await getCookieHeader(),
         };
+      } 
+
+      if (req.body instanceof FormData && req.headers) {
+        delete (req.headers as any)[HeaderType.contentType];
       }
       return req;
     },

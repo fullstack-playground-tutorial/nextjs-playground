@@ -30,7 +30,6 @@ const getDefaultFilm = (): Film => ({
     description: "",
     numberOfEpisodes: 0,
     trailerURL: "",
-    imageURLs: [],
     interests: [],
     interestIds: [],
     slug: "",
@@ -45,7 +44,6 @@ const getFilmMode = (pathname: string, id?: string) => {
 };
 
 export default function FilmForm({ film, suggestions }: Props) {
-    console.log("film", film);
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
@@ -75,27 +73,20 @@ export default function FilmForm({ film, suggestions }: Props) {
     const logoInputRef = useRef<HTMLInputElement>(null);
 
     // Initial previews (derived from film data or new uploads)
-    // For simplicity in this refactor, I'm keeping local state for file objects for upload, 
-    // but relying on URL strings for display if no new file is chosen.
-    // In a real app, we'd handle existing URLs vs new Files more robustly.
     const [posterFile, setPosterFile] = useState<File | null>(null);
-    const [posterPreview, setPosterPreview] = useState<string>(film?.imageURLs?.[0] || ""); // Assuming index 0 is poster for now? Or use separate field if available
-    // Note: Film type has logoUrl, imageURLs. It doesn't explicitly distinguish banner vs poster in imageURLs array in the type definition shown, 
-    // but the UI has slots for them. I will assume imageURLs[0] is poster, [1] is banner for this mock, or use local state primarily.
-    // Actually the UI in previous version treated them as separate uploads. 
-    // I'll keep the local file state for the form submission logic.
+    const [posterPreview, setPosterPreview] = useState<string>(film?.posterURL || "");
 
     const [bannerFile, setBannerFile] = useState<File | null>(null);
-    const [bannerPreview, setBannerPreview] = useState<string>(film?.imageURLs?.[1] || "");
+    const [bannerPreview, setBannerPreview] = useState<string>(film?.bannerURL || "");
 
     const [logoFile, setLogoFile] = useState<File | null>(null);
-    const [logoPreview, setLogoPreview] = useState<string>(film?.logoUrl || "");
+    const [logoPreview, setLogoPreview] = useState<string>(film?.logoURL || "");
 
     // Sync state with props if they change (re-validation/refetch)
     useEffect(() => {
         if (film) {
             setState(prev => ({ ...prev, film: { ...film } }));
-            setLogoPreview(film.logoUrl || "");
+            setLogoPreview(film.logoURL || "");
             // logic for images...
         }
     }, [film]);
@@ -146,7 +137,7 @@ export default function FilmForm({ film, suggestions }: Props) {
             } else {
                 setLogoFile(file);
                 setLogoPreview(url);
-                updateFilmState({ logoUrl: fileName(file) }); // Mock setting URL to filename
+                updateFilmState({ logoURL: fileName(file) }); // Mock setting URL to filename
             }
         }
     };
@@ -160,15 +151,11 @@ export default function FilmForm({ film, suggestions }: Props) {
     const fileName = (f: File | null) => f?.name || "";
 
     const getPayload = () => {
-        // Construct payload. In real app, we'd upload files first and get URLs.
         return {
             ...state.film,
-            // Mocking file handling by just using filenames or existing URLs
-            logoUrl: logoFile ? logoFile.name : state.film.logoUrl,
-            imageURLs: [
-                posterFile ? posterFile.name : (state.film.imageURLs[0] || ""),
-                bannerFile ? bannerFile.name : (state.film.imageURLs[1] || "")
-            ].filter(Boolean),
+            logoURL: logoFile ? logoFile.name : state.film.logoURL,
+            posterURL: posterFile ? posterFile.name : state.film.posterURL,
+            bannerURL: bannerFile ? bannerFile.name : state.film.bannerURL,
         };
     };
 
@@ -179,7 +166,11 @@ export default function FilmForm({ film, suggestions }: Props) {
             try {
                 let res;
                 if (mode === "create") {
-                    res = await createFilm({ ...payload }); // status would be passed if API supported it
+                    if (!logoFile || !posterFile || !bannerFile) {
+                        toast.addToast("error", "Please upload all required files");
+                        return;
+                    }
+                    res = await createFilm({ ...payload }, logoFile, posterFile, bannerFile); // status would be passed if API supported it
                 } else if (mode === "edit" || mode === "review") {
                     res = await updateFilm(state.film.id, { ...payload });
                 }

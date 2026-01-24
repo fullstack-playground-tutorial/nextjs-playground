@@ -121,7 +121,7 @@ export default function Banner({ films, duration = 5000 }: Props) {
           isDisplayed={handleIsDisplayed}
           filmId={f.id}
           bannerUrl={f.imageURLs[0]}
-          logoUrl={f.logoUrl}
+          logoUrl={f.logoURL}
           title={f.title}
           description={truncate(f.description ?? "", 120)}
           totalOfEpisodes={f.episodes?.length ?? 0}
@@ -141,11 +141,10 @@ export default function Banner({ films, duration = 5000 }: Props) {
       >
         {films.map((f, index) => (
           <div
-            className={`rounded-full relative w-2 transition-all origin-center flex bg-gray-400 ${
-              index === state.filmCurrentIdx
+            className={`rounded-full relative w-2 transition-all origin-center flex bg-gray-400 ${index === state.filmCurrentIdx
                 ? `h-16 rounded overflow-hidden after:w-full after:block after:content-[''] after:bg-orange-600 after:transition-all after:ease-linear animateProgress after:animate-pulse`
                 : "h-2"
-            } `}
+              } `}
             key={f.id}
             onClick={() => onFilmButtonSelected(index)}
           ></div>

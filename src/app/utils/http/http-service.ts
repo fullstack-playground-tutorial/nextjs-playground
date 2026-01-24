@@ -16,6 +16,7 @@ export type RequestConfig = RequestInit & {
   authSkip?: boolean;
   refreshed?: boolean;
   _isRefresh?: boolean;
+  files?: File[] | Record<string, File | File[] | null | undefined>;
 };
 
 export type RefreshingState = {
@@ -56,6 +57,24 @@ export const createHttpClient = async (
   };
 
   // ====== private helper ======
+  const buildFormData = (body: object, files: RequestConfig['files']) => {
+    const formData = new FormData();
+
+    formData.append("payload", JSON.stringify(body));
+    if (Array.isArray(files)) {
+      files.forEach((file) => formData.append("files", file));
+    } else if (files) {
+      Object.entries(files).forEach(([key, value]) => {
+        if (value instanceof File) {
+          formData.append(key, value);
+        } else if (Array.isArray(value)) {
+          value.forEach((f) => formData.append(key, f));
+        }
+      });
+    }
+    return formData;
+  };
+
   const handleResponse = async <T>(
     res: Response,
     url: string,
@@ -185,25 +204,23 @@ export const createHttpClient = async (
     return sendRequest<T>(url, { ...options, method: METHOD.GET });
   };
 
-  const post = async <T, B extends object>(
-    url: string,
-    body: B,
-    options?: RequestConfig
-  ) => {
-    options = {
-      ...baseRequestInit,
-      ...options,
-      body: JSON.stringify(body),
-    };
+  const post = async <T, B extends object>(url: string, body: B, options?: RequestConfig) => {
+    let finalBody: any = JSON.stringify(body);
+
+    if (options?.files) {
+      finalBody = buildFormData(body, options.files);
+    }
+    options = { ...baseRequestInit, ...options, body: finalBody };
     return sendRequest<T>(url, { ...options, method: METHOD.POST });
   };
 
   const put = async <T>(url: string, body: object, options: RequestConfig) => {
-    options = {
-      ...baseRequestInit,
-      ...options,
-      body: JSON.stringify(body),
-    };
+    let finalBody: any = JSON.stringify(body);
+
+    if (options?.files) {
+      finalBody = buildFormData(body, options.files);
+    }
+    options = { ...baseRequestInit, ...options, body: finalBody };
     return sendRequest<T>(url, { ...options, method: METHOD.PUT });
   };
 
@@ -212,11 +229,12 @@ export const createHttpClient = async (
     body: object,
     options?: RequestConfig
   ) => {
-    options = {
-      ...baseRequestInit,
-      ...options,
-      body: JSON.stringify(body),
-    };
+    let finalBody: any = JSON.stringify(body);
+
+    if (options?.files) {
+      finalBody = buildFormData(body, options.files);
+    }
+    options = { ...baseRequestInit, ...options, body: finalBody };
     return sendRequest<T>(url, { ...options, method: METHOD.PATCH });
   };
 

@@ -12,8 +12,9 @@ export type Film = {
   subTitle?: string;
   slug: string;
   description?: string;
-  logoUrl?: string;
-  imageURLs: string[];
+  logoURL?: string;
+  posterURL?: string;
+  bannerURL?: string;
   numberOfEpisodes?: number;
   newestEpisode?: number;
   publishedAt?: Date;
@@ -21,6 +22,12 @@ export type Film = {
   interestIds: string[];
   trailerURL?: string;
 };
+
+export type FilmImages = {
+  logo: File;
+  poster: File;
+  banner: File;
+}
 
 export type Source = {
   id: string;
