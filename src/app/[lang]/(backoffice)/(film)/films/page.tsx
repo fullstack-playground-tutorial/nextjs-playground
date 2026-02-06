@@ -6,7 +6,6 @@ import WrapperItem from "./components/WrapperItem";
 import Banner from "./components/BannerSlider";
 import Carousel from "./components/Carousel";
 import { NewestFilmCarouselItem } from "./components/FilmCarouselItem";
-import { getFilmService } from "@/app/core/server/context";
 import { Film } from "@/app/feature/film";
 
 export default async function Page() {

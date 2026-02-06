@@ -21,6 +21,7 @@ export type Film = {
   interests: Interest[];
   interestIds: string[];
   trailerURL?: string;
+  director?: string;
 };
 
 export type FilmImages = {
