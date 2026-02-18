@@ -1,0 +1,12 @@
+@reference "tailwindcss";
+
+/* Thumb */
+input[type="range"].slider::-webkit-slider-thumb {
+  background: var(--thumb-color);
+  @apply appearance-none shadow size-4 rounded-full cursor-pointer transition;
+}
+
+input[type="range"].slider::-webkit-slider-thumb:hover {
+  background: var(--thumb-hover-color);
+  @apply appearance-none shadow size-4 rounded-full cursor-pointer scale-120;
+}
