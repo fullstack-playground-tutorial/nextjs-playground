@@ -15,6 +15,7 @@ import HomeIcon from "./icons/home.svg";
 import UserManagerIcon from "./icons/user_manager.svg";
 import TagIcon from "./icons/tag.svg";
 import LanguageIcon from "./icons/language.svg";
+import SettingsIcon from "./icons/settings.svg";
 import SidebarWrapper from "./SidebarWrapper";
 import { MenuSection, MenuSectionProps } from "./MenuSection";
 import { logout, Module, UserInfo } from "@/app/feature/auth";
@@ -43,6 +44,7 @@ const icons: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = {
   UserManagerIcon,
   TagIcon,
   LanguageIcon,
+  SettingsIcon
 };
 
 function Sidebar({ userInfo, topbar, onToggleViewbar }: Props) {
@@ -97,8 +99,7 @@ function Sidebar({ userInfo, topbar, onToggleViewbar }: Props) {
           title="Settings"
           iconName={"SettingsIcon"}
           hidden={!user}
-          onSectionClick={logout}
-          checkAuthorized={() => true}
+          url="/settings"
         />,
         <MenuSection
           key="logout"

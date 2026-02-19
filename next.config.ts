@@ -13,6 +13,10 @@ const nextConfig = {
       bodySizeLimit: "20mb",
     },
   },
+  images: {
+    remotePatterns: [new URL('https://res.cloudinary.com/dw9htagir/image/upload/**')],
+
+  }
 };
 
 export default nextConfig;

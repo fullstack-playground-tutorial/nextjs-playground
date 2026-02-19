@@ -154,7 +154,7 @@ export default function FilmForm({ film, suggestions }: Props) {
       } else {
         setLogoFile(file);
         setLogoPreview(url);
-        updateState({ logoURL: fileName(file) }); // Mock setting URL to filename
+        updateState({ logoUrl: fileName(file) }); // Mock setting URL to filename
       }
     }
   };

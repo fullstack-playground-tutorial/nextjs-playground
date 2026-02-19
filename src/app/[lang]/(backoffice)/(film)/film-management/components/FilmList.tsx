@@ -15,6 +15,7 @@ import VideoCollectionIcon from "@/app/assets/images/icons/video_collection.svg"
 import BinIcon from "@/app/assets/images/icons/bin.svg";
 import EditIcon from "@/app/assets/images/icons/edit.svg";
 import Link from "next/link";
+import Image from "next/image";
 export default function FilmList({
   data,
   limit,
@@ -27,6 +28,7 @@ export default function FilmList({
   limit: number;
   current: number;
 }) {
+  const blurPlaceholder = 'data:image/png;base64,L042PFog4mV@%Mj[M{fk8^WB.9t7'
   const { list, total } = data;
   const searchParams = useSearchParams();
   const [searchTerm, setSearchTerm] = useState("");
@@ -54,21 +56,18 @@ export default function FilmList({
   const StatusBadge = ({ publishedAt }: { publishedAt?: Date }) => (
     <span
       className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full
-                ${
-                  publishedAt && publishedAt?.getTime() > Date.now()
-                    ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                    : ""
-                }
-                ${
-                  publishedAt && publishedAt?.getTime() < Date.now()
-                    ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
-                    : ""
-                }
-      ${
-        publishedAt === undefined
+                ${publishedAt && publishedAt?.getTime() > Date.now()
+          ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+          : ""
+        }
+                ${publishedAt && publishedAt?.getTime() < Date.now()
+          ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
+          : ""
+        }
+      ${publishedAt === undefined
           ? "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
           : ""
-      }
+        }
     `}
     >
       {publishedAt && publishedAt?.getTime() > Date.now()
@@ -94,22 +93,20 @@ export default function FilmList({
           <div className="flex bg-white dark:bg-surface-0 border dark:border-border rounded-md shadow-sm mr-4">
             <button
               onClick={() => setViewMode("list")}
-              className={`p-2 rounded-l-md hover:bg-gray-50 dark:hover:bg-surface-1 ${
-                viewMode === "list"
-                  ? "bg-gray-100 dark:bg-surface-2 text-accent-0"
-                  : "text-gray-500 dark:text-secondary"
-              }`}
+              className={`p-2 rounded-l-md hover:bg-gray-50 dark:hover:bg-surface-1 ${viewMode === "list"
+                ? "bg-gray-100 dark:bg-surface-2 text-accent-0"
+                : "text-gray-500 dark:text-secondary"
+                }`}
               title="List View"
             >
               <ListIcon className="size-5 fill-current" />
             </button>
             <button
               onClick={() => setViewMode("grid")}
-              className={`p-2 rounded-r-md hover:bg-gray-50 dark:hover:bg-surface-1 ${
-                viewMode === "grid"
-                  ? "bg-gray-100 dark:bg-surface-2 text-accent-0"
-                  : "text-gray-500 dark:text-secondary"
-              }`}
+              className={`p-2 rounded-r-md hover:bg-gray-50 dark:hover:bg-surface-1 ${viewMode === "grid"
+                ? "bg-gray-100 dark:bg-surface-2 text-accent-0"
+                : "text-gray-500 dark:text-secondary"
+                }`}
               title="Grid View"
             >
               <GridIcon className="size-5 fill-current" />
@@ -237,13 +234,16 @@ export default function FilmList({
                 key={film.id}
                 className="bg-white dark:bg-surface-0 border dark:border-border rounded-lg shadow hover:shadow-lg transition-shadow overflow-hidden flex flex-col"
               >
-                <div className="relative min-h-64">
+                <div className="relative min-h-72">
                   {film.bannerUrl ? (
                     <div className="h-full hover:scale-105 transition  bg-gray-200 dark:bg-surface-1 flex items-center justify-center">
-                      <img
+                      <Image
                         src={`${config.image_url_host}/${film.bannerUrl}.image/webp.webp`}
                         alt={film.title}
-                        className="w-full h-full object-cover"
+                        fill={true}
+                        placeholder="blur"
+                        objectFit="contain"
+                        blurDataURL={blurPlaceholder}
                       />
                     </div>
                   ) : (
@@ -281,7 +281,7 @@ export default function FilmList({
                       </div>
                     </div>
                     <div className="flex justify-between flex-auto">
-                      <h3 className="font-bold text-xl tracking-tighter dark:text-primary dark:bg-surface-0/50 px-1.5 py-2 rounded">
+                      <h3 className="font-serif text-xl tracking-tight dark:text-primary px-1.5 py-2 rounded backdrop-blur-xs">
                         {film.title}
                       </h3>
                     </div>
