@@ -2,7 +2,7 @@ import Arrow from "./single_arrow.svg";
 import DoubleArrow from "./double_arrow.svg";
 import { useMemo } from "react";
 type Props = {
-  pageTotal: number;
+  total: number;
   currentPage: number;
   truncate?: boolean;
   sideCurrentNumber?: number; // number of page displayed on two side of the current one.
@@ -10,13 +10,13 @@ type Props = {
 };
 
 export default function Pagination({
-  pageTotal: total = 10,
+  total = 10,
   truncate = true,
   sideCurrentNumber = 1,
   currentPage = 5,
   onPageChanged,
 }: Props) {
-  const handlePageClick = (n: number) => {    
+  const handlePageClick = (n: number) => {
     onPageChanged(n);
   };
 
@@ -119,10 +119,10 @@ export default function Pagination({
   }, [currentPage, total]);
 
   return (
-    <div className="p-2 flex flex-row justify-center items-center dark:bg-surface-0 min-w-128 gap-4 rounded-md font-semibold text-sm dark:text-accent-0">
+    <div className="p-2 flex flex-row justify-center items-center min-w-128 gap-4 rounded-md font-semibold text-sm dark:text-accent-0">
       {currentPage > 1 && (
         <button
-          className="transition size-8 flex items-center justify-center outline-0 bg-transparent rounded-full dark:hover:bg-white/10 dark:active:bg-white/20"
+          className="transition size-8 flex items-center cursor-pointer justify-center outline-0 bg-transparent rounded-full dark:hover:bg-white/10 dark:active:bg-white/20"
           onClick={handlePageStartClick}
         >
           <DoubleArrow className="mr-1 rotate-180 size-5" />
@@ -140,7 +140,7 @@ export default function Pagination({
       {renderPages}
       {currentPage < total && (
         <button
-          className="size-8 flex items-center justify-center outline-0 rounded-full bg-transparent transition dark:hover:bg-white/10 dark:active:bg-white/20"
+          className="size-8 flex items-center cursor-pointer justify-center outline-0 rounded-full bg-transparent transition dark:hover:bg-white/10 dark:active:bg-white/20"
           onClick={handlePageNextClick}
         >
           <Arrow className="size-5" />
@@ -148,7 +148,7 @@ export default function Pagination({
       )}
       {currentPage < total && (
         <button
-          className={`size-8 flex items-center justify-center outline-0 rounded-full bg-transparent transition dark:hover:bg-white/10 dark:active:bg-white/20`}
+          className={`size-8 flex items-center cursor-pointer justify-center outline-0 rounded-full bg-transparent transition dark:hover:bg-white/10 dark:active:bg-white/20`}
           onClick={handlePageEndClick}
         >
           <DoubleArrow className="ml-1 size-5" />

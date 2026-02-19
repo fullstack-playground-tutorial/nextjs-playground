@@ -12,35 +12,36 @@ export type Film = {
   subTitle?: string;
   slug: string;
   description?: string;
-  logoURL?: string;
-  posterURL?: string;
-  bannerURL?: string;
+  logoUrl?: string;
+  posterUrl?: string;
+  bannerUrl?: string;
   numberOfEpisodes?: number;
   newestEpisode?: number;
   publishedAt?: Date;
   interests: Interest[];
   interestIds: string[];
   trailerURL?: string;
+  director?: string;
 };
 
 export type FilmImages = {
   logo: File;
   poster: File;
   banner: File;
-}
+};
 
 export type Source = {
   id: string;
   title: string;
   sourceType:
-  | "youtube"
-  | "vimeo"
-  | "mp4"
-  | "hls"
-  | "dash"
-  | "webm"
-  | "mov"
-  | "m3u8";
+    | "youtube"
+    | "vimeo"
+    | "mp4"
+    | "hls"
+    | "dash"
+    | "webm"
+    | "mov"
+    | "m3u8";
   publishedAt?: Date;
   tracks?: { [key: string]: Track };
   sourceUrls: { [key: string]: string };
@@ -51,19 +52,10 @@ export type Episode = {
   title?: string;
   subTitle: string;
   description?: string;
-  sourceType:
-  | "youtube"
-  | "vimeo"
-  | "mp4"
-  | "hls"
-  | "dash"
-  | "webm"
-  | "mov"
-  | "m3u8";
   thumbnailUrl?: string;
   publishedAt?: Date;
   tracks?: { [key: string]: Track };
-  sourceUrls: Source;
+  sources: Source;
 };
 
 export interface FilmFilter extends SearchFilter {

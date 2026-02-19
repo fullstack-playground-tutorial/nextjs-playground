@@ -69,7 +69,7 @@ export default function Banner({ films, duration = 5000 }: Props) {
 
   const displayFilm = useMemo(
     () => films[state.filmCurrentIdx],
-    [state.filmCurrentIdx, films]
+    [state.filmCurrentIdx, films],
   );
 
   const getNewestEpisodes = (film: Film, epDisplayNumber: number = 3) => {
@@ -85,7 +85,7 @@ export default function Banner({ films, duration = 5000 }: Props) {
     if (switchRef.current) {
       switchRef.current.style.setProperty(
         "--progress-duration",
-        `${duration / SECOND}s`
+        `${duration / SECOND}s`,
       );
     }
     if (films.length === 0) return;
@@ -121,7 +121,7 @@ export default function Banner({ films, duration = 5000 }: Props) {
           isDisplayed={handleIsDisplayed}
           filmId={f.id}
           bannerUrl={f.imageURLs[0]}
-          logoUrl={f.logoURL}
+          logoUrl={f.logoUrl}
           title={f.title}
           description={truncate(f.description ?? "", 120)}
           totalOfEpisodes={f.episodes?.length ?? 0}
@@ -141,10 +141,11 @@ export default function Banner({ films, duration = 5000 }: Props) {
       >
         {films.map((f, index) => (
           <div
-            className={`rounded-full relative w-2 transition-all origin-center flex bg-gray-400 ${index === state.filmCurrentIdx
+            className={`rounded-full relative w-2 transition-all origin-center flex bg-gray-400 ${
+              index === state.filmCurrentIdx
                 ? `h-16 rounded overflow-hidden after:w-full after:block after:content-[''] after:bg-orange-600 after:transition-all after:ease-linear animateProgress after:animate-pulse`
                 : "h-2"
-              } `}
+            } `}
             key={f.id}
             onClick={() => onFilmButtonSelected(index)}
           ></div>

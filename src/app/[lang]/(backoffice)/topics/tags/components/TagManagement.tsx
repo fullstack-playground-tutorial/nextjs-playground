@@ -29,12 +29,10 @@ type Props = {
 
 type InternalState = {
   filterVisible: boolean;
-  currentPage: number;
 };
 
 const initialState: InternalState = {
   filterVisible: false,
-  currentPage: 1,
 };
 
 const selectedList: FilterDropdownItem[] = [
@@ -109,7 +107,7 @@ function TagManagement({ hasPermission, limit, currentPage, data }: Props) {
   };
 
   const handleTagEdit = (id: string) => {
-    push(`${pathname}/${id}/edit`, { scroll: false, });
+    push(`${pathname}/${id}/edit`, { scroll: false });
   };
 
   const handleTagDelete = (id: string) => {
@@ -125,7 +123,9 @@ function TagManagement({ hasPermission, limit, currentPage, data }: Props) {
     <>
       <div className="h-screen flex flex-col items-start max-w-300 mx-auto p-4 mt-2">
         <div className="flex flex-row mb-6 gap-4 w-full">
-          <h1 className="font-semibold dark:text-accent-0 text-4xl">Tag Managment</h1>
+          <h1 className="font-semibold dark:text-accent-0 text-4xl">
+            Tag Managment
+          </h1>
         </div>
         <div className="flex flex-row justify-between items-center gap-4 w-full">
           <SearchComponent
@@ -163,34 +163,34 @@ function TagManagement({ hasPermission, limit, currentPage, data }: Props) {
         <div className="grid mt-4 md:mt-6 lg:mt-8 xl:mt-10 xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-4 mx-auto">
           {pending
             ? Array.from({ length: limit }).map((_, i) => {
-              return (
-                <div className="xl:w-70 xl:h-42 max-h-42 h-auto md:w-65 rounded-xl overflow-hidden">
-                  <SkeletonWrapper key={i}>
-                    <SkeletonElement
-                      width={"100%"}
-                      height={"100%"}
-                    ></SkeletonElement>
-                  </SkeletonWrapper>
-                </div>
-              );
-            })
+                return (
+                  <div className="xl:w-70 xl:h-42 max-h-42 h-auto md:w-65 rounded-xl overflow-hidden">
+                    <SkeletonWrapper key={i}>
+                      <SkeletonElement
+                        width={"100%"}
+                        height={"100%"}
+                      ></SkeletonElement>
+                    </SkeletonWrapper>
+                  </div>
+                );
+              })
             : list.map((item) => (
-              <Card
-                key={item.id}
-                id={item.id}
-                title={item.title}
-                slug={item.slug}
-                description={item.description || ""}
-                count={item.usageCount || 0}
-                tagColor={item.color}
-                onDelete={() => handleTagDelete(item.id)}
-                onEdit={() => handleTagEdit(item.id)}
-              />
-            ))}
+                <Card
+                  key={item.id}
+                  id={item.id}
+                  title={item.title}
+                  slug={item.slug}
+                  description={item.description || ""}
+                  count={item.usageCount || 0}
+                  tagColor={item.color}
+                  onDelete={() => handleTagDelete(item.id)}
+                  onEdit={() => handleTagEdit(item.id)}
+                />
+              ))}
         </div>
         <div className="mt-6 md:mt-8 lg:mt-10 self-center">
           <Pagination
-            pageTotal={pageTotal}
+            total={pageTotal}
             currentPage={currentPage}
             onPageChanged={handlePageChange}
           />

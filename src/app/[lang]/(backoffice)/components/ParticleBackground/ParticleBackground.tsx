@@ -102,7 +102,7 @@ export default function ParticleBackground() {
       },
       detectRetina: true,
     }),
-    []
+    [],
   );
 
   if (init) {

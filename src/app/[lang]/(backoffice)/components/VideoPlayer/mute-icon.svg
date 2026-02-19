@@ -1,0 +1,14 @@
+<svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    stroke="currentColor"
+>
+    <path d="M9 9v6h4l5 5V4l-5 5H9z"/>
+    <line
+    x1="23"
+    y1="1"
+    x2="1"
+    y2="23"
+    />
+</svg>
