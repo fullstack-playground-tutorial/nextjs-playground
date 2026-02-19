@@ -26,6 +26,7 @@ class ObjectValidate {
   validate<T extends Object>(values: T): ValidateErrors {
     const res: ValidateErrors = {};
     for (const [field, value] of Object.entries(values)) {
+      if (!this.schema[field]) continue;
       const iv = this.schema[field].validate(value);
       if (iv.length > 0) {
         res[field] = iv;
@@ -91,9 +92,16 @@ export class SchemaItem<T extends string | number> {
     this.emailError = this._fieldName + " is not valid";
   }
 
-  validate<V extends string | number>(value?: V | null): string {
+  validate<V extends string | number | any[]>(value?: V | null): string {
     if (this.required && (value === undefined || value === null)) {
       return this.requiredError;
+    }
+
+    if (Array.isArray(value)) {
+      if (this.required && value.length === 0) {
+        return this.requiredError;
+      }
+      return "";
     }
 
     if (typeof value !== "string" && typeof value !== "number") {

@@ -306,6 +306,7 @@ export default function TopicForm({ user, topic, tagSuggestions }: Props) {
                   value={title}
                   disable={mode === "view" || mode === "review"}
                   label={"Title"}
+                  required
                 />
               </div>
               <p

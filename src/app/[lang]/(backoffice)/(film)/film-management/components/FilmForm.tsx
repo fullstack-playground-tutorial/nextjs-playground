@@ -48,7 +48,7 @@ export default function FilmForm({ film, suggestions }: Props) {
     const pathname = usePathname();
     const searchParams = useSearchParams();
     const toast = useToast();
-
+    const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
     // Mode detection
     const mode = getFilmMode(pathname, film?.id);
     const isViewOrReview = mode === "view" || mode === "review";
@@ -110,7 +110,7 @@ export default function FilmForm({ film, suggestions }: Props) {
         router.replace(`${pathname}?${params.toString()}`);
     }, [debouncedQ]);
 
-    const updateFilmState = (vals: Partial<Film>) => {
+    const updateState = (vals: Partial<Film>) => {
         setState(prev => ({ ...prev, film: { ...prev.film, ...vals } }));
     };
 
@@ -118,15 +118,25 @@ export default function FilmForm({ film, suggestions }: Props) {
         const { name, value } = e.target;
         // Handle number fields
         if (name === "numberOfEpisodes") {
-            updateFilmState({ [name]: parseInt(value) || 0 });
+            updateState({ [name]: parseInt(value) || 0 });
         } else {
-            updateFilmState({ [name]: value as any });
+            updateState({ [name]: value as any });
         }
     };
 
     const handleFileDrop = (files: FileList, type: 'poster' | 'banner' | 'logo') => {
         if (files && files[0]) {
             const file = files[0];
+
+            // Validate file size
+            const isLogo = type === 'logo';
+            const limit = isLogo ? 2 * 1024 * 1024 : 5 * 1024 * 1024; // 2MB for Logo, 5MB for others
+
+            if (file.size > limit) {
+                toast.addToast("error", `${isLogo ? 'Thumbnail' : 'Gallery image'} must be smaller than ${isLogo ? '1-2 MB' : '5 MB'}`);
+                return;
+            }
+
             const url = URL.createObjectURL(file);
             if (type === 'poster') {
                 setPosterFile(file);
@@ -137,7 +147,7 @@ export default function FilmForm({ film, suggestions }: Props) {
             } else {
                 setLogoFile(file);
                 setLogoPreview(url);
-                updateFilmState({ logoURL: fileName(file) }); // Mock setting URL to filename
+                updateState({ logoURL: fileName(file) }); // Mock setting URL to filename
             }
         }
     };
@@ -171,6 +181,11 @@ export default function FilmForm({ film, suggestions }: Props) {
                         return;
                     }
                     res = await createFilm({ ...payload }, logoFile, posterFile, bannerFile); // status would be passed if API supported it
+                    if (res?.fieldErrors) {
+                        setFieldErrors(res.fieldErrors);
+                        return;
+                    }
+
                 } else if (mode === "edit" || mode === "review") {
                     res = await updateFilm(state.film.id, { ...payload });
                 }
@@ -189,6 +204,11 @@ export default function FilmForm({ film, suggestions }: Props) {
         if (status === "approve") startApproving(performAction);
         if (status === "reject") startRejecting(performAction);
     };
+
+    useEffect(() => {
+        const slug = state.film.title.toLowerCase().replace(/\s+/g, "-");
+        updateState({ slug });
+    }, [state.film.title])
 
     return (
         <div className="flex flex-col h-screen items-start mx-auto max-w-5xl p-6">
@@ -300,14 +320,31 @@ export default function FilmForm({ film, suggestions }: Props) {
 
                 {/* Right Column: Form Fields */}
                 <div className="lg:col-span-2 bg-white dark:bg-surface-1 rounded-lg border dark:border-border shadow-lg p-6 flex flex-col gap-6 h-fit">
-                    <div className="h-12">
-                        <FloatInput label="Title" name="title" value={state.film.title} disable={isViewOrReview} onChange={handleChange} />
+                    <div className="flex flex-col gap-2">
+                        <div className="h-12">
+                            <FloatInput required label="Title" name="title" value={state.film.title} disable={isViewOrReview} onChange={handleChange} />
+                        </div>
+
+                        {fieldErrors["title"] && <span className="text-sm text-alert-0">{fieldErrors["title"]}</span>}
+                        <p
+                            className={`text-xs text-tertiary-0 w-full min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-start mt-2 `}
+                        >
+                            <span className="font-bold text-secondary shrink-0">
+                                Slug:
+                            </span>{" "}
+
+                            {state.film.slug}
+                        </p>
                     </div>
-                    <div className="h-12">
-                        <FloatInput label="Sub Title" name="subTitle" value={state.film.subTitle || ""} disable={isViewOrReview} onChange={handleChange} />
+                    <div className="flex flex-col gap-2">
+                        <div className="h-12">
+                            <FloatInput required label="Sub Title" name="subTitle" value={state.film.subTitle || ""} disable={isViewOrReview} onChange={handleChange} />
+                        </div>
+                        {fieldErrors["subTitle"] && <span className="text-sm text-alert-0">{fieldErrors["subTitle"]}</span>}
                     </div>
-                    <div className="h-12">
-                        <FloatInput label="Trailer URL" name="trailerURL" value={state.film.trailerURL || ""} disable={isViewOrReview} onChange={handleChange} />
+                    <div className="flex flex-col gap-2">
+                        <FloatInput required label="Trailer URL" name="trailerURL" value={state.film.trailerURL || ""} disable={isViewOrReview} onChange={handleChange} />
+                        {fieldErrors["trailerURL"] && <span className="text-sm text-alert-0">{fieldErrors["trailerURL"]}</span>}
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -315,7 +352,8 @@ export default function FilmForm({ film, suggestions }: Props) {
                         {/* In real app, date picker would be better */}
                         {/* Using text input for compatibility with previous code logic */}
                         <div className="h-12">
-                            <FloatInput label="Number of Episodes" name="numberOfEpisodes" value={String(state.film.numberOfEpisodes || "")} disable={isViewOrReview} onChange={handleChange} />
+                            <FloatInput type="number" label="Number of Episodes" name="numberOfEpisodes" required value={String(state.film.numberOfEpisodes || "0")} disable={isViewOrReview} onChange={handleChange} />
+                            {fieldErrors["numberOfEpisodes"] && <span className="text-sm text-alert">{fieldErrors["numberOfEpisodes"]}</span>}
                         </div>
                     </div>
 
@@ -327,14 +365,17 @@ export default function FilmForm({ film, suggestions }: Props) {
                             onQChange={(q) => setState(prev => ({ ...prev, interestQ: q }))}
                             suggestions={suggestions || []}
                             selected={state.film.interests}
-                            onTagChange={(items) => updateFilmState({ interests: items })}
+                            onTagChange={(items) => updateState({ interestIds: items.map(item => item.id), interests: items })}
                             maxTags={10}
                             disable={isViewOrReview}
+                            required
                         />
+                        {fieldErrors["interestIds"] && <span className="text-sm text-alert-0">{fieldErrors["interestIds"]}</span>}
                     </div>
 
                     <div className="h-32">
                         <FloatTextarea label="Description" name="description" value={state.film.description || ""} disable={isViewOrReview} onChange={handleChange} />
+                        {fieldErrors["description"] && <span className="text-sm text-alert-0">{fieldErrors["description"]}</span>}
                     </div>
 
                     <ActionButtons

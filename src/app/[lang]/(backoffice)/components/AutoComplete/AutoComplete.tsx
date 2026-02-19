@@ -24,6 +24,8 @@ type Props<
   disable: boolean;
   onTagChange: (selected: AutoCompeleteItem<T>[]) => void;
   onQChange: (text: string) => void;
+  required?: boolean;
+
 };
 
 function AutoComplete<
@@ -42,6 +44,7 @@ function AutoComplete<
   onTagChange,
   onQChange,
   disable,
+  required,
 }: Props<T>) {
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -124,7 +127,7 @@ function AutoComplete<
           className="absolute left-3 top-1/2 -translate-y-1/2 text-base text-secondary font-medium 
       transition-all duration-200"
         >
-          {label}
+          {label}{required && <span className="text-alert-0">*</span>}
         </label>
       </div>
 

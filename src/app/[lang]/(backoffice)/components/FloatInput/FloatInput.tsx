@@ -4,11 +4,13 @@ type Props = {
   value: string | undefined;
   label: string;
   disable: boolean;
+  required?: boolean;
+  type?: "text" | "email" | "password" | "number";
   onChange: (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => void;
 };
-function FloatInput({ onChange, value, label, name, disable }: Props) {
+function FloatInput({ onChange, value, label, name, disable, required, type = "text" }: Props) {
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -18,7 +20,7 @@ function FloatInput({ onChange, value, label, name, disable }: Props) {
     <div className="relative w-full h-full">
       <input
         disabled={disable}
-        type="text"
+        type={type}
         id={name}
         name={name}
         value={value}
@@ -36,7 +38,7 @@ function FloatInput({ onChange, value, label, name, disable }: Props) {
         text-secondary
         peer-focus:top-1.5 peer-focus:-translate-y-0 peer-focus:text-sm peer-focus:font-normal dark:peer-focus:text-accent-0"
       >
-        {label}
+        {label}{required && <span className="text-alert-0">*</span>}
       </label>
     </div>
   );
