@@ -19,6 +19,8 @@ import SettingsIcon from "./icons/settings.svg";
 import SidebarWrapper from "./SidebarWrapper";
 import { MenuSection, MenuSectionProps } from "./MenuSection";
 import { logout, Module, UserInfo } from "@/app/feature/auth";
+import { getLocaleService } from "@/app/utils/resource/locales";
+import { useParams } from "next/navigation";
 
 interface Props {
   userInfo?: UserInfo;
@@ -44,10 +46,12 @@ const icons: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = {
   UserManagerIcon,
   TagIcon,
   LanguageIcon,
-  SettingsIcon
+  SettingsIcon,
 };
 
 function Sidebar({ userInfo, topbar, onToggleViewbar }: Props) {
+  const params = useParams();
+  const { localize } = getLocaleService(params.lang as string);
   const modules = userInfo?.modules ?? [];
   const permissions: string[] = userInfo?.permissions ?? [];
   const user = userInfo?.user;
@@ -87,7 +91,7 @@ function Sidebar({ userInfo, topbar, onToggleViewbar }: Props) {
         <MenuSection
           key="home"
           id="home"
-          title="Home"
+          title={localize("sidebar_home")}
           iconName={"HomeIcon"}
           url="/"
           checkAuthorized={() => true}
@@ -96,15 +100,15 @@ function Sidebar({ userInfo, topbar, onToggleViewbar }: Props) {
         <MenuSection
           key="settings"
           id="settings"
-          title="Settings"
+          title={localize("sidebar_settings")}
           iconName={"SettingsIcon"}
           hidden={!user}
-          url="/settings"
+          url="/settings/generals"
         />,
         <MenuSection
           key="logout"
           id="logout"
-          title="Logout"
+          title={localize("sidebar_logout")}
           iconName={"LogoutIcon"}
           hidden={!user}
           onSectionClick={logout}

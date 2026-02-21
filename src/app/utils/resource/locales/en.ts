@@ -18,5 +18,39 @@ export const en: { [key: string]: string } = {
 
   friend_request_cancel: "cancel friend request",
   friend_request_send: "send friend request",
-  something_go_wrong_error:"Something go wrong!"
+  something_go_wrong_error: "Something go wrong!",
+
+  "en-US": "English (US)",
+  "vi-VN": "Vietnamese",
+
+  settings_account_preferences: "Preferences",
+  settings_account_language: "Language",
+  settings_account_danger_zone: "Danger Zone",
+  settings_account_delete_desc:
+    "Once you delete your account, there is no going back. Please be certain.",
+  settings_account_delete_btn: "Delete Account",
+  settings_account_change_avatar: "Change Avatar",
+  settings_account_personal_info: "Personal Information",
+  settings_account_full_name: "Full Name",
+  settings_account_bio: "Bio (Job Title)",
+  settings_account_contact_info: "Contact Information",
+  settings_account_email: "Email Address",
+  settings_account_phone: "Phone Number",
+  settings_account_security: "Security",
+  settings_account_change_password: "Change Password",
+  settings_account_current_password: "Current Password",
+  settings_account_new_password: "New Password",
+  settings_account_confirm_password: "Confirm Password",
+  settings_account_update_password: "Update Password",
+  settings_account_role_admin: "Administrator",
+  roles_management_title: "Role Management",
+  search_title: "Search",
+  sidebar_home: "Home",
+  sidebar_settings: "Settings",
+  sidebar_logout: "Logout",
+  settings_layout_title: "Settings",
+  settings_layout_description:
+    "Manage your account preferences and application settings.",
+  settings_tab_general: "General",
+  settings_tab_account: "Account Profile",
 };

@@ -1,8 +1,12 @@
 "use client";
-
-import { InternalizationContext } from "@/app/core/client/context/internalization/context";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { use, useState } from "react";
+import { getLocaleService } from "@/app/utils/resource/locales";
+import {
+  useParams,
+  usePathname,
+  useRouter,
+  useSearchParams,
+} from "next/navigation";
+import { useState } from "react";
 
 interface Props {
   hidden: boolean;
@@ -17,7 +21,8 @@ const initialState: InternalState = {
 };
 export default function PhoneSearchBar(props: Props) {
   const [state, setState] = useState(initialState);
-  const internalizationContext = use(InternalizationContext);
+  const params = useParams();
+  const { currentLocale } = getLocaleService(params.lang as string);
   const router = useRouter();
   const pathname = usePathname();
   const onChangeSearchInput = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -34,13 +39,13 @@ export default function PhoneSearchBar(props: Props) {
       q: state.searchText,
     });
 
-    const searchUrl = `/${internalizationContext?.internalization.currentLocale ?? "vi-VN"}/search?${searchParams.toString()}`;
+    const searchUrl = `/${currentLocale ?? "vi-VN"}/search?${searchParams.toString()}`;
     router.replace(searchUrl);
-  }
+  };
 
   const onSearch = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    handleSearch(state.searchText)
+    handleSearch(state.searchText);
   };
 
   return (

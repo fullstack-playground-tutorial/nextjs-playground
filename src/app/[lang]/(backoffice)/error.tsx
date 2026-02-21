@@ -1,7 +1,8 @@
 "use client";
 
-import { InternalizationContext } from "@/app/core/client/context/internalization/context";
-import { useContext, useEffect } from "react";
+import { getLocaleService } from "@/app/utils/resource/locales";
+import { useParams } from "next/navigation";
+import { useEffect } from "react";
 
 interface Props {
   error: Error & { digest?: string };
@@ -9,7 +10,8 @@ interface Props {
 }
 
 export default function Error(props: Props) {
-  const internalization = useContext(InternalizationContext);
+  const params = useParams();
+  const { localize } = getLocaleService(params.lang as string);
 
   useEffect(() => {
     console.log(props.error);
@@ -18,32 +20,30 @@ export default function Error(props: Props) {
   return (
     <div className="mt-12 mx-auto">
       <div className="relative bg-white rounded-2xl shadow-lg dark:bg-gray-700 min-w-80 max-w-sm mx-auto overflow-hidden">
-          {/* Modal header */}
-          <div className="flex bg-red-500 p-4">
-            <div className="my-auto mx-auto flex text-center rounded-full w-8 h-8 border-white border-2 text-white items-center justify-center">
-              !
-            </div>
+        {/* Modal header */}
+        <div className="flex bg-red-500 p-4">
+          <div className="my-auto mx-auto flex text-center rounded-full w-8 h-8 border-white border-2 text-white items-center justify-center">
+            !
           </div>
-          {/* Modal body */}
-          <div className="flex flex-col p-4">
-            <div className=""></div>
-            <div className="text-center font-semibold text-lg">
-              {"Error"}
-            </div>
-            <div className="text-center text-base">
-              {props.error.message ?? "Something go wrong"}
-            </div>
+        </div>
+        {/* Modal body */}
+        <div className="flex flex-col p-4">
+          <div className=""></div>
+          <div className="text-center font-semibold text-lg">{"Error"}</div>
+          <div className="text-center text-base">
+            {props.error.message ?? "Something go wrong"}
           </div>
-          {/* footer */}
-          <div className="flex flex-row justify-center p-4">
-            <button
-              type="button"
-              className="p-2 rounded-full mx-4 w-1/3 text-white font-semibold hover:shadow-lg bg-red-500 text-base hover:bg-red-600 shadow-sm transition-all cursor-pointer"
-              onClick={()=>props.reset()}
-            >
-              Try Again
-            </button>
-          </div>
+        </div>
+        {/* footer */}
+        <div className="flex flex-row justify-center p-4">
+          <button
+            type="button"
+            className="p-2 rounded-full mx-4 w-1/3 text-white font-semibold hover:shadow-lg bg-red-500 text-base hover:bg-red-600 shadow-sm transition-all cursor-pointer"
+            onClick={() => props.reset()}
+          >
+            Try Again
+          </button>
+        </div>
       </div>
     </div>
   );

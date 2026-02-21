@@ -2,32 +2,46 @@ import { en } from "./en";
 import { vi } from "./vi";
 
 const Locales = ["en-US", "vi-VN"] as const;
-export type Locale = (typeof Locales)[number];
+export type LocaleCode = (typeof Locales)[number];
 
 export interface Dictionary {
   [key: string]: string;
 }
 
-export type Dictionaries = Record<Locale, Dictionary>;
+export type Dictionaries = Record<LocaleCode, Dictionary>;
 
 const dictionaries: Dictionaries = {
   "en-US": en,
   "vi-VN": vi,
 };
 
-export const createLocaleService = (defaultLocale: Locale = "en-US") => {
-  let currentLocale: Locale = defaultLocale;
+export const createLocaleService = (defaultLocale: string = "en-US") => {
+  const found = Locales.find(
+    (loc) => loc === defaultLocale || loc.startsWith(defaultLocale),
+  );
 
-  const getDictionary = (locale: Locale): Dictionary => {
+  if (found) {
+    defaultLocale = found;
+  } else {
+    defaultLocale = "en-US";
+  }
+  let currentLocale: LocaleCode = defaultLocale as LocaleCode;
+
+  const getDictionary = (locale: LocaleCode): Dictionary => {
     return dictionaries[locale] || dictionaries["en-US"];
   };
 
-  const changeLanguage = (locale: Locale) => {
-    if (Locales.includes(locale)) {
-      currentLocale = locale;
-    } else {
-      currentLocale = "en-US";
+  // DEPRECATE
+  const changeLanguage = (locale: string) => {
+    if (!locale) return;
+    const found = Locales.find(
+      (loc) => loc === locale || loc.startsWith(locale),
+    );
+    if (found) {
+      currentLocale = found;
     }
+    // If not found, we keep the previous currentLocale instead of reverting to en-US
+    // This handles cases where 'lang' parameter might be a route segment like 'settings'
   };
 
   const localize = (key: string): string => {
@@ -35,7 +49,8 @@ export const createLocaleService = (defaultLocale: Locale = "en-US") => {
     return dict[key] || key;
   };
 
-  const getLocale = (acceptLang?: string): Locale => {
+  // DEPRECATE
+  const getLocale = (acceptLang?: string): LocaleCode => {
     if (!acceptLang) return currentLocale;
 
     const langs = acceptLang.split(",").map((l) => l.split(";")[0].trim());
@@ -48,8 +63,7 @@ export const createLocaleService = (defaultLocale: Locale = "en-US") => {
       }
     }
 
-    currentLocale = "en-US";
-    return "en-US";
+    return currentLocale;
   };
 
   const getSupportLocales = () => Locales;
@@ -59,10 +73,20 @@ export const createLocaleService = (defaultLocale: Locale = "en-US") => {
     changeLanguage,
     localize,
     getLocale,
-    currentLocale,
+    get currentLocale() {
+      return currentLocale;
+    },
     getSupportLocales,
   };
 };
 
-// Khởi tạo instance dùng chung
-export const localeService = createLocaleService();
+let localeService: ReturnType<typeof createLocaleService> | null = null;
+
+export const getLocaleService = (lang?: string) => {
+  if (!localeService) {
+    localeService = createLocaleService(lang);
+  } else if (lang) {
+    localeService.changeLanguage(lang);
+  }
+  return localeService;
+};

@@ -10,13 +10,16 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({
   children,
+  params,
 }: {
   children: React.ReactNode;
+  params: Promise<{ lang: string }>;
 }) {
+  const { lang } = await params;
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={lang} suppressHydrationWarning>
       <body suppressHydrationWarning>
-        <Providers>
+        <Providers lang={lang}>
           <Suspense fallback={<Loading />}>{children}</Suspense>
         </Providers>
       </body>

@@ -1,10 +1,9 @@
 "use client";
-
 import { Story } from "@/app/feature/story";
 import StoryDetailComponent from "./StoryDetail";
 import { useDate } from "@/app/hooks/useDate";
-import { InternalizationContext } from "@/app/core/client/context/internalization/context";
-import { use } from "react";
+import { getLocaleService } from "@/app/utils/resource/locales";
+import { useParams } from "next/navigation";
 
 interface Props {
   story: Story;
@@ -12,11 +11,9 @@ interface Props {
 export * from "./StoryPost";
 
 export const StoryComponent = (props: Props) => {
-  const internalization = use(InternalizationContext);
-  if (!internalization) {
-    return <></>;
-  }
-  const { timeSince } = useDate(internalization.localize);
+  const params = useParams();
+  const { localize } = getLocaleService(params.lang as string);
+  const { timeSince } = useDate(localize);
   return (
     <div className="min-w-[400px] relative max-h-[400px] w-1/2 mx-auto bg-glass-100 rounded-lg p-4 shadow-lg border border-l-glass-500 backdrop-blur-md border-t-glass-500 border-r-glass-200 border-b-glass-200">
       <div className="inline-flex flex-row gap-2 min-w-[200px] bg-glass-200 rounded-full p-2 border shadow-md border-t-glass-500 border-r-glass-200 border-b-glass-200">
@@ -36,13 +33,13 @@ export const StoryComponent = (props: Props) => {
       <StoryDetailComponent content="" />
       <div className="flex flex-row m-0 mt-4 gap-3 tracking-wide">
         <div className="flex justify-center items-center border rounded-full h-8 min-w-8 align-center px-4 py-2 font-normal text-black shadow-md bg-glass-200 border-l-glass-500 border-t-glass-500 border-r-glass-200 border-b-glass-200">
-          <label>Like</label>
+          <label>{localize("like") || "Like"}</label>
         </div>
         <div className="flex justify-center items-center border rounded-full h-8 min-w-8 align-center px-4 py-2 font-normal text-black shadow-md bg-glass-200 border-l-glass-500 border-t-glass-500 border-r-glass-200 border-b-glass-200">
-          <label>Share</label>
+          <label>{localize("share") || "Share"}</label>
         </div>
         <div className="flex justify-center items-center border rounded-full h-8 min-w-8 align-center px-4 py-2 font-normal text-black shadow-md bg-glass-200 border-l-glass-500 border-t-glass-500 border-r-glass-200 border-b-glass-200">
-          <label>Comment</label>
+          <label>{localize("comment") || "Comment"}</label>
         </div>
       </div>
       <div className="flex flex-col rounded-md border tracking-wide text-sm  mt-4 p-4 gap-4 bg-glass-200  border-t-glass-500 border-l-glass-500 border-r-glass-200 border-b-glass-200">

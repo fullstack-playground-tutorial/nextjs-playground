@@ -17,6 +17,39 @@ export const vi: { [key: string]: string } = {
 
   friend_request_cancel: "huỷ yêu cầu kết bạn",
   friend_request_send: "gửi yêu kết bạn",
-  something_go_wrong_error:"Something go wrong!"
+  something_go_wrong_error: "Something go wrong!",
 
+  "en-US": "Tiếng Anh (Mỹ)",
+  "vi-VN": "Tiếng Việt",
+
+  settings_account_preferences: "Tùy chọn",
+  settings_account_language: "Ngôn ngữ",
+  settings_account_danger_zone: "Khu vực nguy hiểm",
+  settings_account_delete_desc:
+    "Một khi bạn xóa tài khoản, không thể khôi phục lại. Hãy chắc chắn.",
+  settings_account_delete_btn: "Xóa tài khoản",
+  settings_account_change_avatar: "Thay đổi ảnh đại diện",
+  settings_account_personal_info: "Thông tin cá nhân",
+  settings_account_full_name: "Họ và tên",
+  settings_account_bio: "Tiểu sử (Chức danh)",
+  settings_account_contact_info: "Thông tin liên hệ",
+  settings_account_email: "Địa chỉ Email",
+  settings_account_phone: "Số điện thoại",
+  settings_account_security: "Bảo mật",
+  settings_account_change_password: "Thay đổi mật khẩu",
+  settings_account_current_password: "Mật khẩu hiện tại",
+  settings_account_new_password: "Mật khẩu mới",
+  settings_account_confirm_password: "Xác nhận mật khẩu",
+  settings_account_update_password: "Cập nhật mật khẩu",
+  settings_account_role_admin: "Quản trị viên",
+  roles_management_title: "Quản lý vai trò",
+  search_title: "Tìm kiếm",
+  sidebar_home: "Trang chủ",
+  sidebar_settings: "Cài đặt",
+  sidebar_logout: "Đăng xuất",
+  settings_layout_title: "Cài đặt",
+  settings_layout_description:
+    "Quản lý tùy chọn tài khoản và cài đặt ứng dụng.",
+  settings_tab_general: "Tổng quan",
+  settings_tab_account: "Hồ sơ tài khoản",
 };

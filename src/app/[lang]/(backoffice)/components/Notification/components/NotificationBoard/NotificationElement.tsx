@@ -1,71 +1,52 @@
-"use server"
-import { InternalizationContext } from "@/app/core/client/context/internalization/context";
+"use server";
+import { getLocaleService } from "@/app/utils/resource/locales";
+import { Sprintf } from "@/app/utils/string";
 import { accept, reject } from "@/app/feature/friend/actions";
 import { Notification } from "@/app/feature/notification/notification";
 import { cookies } from "next/headers";
-import { use } from "react";
 
 interface Props {
   noti: Notification;
+  lang?: string;
 }
 
-export async function NotificationElement({ noti }: Props) {
-  const userId = (await cookies()).get("userId")?.value
-  const internalization = use(InternalizationContext);
+export async function NotificationElement({ noti, lang }: Props) {
+  const userId = (await cookies()).get("userId")?.value;
+  const { localize } = getLocaleService(lang);
   const onAcceptClick = (e: React.MouseEvent) => {
     e.preventDefault();
     if (noti.requester && noti.requester.id) {
-      return accept(noti.requester.id)
-       
+      return accept(noti.requester.id);
     }
   };
 
   const onRejectClick = (e: React.MouseEvent) => {
     e.preventDefault();
     if (noti.requester && noti.requester.id) {
-      reject(noti.requester.id)
+      reject(noti.requester.id);
     }
   };
 
   const renderContent = () => {
     let contentString = noti.content;
-    if (internalization) {
-      switch (noti.content) {
-        case "add_friend":
-          contentString = internalization?.localize(
-            noti.content,
-            noti.requester.name
-          );
-
-          break;
-        case "accept_friend":
-          contentString = internalization.localize(
-            noti.content,
-            noti.requester.name
-          );
-
-          break;
-        case "reject_friend":
-          contentString = internalization.localize(
-            noti.content,
-            noti.requester.name
-          );
-
-          break;
-        case "your_accept_friend":
-          contentString = internalization.localize(
-            noti.content,
-            noti.requester.name
-          );
-        case "your_reject_friend":
-          contentString = internalization.localize(
-            noti.content,
-            noti.requester.name
-          );
-          break;
-        default:
-          break;
-      }
+    switch (noti.content) {
+      case "add_friend":
+        contentString = Sprintf(localize(noti.content), noti.requester.name);
+        break;
+      case "accept_friend":
+        contentString = Sprintf(localize(noti.content), noti.requester.name);
+        break;
+      case "reject_friend":
+        contentString = Sprintf(localize(noti.content), noti.requester.name);
+        break;
+      case "your_accept_friend":
+        contentString = Sprintf(localize(noti.content), noti.requester.name);
+        break;
+      case "your_reject_friend":
+        contentString = Sprintf(localize(noti.content), noti.requester.name);
+        break;
+      default:
+        break;
     }
 
     return contentString;
@@ -74,7 +55,7 @@ export async function NotificationElement({ noti }: Props) {
   const renderColor = () => {
     if (userId) {
       const subscriber = noti.subscribers.find(
-        (subscriber) => subscriber.id == userId
+        (subscriber) => subscriber.id == userId,
       );
       if (subscriber) {
         return subscriber.readed

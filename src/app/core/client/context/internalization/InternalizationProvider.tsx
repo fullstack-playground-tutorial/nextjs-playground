@@ -1,27 +1,34 @@
-"use client"
-import { ReactNode, useState } from "react";
+"use client";
+import { ReactNode, useEffect, useState } from "react";
 
 import { InternalizationContext, InternalizationState } from "./context";
 import { Sprintf } from "@/app/utils/string";
-import { Locale, localeService } from "@/app/utils/resource/locales";
+import { getLocaleService, LocaleCode } from "@/app/utils/resource/locales";
 
 export interface Props {
   children: ReactNode;
+  lang?: string;
 }
-
 
 export default function InternalizationProvider(props: Props) {
   const [internalization, setInternalization] = useState<InternalizationState>({
-    currentLocale: localeService.currentLocale,
+    currentLocale: getLocaleService(props.lang).currentLocale,
   });
 
-  const changeLanguage = (locale: Locale) => {
+  useEffect(() => {
+    if (props.lang) {
+      getLocaleService(props.lang);
+      setInternalization({ currentLocale: props.lang as LocaleCode });
+    }
+  }, [props.lang]);
+
+  const changeLanguage = (locale: LocaleCode) => {
     setInternalization((prev) => ({ ...prev, currentLocale: locale }));
     return null;
   };
 
   const localize = (key: string, ...val: string[]) => {
-    return Sprintf(localeService.localize(key), ...val);
+    return Sprintf(getLocaleService().localize(key), ...val);
   };
 
   return (

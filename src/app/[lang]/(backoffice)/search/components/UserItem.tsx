@@ -1,10 +1,8 @@
 "use client";
-import { InternalizationContext } from "@/app/core/client/context/internalization/context";
+import { getLocaleService } from "@/app/utils/resource/locales";
 import { FriendStatus, SearchItem } from "@/app/feature/search/search";
-import React, {
-  TransitionStartFunction,
-  useContext,
-} from "react";
+import { useParams } from "next/navigation";
+import React, { TransitionStartFunction } from "react";
 
 interface Props {
   item: SearchItem;
@@ -16,9 +14,10 @@ interface Props {
 }
 
 export const UserItem = (props: Props) => {
-  const internalization = useContext(InternalizationContext);
+  const params = useParams();
+  const { localize } = getLocaleService(params.lang as string);
   const handleAddFriendOnClick = (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
   ) => {
     e.preventDefault();
     props.startTransition(() => {
@@ -26,7 +25,7 @@ export const UserItem = (props: Props) => {
     });
   };
   const handleUnfriendOnClick = (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
   ) => {
     e.preventDefault();
     props.startTransition(() => {
@@ -35,7 +34,7 @@ export const UserItem = (props: Props) => {
   };
 
   const handleCancelFriendRequestOnClick = (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
   ) => {
     e.preventDefault();
     props.startTransition(() => {
@@ -49,7 +48,7 @@ export const UserItem = (props: Props) => {
     switch (friendStatus) {
       case "A":
         // show unfriend button
-        content = internalization?.localize("unfriend");
+        content = localize("unfriend");
         action = handleUnfriendOnClick;
         break;
       case "C":
@@ -57,12 +56,12 @@ export const UserItem = (props: Props) => {
       case "U":
       case undefined:
         // show add friend button
-        content = internalization?.localize("friend_request_send");
+        content = localize("friend_request_send");
         action = handleAddFriendOnClick;
         break;
       case "P":
         // show cancel friend request button
-        content = internalization?.localize("friend_request_cancel");
+        content = localize("friend_request_cancel");
         action = handleCancelFriendRequestOnClick;
         break;
       default:

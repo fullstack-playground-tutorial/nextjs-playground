@@ -11,7 +11,8 @@ import {
 } from "react";
 import Uploader from "@/app/components/Upload";
 import { useDate } from "@/app/hooks/useDate";
-import { InternalizationContext } from "@/app/core/client/context/internalization/context";
+import { getLocaleService } from "@/app/utils/resource/locales";
+import { useParams } from "next/navigation";
 import FileStack from "@/app/components/FileStack";
 
 interface Props {}
@@ -27,23 +28,20 @@ interface InternalState {
 
 const initialState: InternalState = {
   text: "",
-  droppedfiles: [
-    
-  ],
+  droppedfiles: [],
 };
 
 const StoryPost: React.FC<Props> = (props: Props) => {
   const [state, setState] = useState<InternalState>(initialState);
   const createWitText = create.bind(null, state.text);
-  const internalization = use(InternalizationContext);
-  if (!internalization) {
-    return <></>;
-  }
-  const { timeSince } = useDate(internalization.localize);
+  const params = useParams();
+  const { localize } = getLocaleService(params.lang as string);
+
+  const { timeSince } = useDate(localize);
 
   const [actionState, action] = useActionState(
     createWitText,
-    initialActionState
+    initialActionState,
   );
 
   const textRef = useRef<HTMLTextAreaElement>(null);

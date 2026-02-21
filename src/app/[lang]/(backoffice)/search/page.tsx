@@ -5,6 +5,8 @@ import { UserItem } from "./components/UserItem";
 import { useEffect, useState, useTransition } from "react";
 import { addFriend, cancel, unfriend } from "@/app/feature/friend/actions";
 import Loading from "../../loading";
+import { getLocaleService } from "@/app/utils/resource/locales";
+import { useParams } from "next/navigation";
 
 interface Props {
   params: { language: string };
@@ -25,6 +27,8 @@ const initialState: InternalState = {
 function SearchPage({ params, searchParams }: Props) {
   const [isPending, startTransition] = useTransition(); // should set at top
   const [state, setState] = useState(initialState);
+  const routeParams = useParams();
+  const { localize } = getLocaleService(routeParams.lang as string);
 
   async function handleUnFriend(friendId: string): Promise<boolean> {
     const res = await unfriend(friendId);
@@ -81,7 +85,7 @@ function SearchPage({ params, searchParams }: Props) {
         userId: userId,
       });
     });
-  }, [searchParams.q ]);
+  }, [searchParams.q]);
 
   const renderList = (items: SearchItem[]) => {
     return (
@@ -113,7 +117,9 @@ function SearchPage({ params, searchParams }: Props) {
       {isPending && <Loading />}
       {
         <div className="bg-transparent flex-1 rounded-lg flex sm:flex-col md:flex-row overflow-hidden gap-4 p-4 mx-auto w-3/4">
-          <h1 className="text-2xl font-bold text-white text-center">Search</h1>
+          <h1 className="text-2xl font-bold text-white text-center">
+            {localize("search_title")}
+          </h1>
           <div>{renderList(state.list)}</div>
         </div>
       }
