@@ -13,10 +13,7 @@ import { EnglishNoteService } from "@/app/feature/english-note/english-note";
 import { EnglishNoteClient } from "@/app/feature/english-note/service";
 import { HTTPService } from "@/app/utils/http";
 import { createTopicService, TopicService } from "@/app/feature/topic";
-import {
-  createTagService,
-  TagService,
-} from "@/app/feature/tags";
+import { createTagService, TagService } from "@/app/feature/tags";
 import { httpServiceInstance } from "./http-config";
 import { createRoleService, RoleService } from "@/app/feature/role";
 import { createGoldService, GoldService } from "@/app/feature/gold/service";
@@ -27,6 +24,7 @@ import {
   PFPassbookService,
 } from "@/app/feature/personal-finance/service";
 import { createFilmService, FilmService } from "@/app/feature/film";
+import { createQuizService, QuizService } from "@/app/feature/quiz";
 
 class ApplicationContext {
   private authService?: AuthService;
@@ -45,6 +43,7 @@ class ApplicationContext {
   private personalFinanceService?: PersonalFinanceService;
   private pFPassbookService?: PFPassbookService;
   private filmService?: FilmService;
+  private quizService?: QuizService;
 
   constructor(private httpService: HTTPService) {
     this.getAuthService = this.getAuthService.bind(this);
@@ -59,6 +58,7 @@ class ApplicationContext {
     this.getPersonalFinanceService = this.getPersonalFinanceService.bind(this);
     this.getPFPassbookService = this.getPFPassbookService.bind(this);
     this.getFilmService = this.getFilmService.bind(this);
+    this.getQuizService = this.getQuizService.bind(this);
   }
 
   getAuthService(): AuthService {
@@ -86,7 +86,7 @@ class ApplicationContext {
     if (!this.notificationService) {
       this.notificationService = new NotificationClient(
         this.httpService,
-        config.notification_url
+        config.notification_url,
       );
     }
     return this.notificationService;
@@ -96,7 +96,7 @@ class ApplicationContext {
     if (!this.friendService) {
       this.friendService = new FriendClient(
         this.httpService,
-        config.friend_url
+        config.friend_url,
       );
     }
     return this.friendService;
@@ -106,7 +106,7 @@ class ApplicationContext {
     if (!this.searchService) {
       this.searchService = new SearchClient(
         this.httpService,
-        config.search_url
+        config.search_url,
       );
     }
     return this.searchService;
@@ -116,7 +116,7 @@ class ApplicationContext {
     if (!this.topicService) {
       this.topicService = createTopicService(
         this.httpService,
-        config.topic_url
+        config.topic_url,
       );
     }
     return this.topicService;
@@ -126,7 +126,7 @@ class ApplicationContext {
     if (!this.topicTagService) {
       this.topicTagService = createTagService(
         this.httpService,
-        config.topic_tag_url
+        config.topic_tag_url,
       );
     }
     return this.topicTagService;
@@ -136,17 +136,17 @@ class ApplicationContext {
     if (!this.filmInterestService) {
       this.filmInterestService = createTagService(
         this.httpService,
-        config.film_interest_url
+        config.film_interest_url,
       );
     }
     return this.filmInterestService;
-  }
+  };
 
   getEnglishNoteService = () => {
     if (!this.englishNoteService) {
       this.englishNoteService = new EnglishNoteClient(
         this.httpService,
-        config.english_note_url
+        config.english_note_url,
       );
     }
     return this.englishNoteService;
@@ -163,7 +163,7 @@ class ApplicationContext {
     if (!this.personalFinanceService) {
       this.personalFinanceService = createPersonalFinanceService(
         this.httpService,
-        config.personal_finance_url
+        config.personal_finance_url,
       );
     }
     return this.personalFinanceService;
@@ -173,7 +173,7 @@ class ApplicationContext {
     if (!this.pFPassbookService) {
       this.pFPassbookService = createPFPassbookService(
         this.httpService,
-        config.pfpassbook_url
+        config.pfpassbook_url,
       );
     }
     return this.pFPassbookService;
@@ -184,6 +184,13 @@ class ApplicationContext {
       this.filmService = createFilmService(this.httpService, config.film_url);
     }
     return this.filmService;
+  };
+
+  getQuizService = () => {
+    if (!this.quizService) {
+      this.quizService = createQuizService(this.httpService, config.quiz_url);
+    }
+    return this.quizService;
   };
 
   // getApiEnglishNoteService = () => {
@@ -289,5 +296,6 @@ export const {
   getPersonalFinanceService,
   getPFPassbookService,
   getFilmService,
-  getFilmInterestService
+  getFilmInterestService,
+  getQuizService,
 } = appContext;

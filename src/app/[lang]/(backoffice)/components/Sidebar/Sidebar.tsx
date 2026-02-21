@@ -16,6 +16,7 @@ import UserManagerIcon from "./icons/user_manager.svg";
 import TagIcon from "./icons/tag.svg";
 import LanguageIcon from "./icons/language.svg";
 import SettingsIcon from "./icons/settings.svg";
+import QuizIcon from "./icons/quiz.svg";
 import SidebarWrapper from "./SidebarWrapper";
 import { MenuSection, MenuSectionProps } from "./MenuSection";
 import { logout, Module, UserInfo } from "@/app/feature/auth";
@@ -47,6 +48,7 @@ const icons: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = {
   TagIcon,
   LanguageIcon,
   SettingsIcon,
+  QuizIcon,
 };
 
 function Sidebar({ userInfo, topbar, onToggleViewbar }: Props) {
@@ -97,6 +99,30 @@ function Sidebar({ userInfo, topbar, onToggleViewbar }: Props) {
           checkAuthorized={() => true}
         />,
         ...renderMenuItems(modules),
+        <MenuSection
+          key="quiz"
+          id="quiz"
+          title={localize("Quiz")}
+          iconName={"QuizIcon"}
+          hidden={!user}
+        >
+          <MenuSection
+            key="quizzes"
+            id="quizzes"
+            title={localize("quizzes")}
+            iconName={"QuizIcon"}
+            hidden={!user}
+            url="/quizzes"
+          />
+          <MenuSection
+            key="quiz-management"
+            id="quiz-management"
+            title={localize("quiz management")}
+            iconName={"QuizIcon"}
+            hidden={!user}
+            url="/quiz-management"
+          />
+        </MenuSection>,
         <MenuSection
           key="settings"
           id="settings"
