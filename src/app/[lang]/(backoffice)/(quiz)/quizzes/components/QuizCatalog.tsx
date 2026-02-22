@@ -72,7 +72,7 @@ export default function QuizCatalog({
           <SearchComponent
             placeHolder="Search available quizzes..."
             filterOn={false}
-            onFilterToggle={() => {}}
+            onFilterToggle={() => { }}
             onSearch={handleSearch}
             onQueryChange={(q) => setSearchTerm(q)}
             keyword={searchTerm}
@@ -84,7 +84,7 @@ export default function QuizCatalog({
 
       {/* Grid Content */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 min-h-[500px]">
-        {filteredQuizzes.map((quiz) => (
+        {list.map((quiz) => (
           <div
             key={quiz.id}
             className="group relative bg-white dark:bg-surface-0 border dark:border-border rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col h-full overflow-hidden"
@@ -123,7 +123,7 @@ export default function QuizCatalog({
                     Questions
                   </span>
                   <span className="font-bold text-sm dark:text-primary">
-                    {quiz.questions.length}
+                    {quiz.questions?.length}
                   </span>
                 </div>
                 <div className="flex flex-col text-right">
@@ -131,7 +131,7 @@ export default function QuizCatalog({
                     Duration
                   </span>
                   <span className="font-bold text-sm dark:text-primary">
-                    {~~(quiz.timeout / 60)} min
+                    {~~(quiz.duration / 60)} min
                   </span>
                 </div>
               </div>

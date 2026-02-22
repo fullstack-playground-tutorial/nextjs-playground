@@ -19,7 +19,7 @@ export default function Page() {
     quiz: {
       questions: [],
       point: 10,
-      timeout: 60 * 60,
+      duration: 60 * 60,
       title: "",
       description: "",
       id: crypto.randomUUID(),
@@ -64,7 +64,7 @@ export default function Page() {
           ...prev.quiz.questions,
           {
             id: (prev.quiz.questions.length + 1).toString(),
-            question: "",
+            content: "",
             choices: [],
             answers: [],
             point: 0,
@@ -127,7 +127,7 @@ export default function Page() {
   ) => {
     const copy = [...state.quiz.questions];
     const quizIdx = copy.findIndex((i) => i.id === id);
-    copy[quizIdx].question = e.target.value;
+    copy[quizIdx].content = e.target.value;
 
     setState((prev) => ({ ...prev, quiz: { ...prev.quiz, questions: copy } }));
   };
@@ -205,7 +205,7 @@ export default function Page() {
     if (!Number.isNaN(newTimeout)) {
       setState((prev) => ({
         ...prev,
-        quiz: { ...prev.quiz, timeout: newTimeout },
+        quiz: { ...prev.quiz, duration: newTimeout },
       }));
     }
   };
@@ -320,7 +320,7 @@ export default function Page() {
               <input
                 type="number"
                 className="w-24 px-2 py-1 rounded bg-transparent border-b border-accent-0/30 focus:border-accent-0 outline-none text-center font-bold"
-                value={quiz.timeout}
+                value={quiz.duration}
                 onChange={handleChangeQuizTimeout}
               />
             </div>
@@ -358,7 +358,7 @@ export default function Page() {
 
                 <textarea
                   placeholder="Type your question here..."
-                  value={item.question}
+                  value={item.content}
                   onChange={(e) => handleChangeQuestion(e, item.id)}
                   className="w-full min-h-[100px] px-4 py-3 rounded-lg border dark:border-border dark:bg-surface-0 outline-none focus:border-accent-0 transition-colors resize-none"
                 />
@@ -437,7 +437,7 @@ export default function Page() {
                   </span>
                 </div>
                 <p className="font-semibold dark:text-primary">
-                  {item.question}
+                  {item.content}
                 </p>
                 <div className="flex flex-wrap gap-2 mt-2">
                   {item.choices.map((c) => (

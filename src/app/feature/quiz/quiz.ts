@@ -1,28 +1,43 @@
 import { SearchFilter } from "@/app/utils/service";
 
+export type Quiz = {
+  questions: Question[];
+  id: string;
+  title: string;
+  slug: string;
+  description?: string;
+  thumbnailUrl?: string;
+  point: number;
+  duration: number;
+  createdAt?: Date;
+  updatedAt?: Date;
+  createdBy?: string;
+  updatedBy?: string;
+  questionCount?: number;
+};
+
+
 export type Question = {
   id: string;
-  question: string;
+  quizId: string;
+  content: string;
+  type: "single_choice" | "multiple_choice";
+  point: number;
+  explanation?: string;
+  orderIndex: number;
   choices: Choice[];
   answers: string[];
-  point: number;
   status: "draft" | "done";
 };
 
-export type Quiz = {
-  questions: Question[];
-  createAt?: Date;
-  point: number;
-  title: string;
-  description?: string;
-  id: string;
-  timeout: number;
-};
 
 export type Choice = {
   id: string;
+  questionId: string;
   content: string;
-  // status: 'draft' | 'submit'
+  isCorrect: boolean;
+  explanation?: string;
+  orderIndex: number;
 };
 
 export interface QuizFilter extends SearchFilter {

@@ -100,30 +100,6 @@ function Sidebar({ userInfo, topbar, onToggleViewbar }: Props) {
         />,
         ...renderMenuItems(modules),
         <MenuSection
-          key="quiz"
-          id="quiz"
-          title={localize("Quiz")}
-          iconName={"QuizIcon"}
-          hidden={!user}
-        >
-          <MenuSection
-            key="quizzes"
-            id="quizzes"
-            title={localize("quizzes")}
-            iconName={"QuizIcon"}
-            hidden={!user}
-            url="/quizzes"
-          />
-          <MenuSection
-            key="quiz-management"
-            id="quiz-management"
-            title={localize("quiz management")}
-            iconName={"QuizIcon"}
-            hidden={!user}
-            url="/quiz-management"
-          />
-        </MenuSection>,
-        <MenuSection
           key="settings"
           id="settings"
           title={localize("sidebar_settings")}

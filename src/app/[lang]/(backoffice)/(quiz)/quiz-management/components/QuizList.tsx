@@ -6,7 +6,7 @@ import {
   SearchComponent,
 } from "@/components/Search";
 import { FilterBar } from "@/components/Search/Filter";
-import { startTransition, useMemo, useState } from "react";
+import { startTransition, use, useMemo, useState } from "react";
 
 import GridIcon from "../../../components/Sidebar/icons/grid_menu.svg";
 import ListIcon from "../../../components/Sidebar/icons/menu.svg";
@@ -27,15 +27,15 @@ export default function QuizList({
   current,
   keyword,
 }: {
-  data: {
+  data: Promise<{
     list: Quiz[];
     total: number;
-  };
+  }>;
   limit: number;
   current: number;
   keyword: string;
 }) {
-  const { list, total } = data;
+  const { list, total } = use(data);
   const searchParams = useSearchParams();
   const [searchTerm, setSearchTerm] = useState(keyword || "");
   const [filterVisibility, setFilterVisibility] = useState(false);
@@ -116,22 +116,20 @@ export default function QuizList({
             <div className="flex bg-white dark:bg-surface-0 border dark:border-border rounded-md shadow-sm">
               <button
                 onClick={() => setViewMode("list")}
-                className={`p-2 rounded-l-md hover:bg-gray-50 dark:hover:bg-surface-1 ${
-                  viewMode === "list"
-                    ? "bg-gray-100 dark:bg-surface-2 text-accent-0"
-                    : "text-gray-500 dark:text-secondary"
-                }`}
+                className={`p-2 rounded-l-md hover:bg-gray-50 dark:hover:bg-surface-1 ${viewMode === "list"
+                  ? "bg-gray-100 dark:bg-surface-2 text-accent-0"
+                  : "text-gray-500 dark:text-secondary"
+                  }`}
                 title="List View"
               >
                 <ListIcon className="size-5 fill-current" />
               </button>
               <button
                 onClick={() => setViewMode("grid")}
-                className={`p-2 rounded-r-md hover:bg-gray-50 dark:hover:bg-surface-1 ${
-                  viewMode === "grid"
-                    ? "bg-gray-100 dark:bg-surface-2 text-accent-0"
-                    : "text-gray-500 dark:text-secondary"
-                }`}
+                className={`p-2 rounded-r-md hover:bg-gray-50 dark:hover:bg-surface-1 ${viewMode === "grid"
+                  ? "bg-gray-100 dark:bg-surface-2 text-accent-0"
+                  : "text-gray-500 dark:text-secondary"
+                  }`}
                 title="Grid View"
               >
                 <GridIcon className="size-5 fill-current" />
@@ -142,9 +140,8 @@ export default function QuizList({
 
         {/* Filters */}
         <div
-          className={`transition-all overflow-hidden ${
-            filterVisibility ? "max-h-20 opacity-100" : "max-h-0 opacity-0"
-          }`}
+          className={`transition-all overflow-hidden ${filterVisibility ? "max-h-20 opacity-100" : "max-h-0 opacity-0"
+            }`}
         >
           <div className="bg-surface-1 p-4 rounded-lg border dark:border-border shadow-sm">
             <FilterBar visible={filterVisibility}>
@@ -214,7 +211,7 @@ export default function QuizList({
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm dark:text-secondary">
-                        {quiz.timeout}
+                        {quiz.duration}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -289,7 +286,7 @@ export default function QuizList({
                         Questions:
                       </span>
                       <span className="font-semibold dark:text-primary">
-                        {quiz.questions.length}
+                        {quiz.questionCount}
                       </span>
                     </div>
                     <div className="flex justify-between text-sm">
@@ -297,7 +294,7 @@ export default function QuizList({
                         Time Limit:
                       </span>
                       <span className="font-semibold dark:text-primary">
-                        {quiz.timeout}s
+                        {quiz.duration}s
                       </span>
                     </div>
                   </div>

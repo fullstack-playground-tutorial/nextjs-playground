@@ -1,6 +1,5 @@
-import { mockQuizList, Quiz } from "@/app/feature/quiz";
-import { SearchResult } from "@/app/utils/service";
 import QuizCatalog from "./components/QuizCatalog";
+import { getQuizService } from "@/app/core/server/context";
 
 type SearchParams = {
   q?: string;
@@ -21,14 +20,11 @@ export default async function QuizzesPage(props: Props) {
   const sort = searchParams?.sort || "created_at";
 
   // In a real application, you would fetch from a service:
-  // const data = await getQuizService().search({...});
-
-  // Using Mock data for now to match the user's setup
-  const data = await new Promise<SearchResult<Quiz>>((resolve) => {
-    resolve({
-      list: mockQuizList,
-      total: mockQuizList.length,
-    });
+  const data = await getQuizService().search({
+    keyword: q,
+    limit: limit,
+    offset: 0,
+    sort: sort,
   });
 
   return (

@@ -121,7 +121,7 @@ export default function QuizTest() {
             {quiz.title}
           </h1>
           <p className="text-sm dark:text-secondary italic">
-            Time Limit: {quiz.timeout} seconds • Total Points: {quiz.point}
+            Time Limit: {quiz.duration} seconds • Total Points: {quiz.point}
           </p>
         </div>
       </div>
@@ -149,18 +149,17 @@ export default function QuizTest() {
               </div>
 
               <p className="text-lg font-medium dark:text-primary mb-6 leading-relaxed">
-                {item.question}
+                {item.content}
               </p>
 
               <div className="grid grid-cols-1 gap-3">
                 {item.choices.map((c) => (
                   <label
                     key={c.id}
-                    className={`flex items-center gap-4 p-4 rounded-lg border cursor-pointer transition-all ${
-                      isChecked(idx, c.id)
-                        ? "border-accent-0 bg-accent-0/5 dark:bg-accent-0/10 shadow-inner"
-                        : "border-border hover:border-accent-0/30 dark:bg-surface-0"
-                    }`}
+                    className={`flex items-center gap-4 p-4 rounded-lg border cursor-pointer transition-all ${isChecked(idx, c.id)
+                      ? "border-accent-0 bg-accent-0/5 dark:bg-accent-0/10 shadow-inner"
+                      : "border-border hover:border-accent-0/30 dark:bg-surface-0"
+                      }`}
                   >
                     <input
                       type="checkbox"

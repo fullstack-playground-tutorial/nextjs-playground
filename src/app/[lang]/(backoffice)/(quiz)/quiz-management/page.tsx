@@ -1,7 +1,6 @@
-import { mockQuizList, Quiz } from "@/app/feature/quiz";
-import { SearchResult } from "@/app/utils/service";
 import Link from "next/link";
 import QuizList from "./components/QuizList";
+import { getQuizService } from "@/app/core/server/context";
 
 type SearchParams = {
   q?: string;
@@ -23,20 +22,14 @@ export default async function Page(props: Props) {
   const sort = searchParams?.sort || "created_at";
   const offset = (currentPage - 1) * limit;
 
-  // const data = await getQuizService().search({
-  //   keyword: q,
-  //   limit: limit,
-  //   offset: offset,
-  //   sort: sort,
-  // });
-
-  // Mock
-  const data = await new Promise<SearchResult<Quiz>>((resolve) => {
-    resolve({
-      list: mockQuizList,
-      total: mockQuizList.length,
-    });
+  const data = getQuizService().search({
+    keyword: q,
+    limit: limit,
+    offset: offset,
+    sort: sort,
   });
+
+
 
   return (
     <>
