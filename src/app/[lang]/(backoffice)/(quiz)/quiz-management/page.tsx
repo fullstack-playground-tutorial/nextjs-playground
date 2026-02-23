@@ -11,10 +11,12 @@ type SearchParams = {
 };
 
 type Props = {
+  params: Promise<{ lang: string }>;
   searchParams?: Promise<SearchParams>;
 };
 
 export default async function Page(props: Props) {
+  const { lang } = await props.params;
   const searchParams = await props.searchParams;
   const q = searchParams?.q || "";
   const currentPage = Number(searchParams?.page) || 1;
@@ -44,7 +46,7 @@ export default async function Page(props: Props) {
               Manage your quiz catalog
             </p>
           </div>
-          <Link href="quiz-management/create">
+          <Link href={`/${lang}/quiz-management/create`}>
             <button className="bg-accent-0 hover:bg-accent-1 text-white font-semibold py-2 px-4 rounded shadow transition-colors">
               + Create New
             </button>

@@ -61,3 +61,13 @@ export async function createQuiz(quiz: Quiz) {
     return { error: error.message || "An error occurred" };
   }
 }
+
+export async function deleteQuiz(id: string) {
+  try {
+    const res = await getQuizService().remove(id);
+
+    return { successMsg: "Quiz deleted successfully", data: res };
+  } catch (error: any) {
+    throw error;
+  }
+}

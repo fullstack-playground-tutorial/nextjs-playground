@@ -6,7 +6,7 @@ export type Quiz = {
   slug: string;
   description?: string;
   thumbnailUrl?: string;
-  status: "draft" | "published" | "archived";
+  status: "draft" | "published" | "archived" | "closed";
   duration: number; // in minutes
   createdAt?: Date;
   updatedAt?: Date;

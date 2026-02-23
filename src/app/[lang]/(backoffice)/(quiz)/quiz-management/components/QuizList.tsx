@@ -226,17 +226,17 @@ export default function QuizList({
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <Link
-                        href={`/quiz/${quiz.id}`}
-                        className="text-accent-0 hover:text-accent-1 mr-4"
+                        href={`${pathname}/${quiz.id}`}
+                        className="text-accent-0 hover:text-accent-1 mr-4 cursor-pointer"
                       >
                         Preview
                       </Link>
-                      <button className="text-accent-0 hover:text-accent-1 mr-4">
+                      <button className="text-accent-0 hover:text-accent-1 mr-4 cursor-pointer">
                         Edit
                       </button>
-                      <button className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
+                      <Link href={`${pathname}/${quiz.id}/delete`} className="text-red-600 cursor-pointer hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
                         Delete
-                      </button>
+                      </Link>
                     </td>
                   </tr>
                 ))}
@@ -299,7 +299,7 @@ export default function QuizList({
                   <div className="mt-auto pt-6 flex justify-between items-center gap-2">
                     <div className="flex gap-2">
                       <Link
-                        href={`/quiz/${quiz.id}`}
+                        href={`${pathname}/${quiz.id}`}
                         className="p-2 hover:bg-gray-100 dark:hover:bg-surface-1 rounded-full transition-colors group"
                         title="Preview"
                       >
@@ -311,15 +311,16 @@ export default function QuizList({
                       >
                         <EditIcon className="size-5 fill-gray-400 dark:fill-secondary group-hover:fill-accent-0" />
                       </button>
-                      <button
+                      <Link
+                        href={`${pathname}/${quiz.id}/delete`}
                         className="p-2 hover:bg-gray-100 dark:hover:bg-surface-1 rounded-full transition-colors group"
                         title="Delete"
                       >
                         <BinIcon className="size-5 fill-gray-400 dark:fill-secondary group-hover:fill-red-500" />
-                      </button>
+                      </Link>
                     </div>
                     <Link
-                      href={`/quiz/${quiz.id}`}
+                      href={`${pathname}/${quiz.id}`}
                       className="flex items-center gap-2 px-4 py-2 -mr-7 bg-accent-0 hover:bg-accent-1 text-white rounded-l-lg rounded-r-sm transition-colors text-sm font-medium"
                     >
                       <PlayCircleIcon className="size-4 fill-current" />
