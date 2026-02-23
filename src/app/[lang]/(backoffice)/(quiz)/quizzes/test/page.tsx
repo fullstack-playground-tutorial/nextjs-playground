@@ -2,10 +2,10 @@
 
 import React, { useEffect, useState, useTransition } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { getQuiz } from "@/app/feature/quiz/action";
 import type { Quiz } from "@/app/feature/quiz";
 import useToast from "@/app/components/Toast";
 import BackArrow from "@/app/assets/images/icons/back_arrow.svg";
+import { getQuizService } from "@/app/core/server/context";
 
 type Answer = {
   choices: string[]; // choice ids
@@ -43,22 +43,20 @@ export default function QuizTest() {
 
     if (!quiz) return;
 
-    const correctSheet = quiz.questions.map((it) => ({ choices: it.answers }));
+    const totalPossibleScore = quiz.questions.reduce((acc, q) => acc + (q.point || 0), 0);
 
-    answerSheet.forEach((it, idx) => {
-      if (it.choices.length === 0) {
+    quiz.questions.forEach((q, idx) => {
+      const userChoices = answerSheet[idx].choices;
+      if (userChoices.length === 0) {
         notFillAlert = true;
       }
-      const correctSet = new Set(correctSheet[idx].choices);
-      const userSet = new Set(it.choices);
 
-      // Check if user's choices match correct answers exactly
-      const isCorrect =
-        correctSet.size === userSet.size &&
-        [...correctSet].every((val) => userSet.has(val));
+      const correctAnswers = q.answers.filter(a => a.isCorrect).map(a => a.id!).filter(Boolean);
+      const isCorrect = correctAnswers.length === userChoices.length &&
+        correctAnswers.every(id => userChoices.includes(id));
 
       if (isCorrect) {
-        score += quiz.questions[idx].point || 0;
+        score += q.point || 0;
       }
     });
 
@@ -68,9 +66,8 @@ export default function QuizTest() {
     } else {
       toast.addToast(
         "success",
-        `Quiz submitted! Your score: ${score}/${quiz.point}`,
+        `Quiz submitted! Your score: ${score}/${totalPossibleScore}`,
       );
-      // Typically you'd navigate or show a result modal here
     }
   };
 
@@ -82,17 +79,23 @@ export default function QuizTest() {
     const fetchQuiz = async () => {
       if (id) {
         startTransition(async () => {
-          const res = await getQuiz(id);
-          if (res.error || !res.data) {
-            toast.addToast("error", res.error || "Quiz not found");
+          try {
+            const res = await getQuizService().load(id);
+            if (!res) {
+              toast.addToast("error", "Quiz not found");
+              router.back();
+            } else {
+              const initialSheet: Answer[] = res.questions.map(() => ({
+                choices: [],
+              }));
+              setAnswerSheet(initialSheet);
+              setQuiz(res);
+            }
+          } catch (error) {
+            toast.addToast("error", "Failed to load quiz");
             router.back();
-          } else {
-            const initialSheet: Answer[] = res.data.questions.map(() => ({
-              choices: [],
-            }));
-            setAnswerSheet(initialSheet);
-            setQuiz(res.data);
           }
+
         });
       }
     };
@@ -121,7 +124,7 @@ export default function QuizTest() {
             {quiz.title}
           </h1>
           <p className="text-sm dark:text-secondary italic">
-            Time Limit: {quiz.duration} seconds • Total Points: {quiz.point}
+            Time Limit: {quiz.duration} minutes • Total Points: {quiz.questions.reduce((acc, q) => acc + (q.point || 0), 0)}
           </p>
         </div>
       </div>
@@ -136,7 +139,7 @@ export default function QuizTest() {
         <div className="space-y-6">
           {quiz.questions.map((item, idx) => (
             <div
-              key={item.id}
+              key={item.id || idx}
               className="p-6 rounded-xl bg-surface-1 border border-border shadow-sm hover:shadow-md transition-shadow"
             >
               <div className="flex justify-between items-start mb-4">
@@ -153,23 +156,32 @@ export default function QuizTest() {
               </p>
 
               <div className="grid grid-cols-1 gap-3">
-                {item.choices.map((c) => (
+                {item.answers.map((c, cIdx) => (
                   <label
-                    key={c.id}
-                    className={`flex items-center gap-4 p-4 rounded-lg border cursor-pointer transition-all ${isChecked(idx, c.id)
+                    key={c.id || cIdx}
+                    className={`flex items-center gap-4 p-4 rounded-lg border cursor-pointer transition-all ${isChecked(idx, c.id || "")
                       ? "border-accent-0 bg-accent-0/5 dark:bg-accent-0/10 shadow-inner"
                       : "border-border hover:border-accent-0/30 dark:bg-surface-0"
                       }`}
                   >
                     <input
-                      type="checkbox"
+                      type={item.type === "single_choice" ? "radio" : "checkbox"}
+                      name={`question-${item.id || idx}`}
                       className="size-5 accent-accent-0 rounded border-gray-300 focus:ring-accent-0"
-                      value={c.id}
-                      onChange={(e) => toggleChoice(e, idx)}
-                      checked={isChecked(idx, c.id)}
+                      value={c.id || ""}
+                      onChange={(e) => {
+                        if (item.type === "single_choice") {
+                          const newSheet = [...answerSheet];
+                          newSheet[idx].choices = [e.target.value];
+                          setAnswerSheet(newSheet);
+                        } else {
+                          toggleChoice(e, idx);
+                        }
+                      }}
+                      checked={isChecked(idx, c.id || "")}
                     />
                     <span
-                      className={`text-sm font-medium transition-colors ${isChecked(idx, c.id) ? "text-accent-0" : "dark:text-secondary"}`}
+                      className={`text-sm font-medium transition-colors ${isChecked(idx, c.id || "") ? "text-accent-0" : "dark:text-secondary"}`}
                     >
                       {c.content}
                     </span>

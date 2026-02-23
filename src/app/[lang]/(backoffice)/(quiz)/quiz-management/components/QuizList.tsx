@@ -173,7 +173,7 @@ export default function QuizList({
                     scope="col"
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-secondary uppercase tracking-wider"
                   >
-                    Time (s)
+                    Time (min)
                   </th>
                   <th
                     scope="col"
@@ -185,7 +185,7 @@ export default function QuizList({
                     scope="col"
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-secondary uppercase tracking-wider"
                   >
-                    Score
+                    Status
                   </th>
                   <th
                     scope="col"
@@ -216,12 +216,12 @@ export default function QuizList({
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm dark:text-secondary">
-                        {quiz.questions.length}
+                        {quiz.questionCount || 0}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm dark:text-secondary">
-                        {quiz.point}
+                      <div className={`text-xs px-2 py-1 rounded-full inline-block ${quiz.status === 'published' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                        {quiz.status}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -267,12 +267,9 @@ export default function QuizList({
                       <QuizIcon className="size-8 fill-accent-0" />
                     </div>
                     <div className="flex flex-col items-end">
-                      <span className="text-2xl font-bold text-accent-0">
-                        {quiz.point}
-                      </span>
-                      <span className="text-xs text-gray-500 dark:text-secondary uppercase">
-                        Points
-                      </span>
+                      <div className={`text-[10px] px-2 py-0.5 rounded-full uppercase font-bold ${quiz.status === 'published' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                        {quiz.status}
+                      </div>
                     </div>
                   </div>
 
@@ -294,7 +291,7 @@ export default function QuizList({
                         Time Limit:
                       </span>
                       <span className="font-semibold dark:text-primary">
-                        {quiz.duration}s
+                        {quiz.duration}m
                       </span>
                     </div>
                   </div>

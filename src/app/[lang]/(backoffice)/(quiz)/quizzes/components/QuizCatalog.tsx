@@ -98,12 +98,6 @@ export default function QuizCatalog({
                   <PlayCircleIcon className="size-6 fill-accent-0 group-hover:fill-white transition-colors" />
                 </div>
                 <div className="text-right">
-                  <span className="block text-2xl font-black text-accent-0 leading-none">
-                    {quiz.point}
-                  </span>
-                  <span className="text-[10px] uppercase font-bold text-secondary tracking-tighter">
-                    Max Points
-                  </span>
                 </div>
               </div>
 
@@ -123,7 +117,7 @@ export default function QuizCatalog({
                     Questions
                   </span>
                   <span className="font-bold text-sm dark:text-primary">
-                    {quiz.questions?.length}
+                    {quiz.questionCount || 0}
                   </span>
                 </div>
                 <div className="flex flex-col text-right">
@@ -131,7 +125,7 @@ export default function QuizCatalog({
                     Duration
                   </span>
                   <span className="font-bold text-sm dark:text-primary">
-                    {~~(quiz.duration / 60)} min
+                    {quiz.duration} min
                   </span>
                 </div>
               </div>
