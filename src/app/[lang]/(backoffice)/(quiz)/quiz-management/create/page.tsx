@@ -1,5 +1,5 @@
-import QuizCreateForm from "./components/QuizCreateForm";
-import BackButton from "./components/BackButton";
+import QuizForm from "../components/QuizForm";
+import BackButton from "../components/BackButton";
 
 export default function Page() {
   return (
@@ -11,7 +11,7 @@ export default function Page() {
         </div>
       </div>
 
-      <QuizCreateForm />
+      <QuizForm mode="view" />
     </div>
   );
 }
