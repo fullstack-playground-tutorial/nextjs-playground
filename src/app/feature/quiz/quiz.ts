@@ -2,8 +2,8 @@ import { SearchFilter } from "@/app/utils/service";
 
 export type Quiz = {
   id: string;
-  title: string;
-  slug: string;
+  title?: string;
+  slug?: string;
   description?: string;
   thumbnailUrl?: string;
   status: "draft" | "publish" | "archive" | "close";

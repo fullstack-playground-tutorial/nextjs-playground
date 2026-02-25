@@ -48,7 +48,7 @@ export default function QuizList({
   }, [total, limit]);
 
   const filteredQuizzes = list.filter((quiz) =>
-    quiz.title.toLowerCase().includes(searchTerm.toLowerCase()),
+    quiz.title ? quiz.title.toLowerCase().includes(searchTerm.toLowerCase()) : "".includes(searchTerm.toLowerCase()),
   );
 
   const handlePageChange = (n: number) => {
@@ -220,7 +220,7 @@ export default function QuizList({
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className={`text-xs px-2 py-1 rounded-full inline-block ${quiz.status === 'published' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                      <div className={`text-xs px-2 py-1 rounded-full inline-block ${quiz.status === 'publish' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
                         {quiz.status}
                       </div>
                     </td>
@@ -267,7 +267,7 @@ export default function QuizList({
                       <QuizIcon className="size-8 fill-accent-0" />
                     </div>
                     <div className="flex flex-col items-end">
-                      <div className={`text-[10px] px-2 py-0.5 rounded-full uppercase font-bold ${quiz.status === 'published' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                      <div className={`text-[10px] px-2 py-0.5 rounded-full uppercase font-bold ${quiz.status === 'publish' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
                         {quiz.status}
                       </div>
                     </div>
@@ -305,12 +305,12 @@ export default function QuizList({
                       >
                         <TopicIcon className="size-5 fill-gray-400 dark:fill-secondary group-hover:fill-accent-0" />
                       </Link>
-                      <button
+                      <Link
+                        href={`${pathname}/${quiz.id}/edit`}
                         className="p-2 hover:bg-gray-100 dark:hover:bg-surface-1 rounded-full transition-colors group"
-                        title="Edit"
                       >
                         <EditIcon className="size-5 fill-gray-400 dark:fill-secondary group-hover:fill-accent-0" />
-                      </button>
+                      </Link>
                       <Link
                         href={`${pathname}/${quiz.id}/delete`}
                         className="p-2 hover:bg-gray-100 dark:hover:bg-surface-1 rounded-full transition-colors group"

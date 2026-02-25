@@ -14,7 +14,6 @@ export const httpServiceInstance = await createHttpClient(
     next: {
       revalidate: 3600,
     },
-    cache: "force-cache",
   },
   {
     response: async (response, url, isRefreshing, options) => {
@@ -44,7 +43,7 @@ export const httpServiceInstance = await createHttpClient(
           ...req.headers,
           [HeaderType.cookie]: await getCookieHeader(),
         };
-      } 
+      }
 
       if (req.body instanceof FormData && req.headers) {
         delete (req.headers as any)[HeaderType.contentType];

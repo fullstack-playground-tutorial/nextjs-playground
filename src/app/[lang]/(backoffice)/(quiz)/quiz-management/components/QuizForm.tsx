@@ -20,14 +20,14 @@ type InternalState = {
 export default function QuizForm({ mode, fetchedQuizPromise: quizPromise }: Props) {
     const fetchedQuiz = quizPromise ? use(quizPromise) : undefined;
     const [state, setState] = useState<InternalState>({
-        quiz: fetchedQuiz ?? {
+        quiz: {
             questions: [],
             status: "draft",
             duration: 60, // 60 minutes
             title: "",
             description: "",
             id: "", // Generated at backend
-            slug: ""
+            slug: "", ...fetchedQuiz
         },
         errors: {}
     });
@@ -253,11 +253,7 @@ export default function QuizForm({ mode, fetchedQuizPromise: quizPromise }: Prop
     };
 
     const currentPoint = useMemo(() => {
-        let newQuizPoint = 0;
-        state.quiz.questions.forEach((v) => {
-            newQuizPoint = newQuizPoint + v.point;
-        });
-        return newQuizPoint;
+        return state.quiz.questions.reduce((acc, v) => acc + (Number(v.point) || 0), 0);
     }, [state.quiz.questions]);
 
     const { quiz, errors } = state;
@@ -316,7 +312,7 @@ export default function QuizForm({ mode, fetchedQuizPromise: quizPromise }: Prop
                             </label>
                             <div className="flex items-center gap-2">
                                 <span className="font-bold dark:text-primary text-xl">
-                                    {currentPoint}
+                                    {Number.isNaN(currentPoint) ? 0 : currentPoint}
                                 </span>
                             </div>
                         </div>
@@ -405,7 +401,7 @@ export default function QuizForm({ mode, fetchedQuizPromise: quizPromise }: Prop
                                 <label className="text-xs font-bold text-secondary uppercase">
                                     Choices
                                 </label>
-                                {item.answers.map((c, cIndex) => (
+                                {item.answers?.map((c, cIndex) => (
                                     <div key={cIndex} className="flex flex-col gap-1">
                                         <div className="flex gap-3 items-center">
                                             <input
@@ -499,7 +495,7 @@ export default function QuizForm({ mode, fetchedQuizPromise: quizPromise }: Prop
                         >
                             <div className="flex justify-between items-center">
                                 <span className="text-xs font-bold text-secondary uppercase">
-                                    Question #{index + 1} • {item.point} Points
+                                    Question #{index + 1} • {Number(item.point) || 0} Points
                                 </span>
                                 {Object.keys(errors).some(k => k.startsWith(`questions.${index}`)) && <span className="text-alert-0 text-[10px] font-bold">HAS ERRORS</span>}
                             </div>
@@ -507,7 +503,7 @@ export default function QuizForm({ mode, fetchedQuizPromise: quizPromise }: Prop
                                 {item.content}
                             </p>
                             <div className="flex flex-wrap gap-2 mt-2">
-                                {item.answers.map((c, cIndex) => (
+                                {item.answers?.map((c, cIndex) => (
                                     <div
                                         key={cIndex}
                                         className={`px-3 py-1 rounded-full text-xs border ${c.isCorrect ? "border-accent-0 bg-accent-0/10 text-accent-0" : "border-border text-secondary"}`}

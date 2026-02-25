@@ -3,6 +3,8 @@
 import { getQuizService } from "@/app/core/server/context";
 import { Quiz } from "./quiz";
 import { createSchemaItem, InputValidate } from "@/app/utils/validate/validate";
+import { revalidateTag, updateTag } from "next/cache";
+import { CACHE_TAG } from "@/app/utils/cache/tag";
 
 export async function createQuiz(quiz: Quiz) {
   try {
@@ -110,7 +112,11 @@ export async function updateQuiz(quiz: Quiz) {
       }
     }
     const res = await getQuizService().patch(quiz.id, quiz);
-    return { successMsg: "Quiz updated successfully", data: res };
+    if (res > 0) {
+      revalidateTag(CACHE_TAG.QUIZZES, "max");
+      updateTag(CACHE_TAG.QUIZ + "-" + quiz.id);
+    }
+    return { successMsg: "Quiz updated successfully" };
   } catch (error: any) {
     throw error;
   }
@@ -119,8 +125,14 @@ export async function updateQuiz(quiz: Quiz) {
 export async function deleteQuiz(id: string) {
   try {
     const res = await getQuizService().remove(id);
+    if (res > 0) {
+      revalidateTag(CACHE_TAG.QUIZZES, "max");
+      updateTag(CACHE_TAG.QUIZ + "-" + id);
+      return { successMsg: "Quiz deleted successfully" };
+    } else {
+      throw new Error("Failed to delete quiz");
+    }
 
-    return { successMsg: "Quiz deleted successfully", data: res };
   } catch (error: any) {
     throw error;
   }

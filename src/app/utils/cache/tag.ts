@@ -6,4 +6,6 @@ export const CACHE_TAG = {
     FILM: "film",
     FILMS: "films",
     INTEREST_SUGGESTIONS: "interest_suggestions",
+    QUIZZES: "quizzes",
+    QUIZ: "quiz"
 }

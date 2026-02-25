@@ -2,7 +2,7 @@
 
 import { getFilmService } from "@/app/core/server/context";
 import { Film } from "./film";
-import { updateTag } from "next/cache";
+import { revalidateTag } from "next/cache";
 import { CACHE_TAG } from "@/app/utils/cache/tag";
 import { InputValidate } from "@/app/utils/validate/validate";
 import { Schema, ValidateErrors } from "@/app/utils/validate/model";
@@ -45,7 +45,7 @@ export async function createFilm(film: Film, logoFile: File, posterFile: File, b
         });
 
         if (result > 0) {
-            updateTag(CACHE_TAG.FILMS)
+            revalidateTag(CACHE_TAG.FILMS, "max")
             return { successMsg: "Film created successfully!" };
         } else {
             return { errMsg: "Film created failed!" };

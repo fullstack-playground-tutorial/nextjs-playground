@@ -11,7 +11,7 @@ export default function Page() {
         </div>
       </div>
 
-      <QuizForm mode="view" />
+      <QuizForm mode="create" />
     </div>
   );
 }
