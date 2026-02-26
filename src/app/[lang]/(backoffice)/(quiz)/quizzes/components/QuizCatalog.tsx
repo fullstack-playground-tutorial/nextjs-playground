@@ -34,7 +34,7 @@ export default function QuizCatalog({
   }, [total, limit]);
 
   const filteredQuizzes = list.filter((quiz) =>
-    quiz.title.toLowerCase().includes(searchTerm.toLowerCase()),
+    (quiz.title ?? "").toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const handlePageChange = (n: number) => {
@@ -132,7 +132,7 @@ export default function QuizCatalog({
 
               <div className="mt-6 pt-2">
                 <Link
-                  href={`/quizzes/test/${quiz.id}`}
+                  href={`/quizzes/${quiz.slug}-${quiz.id}/test`}
                   className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-accent-0 hover:bg-accent-1 text-white rounded-xl transition-all font-bold text-sm shadow-lg shadow-accent-0/20 active:scale-95"
                 >
                   Start Quiz
