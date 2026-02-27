@@ -137,3 +137,6 @@ export async function deleteQuiz(id: string) {
     throw error;
   }
 }
+export async function loadQuiz(id: string) {
+  return await getQuizService().load(id);
+}

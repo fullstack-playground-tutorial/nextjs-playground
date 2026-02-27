@@ -7,7 +7,8 @@ import { Quiz } from "@/app/feature/quiz";
 import Pagination from "@/components/Pagination";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import PlayCircleIcon from "@/app/assets/images/icons/play_circle.svg";
-import Link from "next/link";
+import { startQuizAttempt } from "@/app/feature/quiz-attempt/action";
+import useToast from "@/app/components/Toast";
 
 export default function QuizCatalog({
   data,
@@ -26,7 +27,10 @@ export default function QuizCatalog({
   const { list, total } = data;
   const searchParams = useSearchParams();
   const [searchTerm, setSearchTerm] = useState(keyword || "");
-  const { replace } = useRouter();
+  const [isStarting, setIsStarting] = useState<string | null>(null);
+  const router = useRouter();
+  const toast = useToast();
+  const { replace, push } = router;
   const pathname = usePathname();
 
   const pageTotal = useMemo(() => {
@@ -62,6 +66,22 @@ export default function QuizCatalog({
     params.set("limit", n + "");
     const newPath = `${pathname}?${params.toString()}`;
     replace(newPath, { scroll: false });
+  };
+
+  const handleStartQuiz = async (quizId: string) => {
+    setIsStarting(quizId);
+    try {
+      const attId = await startQuizAttempt(quizId);
+      if (attId) {
+        push(`/quizzes/test?attemptId=${attId}`);
+      } else {
+        toast.addToast("error", "Failed to start quiz attempt");
+      }
+    } catch (e) {
+      toast.addToast("error", "An error occurred");
+    } finally {
+      setIsStarting(null);
+    }
   };
 
   return (
@@ -131,12 +151,13 @@ export default function QuizCatalog({
               </div>
 
               <div className="mt-6 pt-2">
-                <Link
-                  href={`/quizzes/${quiz.slug}-${quiz.id}/test`}
-                  className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-accent-0 hover:bg-accent-1 text-white rounded-xl transition-all font-bold text-sm shadow-lg shadow-accent-0/20 active:scale-95"
+                <button
+                  onClick={() => handleStartQuiz(quiz.id)}
+                  disabled={isStarting === quiz.id}
+                  className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-accent-0 hover:bg-accent-1 text-white rounded-xl transition-all font-bold text-sm shadow-lg shadow-accent-0/20 active:scale-95 disabled:opacity-50"
                 >
-                  Start Quiz
-                </Link>
+                  {isStarting === quiz.id ? "Starting..." : "Start Quiz"}
+                </button>
               </div>
             </div>
           </div>

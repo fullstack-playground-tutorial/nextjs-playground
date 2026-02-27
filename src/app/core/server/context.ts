@@ -25,6 +25,7 @@ import {
 } from "@/app/feature/personal-finance/service";
 import { createFilmService, FilmService } from "@/app/feature/film";
 import { createQuizService, QuizService } from "@/app/feature/quiz";
+import { createQuizAttemptService, QuizAttemptService } from "@/app/feature/quiz-attempt";
 
 class ApplicationContext {
   private authService?: AuthService;
@@ -44,6 +45,7 @@ class ApplicationContext {
   private pFPassbookService?: PFPassbookService;
   private filmService?: FilmService;
   private quizService?: QuizService;
+  private quizAttemptService?: QuizAttemptService;
 
   constructor(private httpService: HTTPService) {
     this.getAuthService = this.getAuthService.bind(this);
@@ -59,6 +61,7 @@ class ApplicationContext {
     this.getPFPassbookService = this.getPFPassbookService.bind(this);
     this.getFilmService = this.getFilmService.bind(this);
     this.getQuizService = this.getQuizService.bind(this);
+    this.getQuizAttemptService = this.getQuizAttemptService.bind(this);
   }
 
   getAuthService(): AuthService {
@@ -193,6 +196,16 @@ class ApplicationContext {
     return this.quizService;
   };
 
+  getQuizAttemptService = () => {
+    if (!this.quizAttemptService) {
+      this.quizAttemptService = createQuizAttemptService(
+        this.httpService,
+        config.quiz_attempt_url,
+      );
+    }
+    return this.quizAttemptService;
+  };
+
   // getApiEnglishNoteService = () => {
   //   if (!this.apiEnglishNoteService) {
   //     const englishNoteRepo = new EnglishNoteMongoRepository(
@@ -298,4 +311,5 @@ export const {
   getFilmService,
   getFilmInterestService,
   getQuizService,
+  getQuizAttemptService,
 } = appContext;
