@@ -1,28 +1,35 @@
 import { HTTPService } from "@/app/utils/http";
-import { createGenericWithSearchService, CRUDWithSearchService } from "@/app/utils/service";
 import { QuizAttempt, QuizAttemptFilter, UserAnswer } from "./quiz-attempt";
 
-export interface QuizAttemptService extends Omit<CRUDWithSearchService<QuizAttempt, QuizAttemptFilter, "id">, "create"> {
+export interface QuizAttemptService {
+    load(quizId: string, attemptId: string): Promise<QuizAttempt>;
+    all(quizId: string): Promise<QuizAttempt[]>;
     create(quizId: string): Promise<string | null>;
-    submit(attemptId: string, answers: UserAnswer[]): Promise<number>;
-    syncAllAnswer(attemptId: string, answers: UserAnswer[]): Promise<number>;
+    submit(quizId: string, attemptId: string, answers: UserAnswer[]): Promise<number>;
+    // syncAllAnswer(attemptId: string, answers: UserAnswer[]): Promise<number>;
 }
 
 export const createQuizAttemptService = (http: HTTPService, url: string): QuizAttemptService => {
-    const base = createGenericWithSearchService<QuizAttempt, QuizAttemptFilter, "id">(http, url);
     return {
-        ...base,
-        async create(quizId: string): Promise<string | null> {
-            const res = await http.post<string, any>(`${url.replace("/attempts", "")}/${quizId}/attempts`, {});
+        async load(quizId: string, attemptId: string): Promise<QuizAttempt> {
+            const res = await http.get<QuizAttempt>(`${url}/${quizId}/attempts/${attemptId}`);
             return res.body || null;
         },
-        async submit(attemptId: string, answers: UserAnswer[]): Promise<number> {
-            const res = await http.patch<any>(`${url}/${attemptId}/submit`, answers);
+        async all(quizId: string): Promise<QuizAttempt[]> {
+            const res = await http.get<QuizAttempt[]>(`${url}/${quizId}/attempts`);
+            return res.body || [];
+        },
+        async create(quizId: string): Promise<string | null> {
+            const res = await http.post<string, any>(`${url}/${quizId}/attempts`, {});
+            return res.body || null;
+        },
+        async submit(quizId: string, attemptId: string, answers: UserAnswer[]): Promise<number> {
+            const res = await http.patch<any>(`${url}/${quizId}/attempts/${attemptId}/submit`, answers);
             return res ? 1 : 0;
         },
-        async syncAllAnswer(attemptId: string, answers: UserAnswer[]): Promise<number> {
-            const res = await http.patch<any>(`${url}/${attemptId}/sync-answers`, answers);
-            return res ? 1 : 0;
-        }
+        // async syncAllAnswer(attemptId: string, answers: UserAnswer[]): Promise<number> {
+        //     const res = await http.patch<any>(`${url}/${attemptId}/sync-answers`, answers);
+        //     return res ? 1 : 0;
+        // }
     };
 };

@@ -12,6 +12,7 @@ export type QuizAttempt = {
     createdAt: Date;
     updatedAt: Date;
     questionsSnapshot: AttemptQuestion[];
+    userAnswers?: UserAnswer[];
 }
 
 export interface QuizAttemptFilter extends SearchFilter {
