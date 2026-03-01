@@ -7,7 +7,7 @@ import type { UserAnswer, QuizAttempt, AttemptQuestion } from "@/app/feature/qui
 import useToast from "@/app/components/Toast";
 import BackArrow from "@/app/assets/images/icons/back_arrow.svg";
 
-export default function QuizTestClient({ attemptPromise }: { attemptPromise: Promise<QuizAttempt | undefined> }) {
+export default function QuizTestClient({ attemptPromise }: { attemptPromise: Promise<QuizAttempt | null> }) {
     const router = useRouter();
     const attemptData = use(attemptPromise);
     const toast = useToast();
@@ -126,7 +126,7 @@ export default function QuizTestClient({ attemptPromise }: { attemptPromise: Pro
                         selectedChoiceIds: choices,
                     }));
 
-                    const status = await submitQuizAttempt(attemptData.id, finalAnswers);
+                    const status = await submitQuizAttempt(attemptData.quizId, attemptData.id, finalAnswers);
                     if (status > 0) {
                         toast.addToast("success", "Quiz submitted successfully!");
                         setIsFinished(true);

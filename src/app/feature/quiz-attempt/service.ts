@@ -1,28 +1,30 @@
 import { HTTPService } from "@/app/utils/http";
-import { createGenericWithSearchService, CRUDWithSearchService } from "@/app/utils/service";
-import { QuizAttempt, QuizAttemptFilter, UserAnswer } from "./quiz-attempt";
+import { QuizAttempt, UserAnswer } from "./quiz-attempt";
 
-export interface QuizAttemptService extends Omit<CRUDWithSearchService<QuizAttempt, QuizAttemptFilter, "id">, "create"> {
-    create(quizId: string): Promise<string | null>;
-    submit(attemptId: string, answers: UserAnswer[]): Promise<number>;
-    syncAllAnswer(attemptId: string, answers: UserAnswer[]): Promise<number>;
+export interface QuizAttemptService {
+    load(quizId: string, attemptId: string, next?: NextFetchRequestConfig | undefined, authSkip?: boolean | undefined): Promise<QuizAttempt | null>;
+    create(quizId: string, next?: NextFetchRequestConfig | undefined, authSkip?: boolean | undefined): Promise<string | null>;
+    submit(quizId: string, attemptId: string, answers: UserAnswer[], next?: NextFetchRequestConfig | undefined, authSkip?: boolean | undefined): Promise<number>;
+    // syncAllAnswer(quizId: string, attemptId: string, answers: UserAnswer[], next?: NextFetchRequestConfig | undefined, authSkip?: boolean | undefined): Promise<number>;
 }
 
 export const createQuizAttemptService = (http: HTTPService, url: string): QuizAttemptService => {
-    const base = createGenericWithSearchService<QuizAttempt, QuizAttemptFilter, "id">(http, url);
     return {
-        ...base,
-        async create(quizId: string): Promise<string | null> {
-            const res = await http.post<string, any>(`${url.replace("/attempts", "")}/${quizId}/attempts`, {});
+        async load(quizId: string, attemptId: string, next?: NextFetchRequestConfig | undefined, authSkip?: boolean | undefined): Promise<QuizAttempt | null> {
+            const res = await http.get<QuizAttempt>(`${url}/${quizId}/attempts/${attemptId}`, { next, authSkip });
             return res.body || null;
         },
-        async submit(attemptId: string, answers: UserAnswer[]): Promise<number> {
-            const res = await http.patch<any>(`${url}/${attemptId}/submit`, answers);
+        async create(quizId: string, next?: NextFetchRequestConfig | undefined, authSkip?: boolean | undefined): Promise<string | null> {
+            const res = await http.post<string, any>(`${url.replace("/attempts", "")}/${quizId}/attempts`, {}, { next, authSkip });
+            return res.body || null;
+        },
+        async submit(quizId: string, attemptId: string, answers: UserAnswer[], next?: NextFetchRequestConfig | undefined, authSkip?: boolean | undefined): Promise<number> {
+            const res = await http.patch<any>(`${url}/${quizId}/attempts/${attemptId}/submit`, answers, { next, authSkip });
             return res ? 1 : 0;
         },
-        async syncAllAnswer(attemptId: string, answers: UserAnswer[]): Promise<number> {
-            const res = await http.patch<any>(`${url}/${attemptId}/sync-answers`, answers);
-            return res ? 1 : 0;
-        }
+        // async syncAllAnswer(attemptId: string, answers: UserAnswer[], next?: NextFetchRequestConfig | undefined, authSkip?: boolean | undefined): Promise<number> {
+        //     const res = await http.patch<any>(`${url}/${attemptId}/sync-answers`, answers, { next, authSkip });
+        //     return res ? 1 : 0;
+        // }
     };
 };

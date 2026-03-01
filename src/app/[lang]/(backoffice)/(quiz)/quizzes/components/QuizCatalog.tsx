@@ -73,7 +73,7 @@ export default function QuizCatalog({
     try {
       const attId = await startQuizAttempt(quizId);
       if (attId) {
-        push(`/quizzes/test?attemptId=${attId}`);
+        push(`/quizzes/${quizId}/test?attemptId=${attId}`);
       } else {
         toast.addToast("error", "Failed to start quiz attempt");
       }

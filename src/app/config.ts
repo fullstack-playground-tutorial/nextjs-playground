@@ -18,7 +18,7 @@ export const config = {
   pfpassbook_url: backofficeServerHost + "/pfa/passbooks",
   film_url: backofficeServerHost + "/films",
   quiz_url: backofficeServerHost + "/quizzes",
-  quiz_attempt_url: backofficeServerHost + "/quizzes/attempts",
+  quiz_attempt_url: backofficeServerHost + "/quizzes",
   image_url_host:
     "https://res.cloudinary.com/dw9htagir/image/upload/v1769265769",
   ws: {
