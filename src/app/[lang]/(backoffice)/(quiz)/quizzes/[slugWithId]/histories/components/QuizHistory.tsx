@@ -78,11 +78,11 @@ export default function QuizHistory({
                                     </td>
                                     <td className="px-6 py-6 text-center">
                                         <div className="inline-flex items-center justify-center">
-                                            <div className={`px-4 py-2 rounded-2xl font-black text-lg border-2 shadow-sm ${item.score >= (quiz?.questions?.reduce((acc, q) => acc + q.point, 0) || 100) * 0.8 ? 'bg-green-500/10 border-green-500/20 text-green-500 shadow-green-500/5' :
-                                                item.score >= 5 ? 'bg-yellow-500/10 border-yellow-500/20 text-yellow-500 shadow-yellow-500/5' :
+                                            <div className={`px-4 py-2 rounded-2xl font-black text-lg border-2 shadow-sm ${item.point >= (quiz?.questions?.reduce((acc, q) => acc + q.point, 0) || 100) * 0.8 ? 'bg-green-500/10 border-green-500/20 text-green-500 shadow-green-500/5' :
+                                                item.point >= 5 ? 'bg-yellow-500/10 border-yellow-500/20 text-yellow-500 shadow-yellow-500/5' :
                                                     'bg-red-500/10 border-red-500/20 text-red-500 shadow-red-500/5'
                                                 }`}>
-                                                {item.score || 0}
+                                                {item.point || 0}
                                             </div>
                                         </div>
                                     </td>

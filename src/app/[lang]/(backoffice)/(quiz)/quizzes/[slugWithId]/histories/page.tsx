@@ -1,6 +1,7 @@
 import { getQuizAttemptService, getQuizService } from "@/app/core/server/context";
 import QuizHistory from "./components/QuizHistory";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 
 type Props = {
     params: Promise<{ slugWithId: string }>;
@@ -8,8 +9,9 @@ type Props = {
 
 export default async function QuizHistoryPage(props: Props) {
     const { slugWithId } = await props.params;
-    const lastDash = slugWithId.lastIndexOf("-");
-    const quizId = slugWithId.slice(lastDash + 1);
+
+    // get quiz id from slugWithId(id is uuid format)
+    const quizId = slugWithId.slice(-36);
 
     if (!quizId) return null;
     const quizSvc = getQuizService();
@@ -20,8 +22,8 @@ export default async function QuizHistoryPage(props: Props) {
     const quiz = await quizSvc.load(quizId);
 
     const sortedAttempts = [...attempts].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    const highestScore = attempts.length > 0 ? Math.max(...attempts.map(a => a.score || 0)) : 0;
-    const latestScore = sortedAttempts.length > 0 ? sortedAttempts[0].score : 0;
+    const highestScore = attempts.length > 0 ? Math.max(...attempts.map(a => a.point || 0)) : 0;
+    const latestScore = sortedAttempts.length > 0 ? sortedAttempts[0].point : 0;
 
     return (
         <div className="p-6 md:p-12 min-h-screen dark:text-primary flex flex-col gap-10">

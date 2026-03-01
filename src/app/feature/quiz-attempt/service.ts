@@ -3,6 +3,7 @@ import { QuizAttempt, UserAnswer } from "./quiz-attempt";
 
 export interface QuizAttemptService {
     load(quizId: string, attemptId: string, next?: NextFetchRequestConfig | undefined, authSkip?: boolean | undefined): Promise<QuizAttempt | null>;
+    getReview(quizId: string, attemptId: string, next?: NextFetchRequestConfig | undefined, authSkip?: boolean | undefined): Promise<QuizAttempt | null>;
     create(quizId: string, next?: NextFetchRequestConfig | undefined, authSkip?: boolean | undefined): Promise<string | null>;
     submit(quizId: string, attemptId: string, answers: UserAnswer[], next?: NextFetchRequestConfig | undefined, authSkip?: boolean | undefined): Promise<number>;
     all(quizId: string): Promise<QuizAttempt[]>;
@@ -16,8 +17,12 @@ export const createQuizAttemptService = (http: HTTPService, url: string): QuizAt
             const res = await http.get<QuizAttempt>(`${url}/${quizId}/attempts/${attemptId}`, { next, authSkip });
             return res.body || null;
         },
+        async getReview(quizId: string, attemptId: string, next?: NextFetchRequestConfig | undefined, authSkip?: boolean | undefined): Promise<QuizAttempt | null> {
+            const res = await http.get<QuizAttempt>(`${url}/${quizId}/attempts/${attemptId}/review`, { next, authSkip });
+            return res.body || null;
+        },
         async create(quizId: string, next?: NextFetchRequestConfig | undefined, authSkip?: boolean | undefined): Promise<string | null> {
-            const res = await http.post<string, any>(`${url.replace("/attempts", "")}/${quizId}/attempts`, {}, { next, authSkip });
+            const res = await http.post<string, any>(`${url}/${quizId}/attempts`, {}, { next, authSkip });
             return res.body || null;
         },
         async submit(quizId: string, attemptId: string, answers: UserAnswer[], next?: NextFetchRequestConfig | undefined, authSkip?: boolean | undefined): Promise<number> {

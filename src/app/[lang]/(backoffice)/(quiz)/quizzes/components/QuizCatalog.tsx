@@ -8,6 +8,7 @@ import Pagination from "@/components/Pagination";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import PlayCircleIcon from "@/app/assets/images/icons/play_circle.svg";
 import { startQuizAttempt } from "@/app/feature/quiz-attempt/action";
+import Link from "next/link";
 import useToast from "@/app/components/Toast";
 
 export default function QuizCatalog({
@@ -150,14 +151,36 @@ export default function QuizCatalog({
                 </div>
               </div>
 
-              <div className="mt-6 pt-2">
+              <div className="mt-6 pt-2 flex gap-3">
                 <button
                   onClick={() => handleStartQuiz(quiz.id)}
                   disabled={isStarting === quiz.id}
-                  className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-accent-0 hover:bg-accent-1 text-white rounded-xl transition-all font-bold text-sm shadow-lg shadow-accent-0/20 active:scale-95 disabled:opacity-50"
+                  className="flex-grow flex items-center justify-center gap-2 px-6 py-3 bg-accent-0 hover:bg-accent-1 text-white rounded-xl transition-all font-bold text-sm shadow-lg shadow-accent-0/20 active:scale-95 disabled:opacity-50"
                 >
                   {isStarting === quiz.id ? "Starting..." : "Start Quiz"}
                 </button>
+                <Link
+                  href={`/quizzes/${quiz.slug ? quiz.slug + "-" : ""}${quiz.id}/histories`}
+                  className="flex items-center justify-center px-4 py-3 bg-surface-2 hover:bg-surface-3 dark:bg-white/5 dark:hover:bg-white/10 rounded-xl transition-all border dark:border-white/10 group shadow-sm"
+                  title="View History"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="text-secondary group-hover:text-accent-0 transition-colors"
+                  >
+                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                    <path d="M3 3v5h5" />
+                    <path d="M12 7v5l4 2" />
+                  </svg>
+                </Link>
               </div>
             </div>
           </div>

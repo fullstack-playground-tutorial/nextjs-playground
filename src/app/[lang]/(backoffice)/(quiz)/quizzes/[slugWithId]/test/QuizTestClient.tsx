@@ -123,7 +123,9 @@ export default function QuizTestClient({ attemptPromise }: { attemptPromise: Pro
                         id: "",
                         attemptId: attemptData.id,
                         questionId: qId,
-                        selectedChoiceIds: choices,
+                        userAnswerChoices: choices.map((choiceId) => ({
+                            choiceId,
+                        })),
                     }));
 
                     const status = await submitQuizAttempt(attemptData.quizId, attemptData.id, finalAnswers);
@@ -146,7 +148,7 @@ export default function QuizTestClient({ attemptPromise }: { attemptPromise: Pro
     if (!attemptData) return null;
 
     if (isFinished) {
-        const score = attemptData?.score || 0;
+        const score = attemptData?.point || 0;
         const totalPossible = questions.reduce((acc, q) => acc + (q.point || 0), 0);
         return (
             <div className="flex flex-col items-center justify-center min-h-[80vh] p-8 text-center bg-surface-0/30 backdrop-blur-sm rounded-3xl border border-border mt-8 mx-auto max-w-2xl shadow-2xl">
@@ -173,7 +175,7 @@ export default function QuizTestClient({ attemptPromise }: { attemptPromise: Pro
 
                 <div className="flex flex-col sm:flex-row gap-4">
                     <button
-                        onClick={() => router.push("/quizzes/history")}
+                        onClick={() => router.push(`/quizzes/${attemptData.quizId}/histories`)}
                         className="px-10 py-4 bg-surface-2 hover:bg-surface-3 dark:text-primary rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg transition-all active:scale-95"
                     >
                         View History
