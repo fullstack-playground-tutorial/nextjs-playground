@@ -146,21 +146,45 @@ export default function QuizTestClient({ attemptPromise }: { attemptPromise: Pro
     if (!attemptData) return null;
 
     if (isFinished) {
+        const score = attemptData?.score || 0;
+        const totalPossible = questions.reduce((acc, q) => acc + (q.point || 0), 0);
         return (
-            <div className="flex flex-col items-center justify-center min-h-[80vh] p-8 text-center">
-                <div className="w-24 h-24 bg-accent-0/20 rounded-full flex items-center justify-center mb-8 animate-bounce shadow-xl shadow-accent-0/10">
-                    <svg className="w-12 h-12 text-accent-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="flex flex-col items-center justify-center min-h-[80vh] p-8 text-center bg-surface-0/30 backdrop-blur-sm rounded-3xl border border-border mt-8 mx-auto max-w-2xl shadow-2xl">
+                <div className="w-32 h-32 bg-accent-0/20 rounded-full flex items-center justify-center mb-8 animate-bounce shadow-xl shadow-accent-0/10 border-4 border-accent-0/40 relative">
+                    <svg className="w-16 h-16 text-accent-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
                     </svg>
+                    <div className="absolute -top-2 -right-2 bg-accent-0 text-white size-12 rounded-full flex items-center justify-center font-black text-xs border-4 border-white dark:border-surface-1 shadow-lg">
+                        100%
+                    </div>
                 </div>
-                <h1 className="text-4xl font-black dark:text-accent-0 mb-4 tracking-tight">Quiz Completed!</h1>
-                <p className="text-xl dark:text-secondary mb-12 max-w-md">Your attempt has been successfully recorded. Great job!</p>
-                <button
-                    onClick={() => router.push("/quizzes")}
-                    className="px-10 py-4 bg-accent-0 text-white rounded-2xl font-bold shadow-xl shadow-accent-0/20 hover:bg-accent-1 hover:-translate-y-1 transition-all active:scale-95"
-                >
-                    Return to Catalog
-                </button>
+                <h1 className="text-5xl font-black dark:text-accent-0 mb-2 tracking-tight">Well Done!</h1>
+                <p className="text-xl dark:text-secondary mb-10 max-w-md">Your quiz results are in. Great effort!</p>
+                <div className="grid grid-cols-2 gap-4 w-full max-w-sm mb-12">
+                    <div className="bg-surface-1 p-6 rounded-2xl border border-border shadow-sm">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-secondary block mb-1">Your Score</span>
+                        <span className="text-4xl font-black text-accent-0">{score}</span>
+                    </div>
+                    <div className="bg-surface-1 p-6 rounded-2xl border border-border shadow-sm">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-secondary block mb-1">Max Points</span>
+                        <span className="text-4xl font-black text-primary">{totalPossible}</span>
+                    </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-4">
+                    <button
+                        onClick={() => router.push("/quizzes/history")}
+                        className="px-10 py-4 bg-surface-2 hover:bg-surface-3 dark:text-primary rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg transition-all active:scale-95"
+                    >
+                        View History
+                    </button>
+                    <button
+                        onClick={() => router.push("/quizzes")}
+                        className="px-10 py-4 bg-accent-0 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-accent-0/20 hover:bg-accent-1 hover:-translate-y-1 transition-all active:scale-95"
+                    >
+                        New Quiz
+                    </button>
+                </div>
             </div>
         );
     }

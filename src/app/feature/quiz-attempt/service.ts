@@ -5,6 +5,8 @@ export interface QuizAttemptService {
     load(quizId: string, attemptId: string, next?: NextFetchRequestConfig | undefined, authSkip?: boolean | undefined): Promise<QuizAttempt | null>;
     create(quizId: string, next?: NextFetchRequestConfig | undefined, authSkip?: boolean | undefined): Promise<string | null>;
     submit(quizId: string, attemptId: string, answers: UserAnswer[], next?: NextFetchRequestConfig | undefined, authSkip?: boolean | undefined): Promise<number>;
+    all(quizId: string): Promise<QuizAttempt[]>;
+
     // syncAllAnswer(quizId: string, attemptId: string, answers: UserAnswer[], next?: NextFetchRequestConfig | undefined, authSkip?: boolean | undefined): Promise<number>;
 }
 
@@ -21,6 +23,10 @@ export const createQuizAttemptService = (http: HTTPService, url: string): QuizAt
         async submit(quizId: string, attemptId: string, answers: UserAnswer[], next?: NextFetchRequestConfig | undefined, authSkip?: boolean | undefined): Promise<number> {
             const res = await http.patch<any>(`${url}/${quizId}/attempts/${attemptId}/submit`, answers, { next, authSkip });
             return res ? 1 : 0;
+        },
+        async all(quizId: string): Promise<QuizAttempt[]> {
+            const res = await http.get<QuizAttempt[]>(`${url}/${quizId}/attempts`);
+            return res.body || [];
         },
         // async syncAllAnswer(attemptId: string, answers: UserAnswer[], next?: NextFetchRequestConfig | undefined, authSkip?: boolean | undefined): Promise<number> {
         //     const res = await http.patch<any>(`${url}/${attemptId}/sync-answers`, answers, { next, authSkip });

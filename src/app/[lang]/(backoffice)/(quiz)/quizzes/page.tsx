@@ -1,3 +1,4 @@
+import Link from "next/link";
 import QuizCatalog from "./components/QuizCatalog";
 import { getQuizService } from "@/app/core/server/context";
 
@@ -42,6 +43,15 @@ export default async function QuizzesPage(props: Props) {
         </div>
         {/* Background Decorative Element */}
         <div className="absolute right-[-5%] top-[-20%] size-64 bg-accent-0/20 blur-3xl rounded-full"></div>
+        <div className="absolute right-8 bottom-8 z-10">
+          <Link
+            href="/quizzes/history"
+            className="flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 rounded-2xl transition-all font-bold text-sm dark:text-primary shadow-xl"
+          >
+            <span>📜</span>
+            View History
+          </Link>
+        </div>
       </div>
 
       {/* Quiz Catalog Section */}
