@@ -14,7 +14,7 @@ import {
 } from "../../../components/ActionButtons/ActionButtons";
 import useToast from "@/components/Toast";
 import BackArrow from "@/assets/images/icons/back_arrow.svg";
-import { User } from "@/app/feature/auth";
+import { config } from "@/app/config";
 
 type Props = {
   film?: Film;
@@ -75,26 +75,33 @@ export default function FilmForm({ film, suggestions }: Props) {
   const bannerInputRef = useRef<HTMLInputElement>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
 
+  const getImageUrl = (url: string) => {
+    if (!url) return "";
+    if (url.startsWith("blob:") || url.startsWith("data:") || url.startsWith("http")) return url;
+    return `${config.image_url_host}/${url}.image/webp.webp`;
+  };
+
   // Initial previews (derived from film data or new uploads)
   const [posterFile, setPosterFile] = useState<File | null>(null);
   const [posterPreview, setPosterPreview] = useState<string>(
-    film?.posterUrl || "",
+    getImageUrl(film?.posterUrl || ""),
   );
 
   const [bannerFile, setBannerFile] = useState<File | null>(null);
   const [bannerPreview, setBannerPreview] = useState<string>(
-    film?.bannerUrl || "",
+    getImageUrl(film?.bannerUrl || ""),
   );
 
   const [logoFile, setLogoFile] = useState<File | null>(null);
-  const [logoPreview, setLogoPreview] = useState<string>(film?.logoUrl || "");
+  const [logoPreview, setLogoPreview] = useState<string>(getImageUrl(film?.logoUrl || ""));
 
   // Sync state with props if they change (re-validation/refetch)
   useEffect(() => {
     if (film) {
       setState((prev) => ({ ...prev, film: { ...film } }));
-      setLogoPreview(film.logoUrl || "");
-      // logic for images...
+      setLogoPreview(getImageUrl(film.logoUrl || ""));
+      setPosterPreview(getImageUrl(film.posterUrl || ""));
+      setBannerPreview(getImageUrl(film.bannerUrl || ""));
     }
   }, [film]);
 
@@ -443,7 +450,7 @@ export default function FilmForm({ film, suggestions }: Props) {
             {fieldErrors["interestIds"] && <span className="text-sm text-alert-0">{fieldErrors["interestIds"]}</span>}
           </div>
 
-          <div className="h-32">
+          <div className="h-48">
             <FloatTextarea label="Description" name="description" value={state.film.description || ""} disable={isViewOrReview} onChange={handleChange} />
             {fieldErrors["description"] && <span className="text-sm text-alert-0">{fieldErrors["description"]}</span>}
           </div>

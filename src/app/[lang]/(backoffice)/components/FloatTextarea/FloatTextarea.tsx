@@ -29,7 +29,7 @@ function FloatTextarea({ onChange, value, label, name, disable, required }: Prop
       >
         {label}{required && <span className="text-alert-0">*</span>}
       </label>
-      <div className="pt-6 px-3 pb-2">
+      <div className="pt-6 px-3 pb-2 h-full">
         <textarea
           ref={inputRef}
           id={name}
