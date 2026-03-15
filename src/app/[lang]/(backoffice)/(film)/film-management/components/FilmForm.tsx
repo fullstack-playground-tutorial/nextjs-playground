@@ -7,7 +7,7 @@ import FloatTextarea from "../../../components/FloatTextarea";
 import AutoComplete from "../../../components/AutoComplete";
 import Uploader from "../../../../../components/Upload";
 import { Film, Interest } from "@/app/feature/film";
-import { createFilm, updateFilm } from "@/app/feature/film/action";
+import { createFilm, patchFilm } from "@/app/feature/film/action";
 import {
   ActionButtons,
   ActionStatus,
@@ -66,7 +66,6 @@ export default function FilmForm({ film, suggestions }: Props) {
 
   // Transitions for actions
   const [submitting, startSubmitting] = useTransition();
-  const [drafting, startDrafting] = useTransition();
   const [approving, startApproving] = useTransition();
   const [rejecting, startRejecting] = useTransition();
 
@@ -74,6 +73,9 @@ export default function FilmForm({ film, suggestions }: Props) {
   const posterInputRef = useRef<HTMLInputElement>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
+
+  // Ref to store original film data for diff checking
+  const originalFilmRef = useRef<Film | null>(null);
 
   const getImageUrl = (url: string) => {
     if (!url) return "";
@@ -98,6 +100,7 @@ export default function FilmForm({ film, suggestions }: Props) {
   // Sync state with props if they change (re-validation/refetch)
   useEffect(() => {
     if (film) {
+      originalFilmRef.current = film;
       setState((prev) => ({ ...prev, film: { ...film } }));
       setLogoPreview(getImageUrl(film.logoUrl || ""));
       setPosterPreview(getImageUrl(film.posterUrl || ""));
@@ -177,13 +180,51 @@ export default function FilmForm({ film, suggestions }: Props) {
 
   const fileName = (f: File | null) => f?.name || "";
 
-  const getPayload = () => {
-    return {
+  const getChangeDiff = (original: Film, current: Film): Partial<Film> => {
+    return (Object.keys(current) as Array<keyof Film>).reduce((acc, key) => {
+      // ignore UI-only fields or read-only fields that shouldn't be patched
+      if (key === 'interests' || key === 'slug') return acc;
+
+      const val1 = original[key];
+      const val2 = current[key];
+
+      const isEmpty1 = val1 === null || val1 === undefined || val1 === "";
+      const isEmpty2 = val2 === null || val2 === undefined || val2 === "";
+      if (isEmpty1 && isEmpty2) return acc;
+
+      if (Array.isArray(val1) && Array.isArray(val2)) {
+        if (val1.length !== val2.length) {
+          return { ...acc, [key]: val2 };
+        }
+        const sorted1 = [...val1].sort();
+        const sorted2 = [...val2].sort();
+        if (JSON.stringify(sorted1) !== JSON.stringify(sorted2)) {
+          return { ...acc, [key]: val2 };
+        }
+        return acc;
+      }
+
+      if (JSON.stringify(val1) !== JSON.stringify(val2)) {
+        return { ...acc, [key]: val2 };
+      }
+      return acc;
+    }, {} as Partial<Film>);
+  };
+
+  const getPayload = (): Partial<Film> | Film => {
+    const base: Film = {
       ...state.film,
-      logoURL: logoFile ? logoFile.name : state.film.logoUrl,
-      posterURL: posterFile ? posterFile.name : state.film.posterUrl,
-      bannerURL: bannerFile ? bannerFile.name : state.film.bannerUrl,
+      logoUrl: logoFile ? logoFile.name : state.film.logoUrl,
+      posterUrl: posterFile ? posterFile.name : state.film.posterUrl,
+      bannerUrl: bannerFile ? bannerFile.name : state.film.bannerUrl,
     };
+
+
+    if (mode === "create") return base;
+    const original = originalFilmRef.current;
+    if (!original) return base;
+
+    return getChangeDiff(original, base);
   };
 
   const handleAction = (status: ActionStatus) => {
@@ -197,14 +238,23 @@ export default function FilmForm({ film, suggestions }: Props) {
             toast.addToast("error", "Please upload all required files");
             return;
           }
-          res = await createFilm({ ...payload }, logoFile, posterFile, bannerFile); // status would be passed if API supported it
+          res = await createFilm({ ...payload } as Film, logoFile, posterFile, bannerFile); // status would be passed if API supported it
           if (res?.fieldErrors) {
             setFieldErrors(res.fieldErrors);
             return;
           }
 
         } else if (mode === "edit" || mode === "review") {
-          res = await updateFilm(state.film.id, { ...payload });
+          if (Object.keys(payload).length === 0 && !logoFile && !posterFile && !bannerFile) {
+            toast.addToast("error", "Please provide at least one field to update");
+            return;
+          }
+
+          res = await patchFilm(state.film.id, payload, { logo: logoFile, poster: posterFile, banner: bannerFile });
+          if (res?.fieldErrors) {
+            setFieldErrors(res.fieldErrors);
+            return;
+          }
         }
 
         if (res?.successMsg) {
@@ -216,7 +266,6 @@ export default function FilmForm({ film, suggestions }: Props) {
       }
     };
 
-    if (status === "draft") startDrafting(performAction);
     if (status === "submit") startSubmitting(performAction);
     if (status === "approve") startApproving(performAction);
     if (status === "reject") startRejecting(performAction);
@@ -457,13 +506,23 @@ export default function FilmForm({ film, suggestions }: Props) {
 
           <ActionButtons
             mode={mode as any}
+            modeActionConfig={{
+              create: ["submit"],
+              edit: ["submit"],
+              review: ["approve", "reject"],
+            }}
+            buttonAppearanceConfig={{
+              submit: {
+                label: mode === "create" ? "Create Film" : "Update Film",
+                waitingLabel: mode === "create" ? "Creating..." : "Updating...",
+                className: "dark:bg-accent-0 hover:dark:bg-accent-1",
+              },
+            }}
             mutationPendings={{
-              draft: drafting,
               submit: submitting,
               approve: approving,
               reject: rejecting,
             }}
-            onSaveDraft={() => handleAction("draft")}
             onSubmit={() => handleAction("submit")}
             onCancel={() => router.back()}
             onApprove={() => handleAction("approve")}
