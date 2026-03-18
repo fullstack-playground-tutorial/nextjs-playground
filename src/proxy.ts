@@ -9,6 +9,7 @@ const publicRoutes: string[] = [
   "/test",
   "/marketplace",
   "/eng-note",
+  "/card-game",
   "",
 ];
 const protectedRoutes: string[] = [
@@ -96,8 +97,8 @@ export async function proxy(request: NextRequest) {
 
   const matchedLocale = localeSegment
     ? supportedLocales.find(
-        (loc) => loc === localeSegment || loc.startsWith(localeSegment),
-      )
+      (loc) => loc === localeSegment || loc.startsWith(localeSegment),
+    )
     : undefined;
 
   const pathnameHasLocale =

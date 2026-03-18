@@ -110,6 +110,14 @@ function Sidebar({ userInfo, topbar, onToggleViewbar }: Props) {
           url="/settings/generals"
         />,
         <MenuSection
+          key="card-game"
+          id="card-game"
+          title={localize("sidebar_card_game")}
+          iconName={"FlashcardIcon"}
+          url="/card-game"
+          checkAuthorized={() => true}
+        />,
+        <MenuSection
           key="logout"
           id="logout"
           title={localize("sidebar_logout")}
