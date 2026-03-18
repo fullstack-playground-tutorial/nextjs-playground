@@ -171,9 +171,12 @@ export default function FilmList({
                     className="hover:bg-gray-50 dark:hover:bg-surface-1 transition-colors"
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium dark:text-primary">
+                      <Link
+                        href={`${pathname}/${film.id}`}
+                        className="text-sm font-medium dark:text-primary hover:text-accent-0 transition-colors"
+                      >
                         {film.title}
-                      </div>
+                      </Link>
                       <div className="text-xs text-gray-500 dark:text-secondary">
                         ID: {film.id}
                       </div>
@@ -204,9 +207,12 @@ export default function FilmList({
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <button className="text-accent-0 hover:text-accent-1 mr-4">
+                      <Link
+                        href={`${pathname}/${film.id}/edit`}
+                        className="text-accent-0 hover:text-accent-1 mr-4"
+                      >
                         Edit
-                      </button>
+                      </Link>
                       <button className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
                         Delete
                       </button>
@@ -267,9 +273,12 @@ export default function FilmList({
                   </div>
                   <div className="flex justify-between flex-row-reverse gap-2 absolute bottom-0 left-0 right-0 p-1 w-full">
                     <div className="flex flex-row items-end gap-2">
-                      <div className="flex items-center size-10 justify-center dark:hover:*:fill-primary bg-white dark:bg-surface-0/50 p-2 rounded-full dark:hover:bg-surface-1 cursor-pointer transition">
+                      <Link
+                        href={`${pathname}/${film.id}/edit`}
+                        className="flex items-center size-10 justify-center dark:hover:*:fill-primary bg-white dark:bg-surface-0/50 p-2 rounded-full dark:hover:bg-surface-1 cursor-pointer transition"
+                      >
                         <EditIcon className="size-5 fill-gray-400 dark:fill-secondary" />
-                      </div>
+                      </Link>
                       <Link
                         href={`/film-management/playlist?list=${film.id}`}
                         className="flex items-center size-10 justify-center dark:hover:*:fill-primary bg-white dark:bg-surface-0/50 p-2 rounded-full dark:hover:bg-surface-1 cursor-pointer transition"
@@ -281,9 +290,12 @@ export default function FilmList({
                       </div>
                     </div>
                     <div className="flex justify-between flex-auto">
-                      <h3 className="font-serif text-xl tracking-tight dark:text-primary px-1.5 py-2 rounded backdrop-blur-xs">
+                      <Link
+                        href={`${pathname}/${film.id}`}
+                        className="font-serif text-xl tracking-tight dark:text-primary px-1.5 py-2 rounded backdrop-blur-xs hover:text-accent-0 transition-colors"
+                      >
                         {film.title}
-                      </h3>
+                      </Link>
                     </div>
                   </div>
                 </div>

@@ -1,5 +1,9 @@
 import { Schema, ValidateErrors } from "./model";
 
+type ValidateOptions = {
+  mode?: "create" | "edit";
+}
+
 export class InputValidate {
   static objectValidate: ObjectValidate;
   static object(schema: Schema) {
@@ -23,11 +27,13 @@ class ObjectValidate {
     this.validate = this.validate.bind(this);
   }
 
-  validate<T extends Object>(values: T): ValidateErrors {
+  validate<T extends Object>(values: Partial<T>, options?: ValidateOptions): ValidateErrors {
+    const defaultOptions: ValidateOptions = { mode: "create" };
+    const opts = { ...defaultOptions, ...options };
     const res: ValidateErrors = {};
     for (const [field, value] of Object.entries(values)) {
       if (!this.schema[field]) continue;
-      const iv = this.schema[field].validate(value);
+      const iv = this.schema[field].validate(value, opts);
       if (iv.length > 0) {
         res[field] = iv;
       }
@@ -48,6 +54,7 @@ export class SchemaItem<T extends string | number> {
   private min?: number;
   private max?: number;
   private required: boolean = false;
+  private requiredOnEdit: boolean = false;
   private type?: "phone" | "email";
   private fieldRef?: string;
   private maxLengthError: string =
@@ -92,13 +99,23 @@ export class SchemaItem<T extends string | number> {
     this.emailError = this._fieldName + " is not valid";
   }
 
-  validate<V extends string | number | any[]>(value?: V | null): string {
-    if (this.required && (value === undefined || value === null)) {
+  validate<V extends string | number | any[]>(value?: V | null, options?: ValidateOptions): string {
+    if (this.required && (value === undefined || value === null) && options?.mode === "create") {
+      return this.requiredError;
+    } else if (this.requiredOnEdit && (value === undefined || value === null) && options?.mode === "edit") {
       return this.requiredError;
     }
 
+
+    if (value === undefined || value === null) {
+      return "";
+    }
+
     if (Array.isArray(value)) {
-      if (this.required && value.length === 0) {
+      if (
+        (this.required && options?.mode === "create" && value.length === 0) ||
+        (this.requiredOnEdit && options?.mode === "edit" && value.length === 0)
+      ) {
         return this.requiredError;
       }
       return "";
@@ -117,7 +134,10 @@ export class SchemaItem<T extends string | number> {
 
     if (typeof value === "string") {
       const strVal = value.trim();
-      if (this.required && strVal.length == 0) {
+      if (
+        (this.required && options?.mode === "create" && strVal.length === 0) ||
+        (this.requiredOnEdit && options?.mode === "edit" && strVal.length === 0)
+      ) {
         errorMsg = this.requiredError;
       } else if (this.minLength && strVal.length < this.minLength) {
         errorMsg = this.minLengthError;
@@ -151,6 +171,13 @@ export class SchemaItem<T extends string | number> {
 
   isRequired(errorMessage?: string) {
     this.required = true;
+    if (errorMessage) {
+      this.requiredError = errorMessage;
+    }
+    return this;
+  }
+  isRequiredOnEdit(errorMessage?: string) {
+    this.requiredOnEdit = true;
     if (errorMessage) {
       this.requiredError = errorMessage;
     }

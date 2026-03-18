@@ -25,7 +25,9 @@ import {
 } from "@/app/feature/personal-finance/service";
 import { createFilmService, FilmService } from "@/app/feature/film";
 import { createQuizService, QuizService } from "@/app/feature/quiz";
+import { createFlashcardService, FlashcardService } from "@/app/feature/flashcard";
 import { createQuizAttemptService, QuizAttemptService } from "@/app/feature/quiz-attempt";
+
 
 class ApplicationContext {
   private authService?: AuthService;
@@ -45,6 +47,7 @@ class ApplicationContext {
   private pFPassbookService?: PFPassbookService;
   private filmService?: FilmService;
   private quizService?: QuizService;
+  private flashcardService?: FlashcardService;
   private quizAttemptService?: QuizAttemptService;
 
   constructor(private httpService: HTTPService) {
@@ -61,6 +64,7 @@ class ApplicationContext {
     this.getPFPassbookService = this.getPFPassbookService.bind(this);
     this.getFilmService = this.getFilmService.bind(this);
     this.getQuizService = this.getQuizService.bind(this);
+    this.getFlashcardService = this.getFlashcardService.bind(this);
     this.getQuizAttemptService = this.getQuizAttemptService.bind(this);
   }
 
@@ -196,6 +200,13 @@ class ApplicationContext {
     return this.quizService;
   };
 
+  getFlashcardService = () => {
+    if (!this.flashcardService) {
+      this.flashcardService = createFlashcardService(this.httpService, config.flashcard_url);
+    }
+    return this.flashcardService;
+  };
+
   getQuizAttemptService = () => {
     if (!this.quizAttemptService) {
       this.quizAttemptService = createQuizAttemptService(
@@ -311,5 +322,6 @@ export const {
   getFilmService,
   getFilmInterestService,
   getQuizService,
+  getFlashcardService,
   getQuizAttemptService,
 } = appContext;

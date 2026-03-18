@@ -19,6 +19,7 @@ export const config = {
   film_url: backofficeServerHost + "/films",
   quiz_url: backofficeServerHost + "/quizzes",
   quiz_attempt_url: backofficeServerHost + "/quizzes",
+  flashcard_url: backofficeServerHost + "/flashcard-sets",
   image_url_host:
     "https://res.cloudinary.com/dw9htagir/image/upload/v1769265769",
   ws: {

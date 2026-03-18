@@ -14,8 +14,18 @@ const nextConfig = {
     },
   },
   images: {
-    remotePatterns: [new URL('https://res.cloudinary.com/dw9htagir/image/upload/**')],
-
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+        pathname: '/dw9htagir/image/upload/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'encrypted-tbn0.gstatic.com',
+        pathname: '/**',
+      },
+    ],
   }
 };
 

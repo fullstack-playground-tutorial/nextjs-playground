@@ -7,5 +7,7 @@ export const CACHE_TAG = {
     FILMS: "films",
     INTEREST_SUGGESTIONS: "interest_suggestions",
     QUIZZES: "quizzes",
-    QUIZ: "quiz"
+    QUIZ: "quiz",
+    FLASHCARDS: "flashcards",
+    FLASHCARD: "flashcard"
 }

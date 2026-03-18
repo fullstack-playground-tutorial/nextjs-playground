@@ -17,6 +17,7 @@ import TagIcon from "./icons/tag.svg";
 import LanguageIcon from "./icons/language.svg";
 import SettingsIcon from "./icons/settings.svg";
 import QuizIcon from "./icons/quiz.svg";
+import FlashcardIcon from "./icons/flashcard.svg";
 import SidebarWrapper from "./SidebarWrapper";
 import { MenuSection, MenuSectionProps } from "./MenuSection";
 import { logout, Module, UserInfo } from "@/app/feature/auth";
@@ -49,6 +50,7 @@ const icons: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = {
   LanguageIcon,
   SettingsIcon,
   QuizIcon,
+  FlashcardIcon,
 };
 
 function Sidebar({ userInfo, topbar, onToggleViewbar }: Props) {
@@ -72,7 +74,7 @@ function Sidebar({ userInfo, topbar, onToggleViewbar }: Props) {
       <MenuSection
         key={id}
         id={id}
-        title={title}
+        title={localize(title)}
         permission={permission}
         iconName={icon}
         url={url}

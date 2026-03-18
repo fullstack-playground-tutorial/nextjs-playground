@@ -1,3 +1,3 @@
-export * from "./film";
+export * from "./flashcard";
 export * from "./service";
 export * from "./action";

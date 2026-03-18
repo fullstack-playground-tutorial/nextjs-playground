@@ -25,23 +25,23 @@ export type Film = {
 };
 
 export type FilmImages = {
-  logo: File;
-  poster: File;
-  banner: File;
+  logo?: File | null;
+  poster?: File | null;
+  banner?: File | null;
 };
 
 export type Source = {
   id: string;
   title: string;
   sourceType:
-    | "youtube"
-    | "vimeo"
-    | "mp4"
-    | "hls"
-    | "dash"
-    | "webm"
-    | "mov"
-    | "m3u8";
+  | "youtube"
+  | "vimeo"
+  | "mp4"
+  | "hls"
+  | "dash"
+  | "webm"
+  | "mov"
+  | "m3u8";
   publishedAt?: Date;
   tracks?: { [key: string]: Track };
   sourceUrls: { [key: string]: string };
