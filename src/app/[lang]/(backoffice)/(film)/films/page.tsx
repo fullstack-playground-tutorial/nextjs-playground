@@ -6,15 +6,21 @@ import WrapperItem from "./components/WrapperItem";
 import Banner from "./components/BannerSlider";
 import Carousel from "./components/Carousel";
 import { NewestFilmCarouselItem } from "./components/FilmCarouselItem";
-import { Film } from "@/app/feature/film";
+import { getFilmService } from "@/app/core/server/context";
+import { config } from "@/app/config";
 
 export default async function Page() {
-  // const newestFilms = await getFilmService()
-  //   .search({
-  //     sort: "publishedAt",
-  //     limit: 4,
-  //   })
-  const newestFilms: Film[] = [];
+  const newestFilms = await getFilmService()
+    .search({
+      sort: "publishedAt",
+      limit: 4,
+    })
+
+  const getImageUrl = (url: string) => {
+    if (!url) return "";
+    if (url.startsWith("blob:") || url.startsWith("data:") || url.startsWith("http")) return url;
+    return `${config.image_url_host}/${url}.image/webp.webp`;
+  };
 
   return (
     <div className="p-4 dark:bg-surface-0 h-screen dark:text-primary max-w-300 mx-auto flex flex-col">
@@ -49,11 +55,19 @@ export default async function Page() {
       </div>
       <div>
         <div className="h-[100vh] w-full">
-          <Banner duration={3000} films={newestFilms} />
+          <Banner duration={3000} films={newestFilms.list.map((f) => ({
+            ...f,
+            bannerUrl: getImageUrl(f.bannerUrl || ""),
+            logoUrl: getImageUrl(f.logoUrl || ""),
+          }))} />
         </div>
         <Carousel
           ItemElement={NewestFilmCarouselItem}
-          items={newestFilms}
+          items={newestFilms.list.map((f) => ({
+            ...f,
+            bannerUrl: getImageUrl(f.bannerUrl || ""),
+            logoUrl: getImageUrl(f.logoUrl || ""),
+          }))}
           visibleCount={4}
           Loading={"loading ..."}
           className=" w-full flex flex-row items-center justify-center rounded-b-lg p-4 -mt-[10%]"

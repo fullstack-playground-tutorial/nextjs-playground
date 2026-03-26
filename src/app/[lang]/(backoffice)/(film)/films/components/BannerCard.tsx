@@ -4,7 +4,7 @@ import Link from "next/link";
 interface Props {
   filmId: string;
   firstEpId?: string;
-  bannerUrl: string;
+  bannerUrl?: string;
   logoUrl?: string;
   title: string;
   description?: string;
@@ -52,9 +52,8 @@ export default function BannerCard({
           "--img-url": `url(${bannerUrl})`,
         } as React.CSSProperties
       }
-      className={`absolute h-full w-full left-0 top-0 overflow-hidden bg-[size:cover] z-0 rounded-lg bg-[image:var(--img-url)] transition-opacity duration-1000 ${
-        isDisplayed(filmId) ? "opacity-100" : "opacity-0 pointer-events-none"
-      }`}
+      className={`absolute h-full w-full left-0 top-0 overflow-hidden bg-[size:cover] z-0 rounded-lg bg-[image:var(--img-url)] transition-opacity duration-1000 ${isDisplayed(filmId) ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
     >
       <div className="absolute h-full bottom-0 left-0 flex flex-col justify-end w-full from-black to-transparent bg-gradient-to-t"></div>
       <div className="absolute right-0 top-0 h-full w-1/4 justify-center items-center p-4 bg-gradient-to-l from-black/60 to-black/transparent rounded-lg ">

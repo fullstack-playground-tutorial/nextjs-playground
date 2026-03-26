@@ -32,8 +32,8 @@ export default function FilmList({
   const { list, total } = data;
   const searchParams = useSearchParams();
   const [searchTerm, setSearchTerm] = useState("");
-  const [viewMode, setViewMode] = useState<"list" | "grid">("list");
-  const { replace, push } = useRouter();
+  const [viewMode, setViewMode] = useState<"list" | "grid">("grid");
+  const { replace } = useRouter();
   const pathname = usePathname();
 
   const pageTotal = useMemo(() => {
@@ -43,6 +43,12 @@ export default function FilmList({
   const filteredFilms = list.filter((film) =>
     film.title.toLowerCase().includes(searchTerm.toLowerCase()),
   );
+
+  const getImageUrl = (url: string) => {
+    if (!url) return "";
+    if (url.startsWith("blob:") || url.startsWith("data:") || url.startsWith("http")) return url;
+    return `${config.image_url_host}/${url}.image/webp.webp`;
+  };
 
   const handlePageChange = (n: number) => {
     const params = new URLSearchParams(searchParams);
@@ -244,7 +250,7 @@ export default function FilmList({
                   {film.bannerUrl ? (
                     <div className="h-full hover:scale-105 transition  bg-gray-200 dark:bg-surface-1 flex items-center justify-center">
                       <Image
-                        src={`${config.image_url_host}/${film.bannerUrl}.image/webp.webp`}
+                        src={getImageUrl(film.bannerUrl)}
                         alt={film.title}
                         fill={true}
                         placeholder="blur"

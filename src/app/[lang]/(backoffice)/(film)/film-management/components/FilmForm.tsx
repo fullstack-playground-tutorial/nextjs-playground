@@ -97,6 +97,10 @@ export default function FilmForm({ film, suggestions }: Props) {
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string>(getImageUrl(film?.logoUrl || ""));
 
+  const [posterMode, setPosterMode] = useState<"upload" | "url">("upload");
+  const [bannerMode, setBannerMode] = useState<"upload" | "url">("upload");
+  const [logoMode, setLogoMode] = useState<"upload" | "url">("upload");
+
   // Sync state with props if they change (re-validation/refetch)
   useEffect(() => {
     if (film) {
@@ -214,9 +218,9 @@ export default function FilmForm({ film, suggestions }: Props) {
   const getPayload = (): Partial<Film> | Film => {
     const base: Film = {
       ...state.film,
-      logoUrl: logoFile ? logoFile.name : state.film.logoUrl,
-      posterUrl: posterFile ? posterFile.name : state.film.posterUrl,
-      bannerUrl: bannerFile ? bannerFile.name : state.film.bannerUrl,
+      logoUrl: logoMode === "upload" && logoFile ? logoFile.name : state.film.logoUrl,
+      posterUrl: posterMode === "upload" && posterFile ? posterFile.name : state.film.posterUrl,
+      bannerUrl: bannerMode === "upload" && bannerFile ? bannerFile.name : state.film.bannerUrl,
     };
 
 
@@ -234,11 +238,13 @@ export default function FilmForm({ film, suggestions }: Props) {
       try {
         let res;
         if (mode === "create") {
-          if (!logoFile || !posterFile || !bannerFile) {
-            toast.addToast("error", "Please upload all required files");
+          if ((logoMode === "upload" && !logoFile) || (logoMode === "url" && !payload.logoUrl) || 
+              (posterMode === "upload" && !posterFile) || (posterMode === "url" && !payload.posterUrl) || 
+              (bannerMode === "upload" && !bannerFile) || (bannerMode === "url" && !payload.bannerUrl)) {
+            toast.addToast("error", "Please provide all required images (upload or URL)");
             return;
           }
-          res = await createFilm({ ...payload } as Film, logoFile, posterFile, bannerFile); // status would be passed if API supported it
+          res = await createFilm({ ...payload } as Film, logoMode === "upload" ? logoFile : null, posterMode === "upload" ? posterFile : null, bannerMode === "upload" ? bannerFile : null);
           if (res?.fieldErrors) {
             setFieldErrors(res.fieldErrors);
             return;
@@ -250,7 +256,11 @@ export default function FilmForm({ film, suggestions }: Props) {
             return;
           }
 
-          res = await patchFilm(state.film.id, payload, { logo: logoFile, poster: posterFile, banner: bannerFile });
+          res = await patchFilm(state.film.id, payload, { 
+            logo: logoMode === "upload" ? logoFile : null, 
+            poster: posterMode === "upload" ? posterFile : null, 
+            banner: bannerMode === "upload" ? bannerFile : null 
+          });
           if (res?.fieldErrors) {
             setFieldErrors(res.fieldErrors);
             return;
@@ -304,143 +314,269 @@ export default function FilmForm({ film, suggestions }: Props) {
         <div className="flex flex-col gap-6">
           {/* Poster */}
           <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium dark:text-secondary">
-              Poster Image
-            </label>
-            <div
-              className={`w-full aspect-[2/3] bg-gray-100 dark:bg-surface-1 rounded-lg overflow-hidden border-2 border-dashed dark:border-border relative group ${!isViewOrReview ? "cursor-pointer" : ""}`}
-              onClick={() => !isViewOrReview && posterInputRef.current?.click()}
-            >
-              <Uploader
-                handleDrop={(files) =>
-                  !isViewOrReview && handleFileDrop(files, "poster")
-                }
+            <div className="flex justify-between items-center">
+              <label className="text-sm font-medium dark:text-secondary">
+                Poster Image
+              </label>
+              {!isViewOrReview && (
+                <div className="flex bg-gray-100 dark:bg-surface-2 p-1 rounded-lg">
+                  <button
+                    type="button"
+                    className={`px-3 py-1 text-xs rounded-md transition-colors ${posterMode === "upload" ? "bg-white dark:bg-surface-1 shadow text-primary" : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"}`}
+                    onClick={() => setPosterMode("upload")}
+                  >Upload</button>
+                  <button
+                    type="button"
+                    className={`px-3 py-1 text-xs rounded-md transition-colors ${posterMode === "url" ? "bg-white dark:bg-surface-1 shadow text-primary" : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"}`}
+                    onClick={() => setPosterMode("url")}
+                  >URL</button>
+                </div>
+              )}
+            </div>
+            
+            {posterMode === "upload" ? (
+              <div
+                className={`w-full aspect-[2/3] bg-gray-100 dark:bg-surface-1 rounded-lg overflow-hidden border-2 border-dashed dark:border-border relative group ${!isViewOrReview ? "cursor-pointer" : ""}`}
+                onClick={() => !isViewOrReview && posterInputRef.current?.click()}
               >
-                <div className="w-full h-full flex flex-col items-center justify-center p-4 text-center">
+                <Uploader
+                  handleDrop={(files) =>
+                    !isViewOrReview && handleFileDrop(files, "poster")
+                  }
+                >
+                  <div className="w-full h-full flex flex-col items-center justify-center p-4 text-center">
+                    {posterPreview ? (
+                      <img
+                        src={posterPreview}
+                        alt="Poster"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <>
+                        <span className="text-4xl mb-2">🖼️</span>
+                        <p className="text-xs dark:text-secondary">
+                          Click or Drop Poster
+                        </p>
+                      </>
+                    )}
+                    {!isViewOrReview && (
+                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-sm font-medium">
+                        Change Image
+                      </div>
+                    )}
+                  </div>
+                </Uploader>
+                <input
+                  type="file"
+                  ref={posterInputRef}
+                  className="hidden"
+                  accept="image/*"
+                  onChange={(e) => handleFileSelect(e, "poster")}
+                  disabled={isViewOrReview}
+                />
+              </div>
+            ) : (
+              <div className="flex flex-col gap-4">
+                <div className="h-12">
+                  <FloatInput
+                    label="Poster URL"
+                    name="posterUrl"
+                    value={state.film.posterUrl || ""}
+                    disable={isViewOrReview}
+                    onChange={(e) => {
+                      const url = e.target.value;
+                      updateState({ posterUrl: url });
+                      setPosterPreview(getImageUrl(url));
+                    }}
+                  />
+                </div>
+                <div className="w-full aspect-[2/3] bg-gray-100 dark:bg-surface-1 rounded-lg overflow-hidden border dark:border-border relative flex items-center justify-center">
                   {posterPreview ? (
-                    <img
-                      src={posterPreview}
-                      alt="Poster"
-                      className="w-full h-full object-cover"
-                    />
+                    <img src={posterPreview} alt="Poster" className="w-full h-full object-cover" />
                   ) : (
-                    <>
-                      <span className="text-4xl mb-2">🖼️</span>
-                      <p className="text-xs dark:text-secondary">
-                        Click or Drop Poster
-                      </p>
-                    </>
-                  )}
-                  {!isViewOrReview && (
-                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-sm font-medium">
-                      Change Image
-                    </div>
+                    <span className="text-xs text-gray-400">Preview Images</span>
                   )}
                 </div>
-              </Uploader>
-              <input
-                type="file"
-                ref={posterInputRef}
-                className="hidden"
-                accept="image/*"
-                onChange={(e) => handleFileSelect(e, "poster")}
-                disabled={isViewOrReview}
-              />
-            </div>
+              </div>
+            )}
           </div>
 
           {/* Banner */}
           <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium dark:text-secondary">
-              Banner Image
-            </label>
-            <div
-              className={`w-full aspect-video bg-gray-100 dark:bg-surface-1 rounded-lg overflow-hidden border-2 border-dashed dark:border-border relative group ${!isViewOrReview ? "cursor-pointer" : ""}`}
-              onClick={() => !isViewOrReview && bannerInputRef.current?.click()}
-            >
-              <Uploader
-                handleDrop={(files) =>
-                  !isViewOrReview && handleFileDrop(files, "banner")
-                }
+            <div className="flex justify-between items-center">
+              <label className="text-sm font-medium dark:text-secondary">
+                Banner Image
+              </label>
+              {!isViewOrReview && (
+                <div className="flex bg-gray-100 dark:bg-surface-2 p-1 rounded-lg">
+                  <button
+                    type="button"
+                    className={`px-3 py-1 text-xs rounded-md transition-colors ${bannerMode === "upload" ? "bg-white dark:bg-surface-1 shadow text-primary" : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"}`}
+                    onClick={() => setBannerMode("upload")}
+                  >Upload</button>
+                  <button
+                    type="button"
+                    className={`px-3 py-1 text-xs rounded-md transition-colors ${bannerMode === "url" ? "bg-white dark:bg-surface-1 shadow text-primary" : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"}`}
+                    onClick={() => setBannerMode("url")}
+                  >URL</button>
+                </div>
+              )}
+            </div>
+
+            {bannerMode === "upload" ? (
+              <div
+                className={`w-full aspect-video bg-gray-100 dark:bg-surface-1 rounded-lg overflow-hidden border-2 border-dashed dark:border-border relative group ${!isViewOrReview ? "cursor-pointer" : ""}`}
+                onClick={() => !isViewOrReview && bannerInputRef.current?.click()}
               >
-                <div className="w-full h-full flex flex-col items-center justify-center p-4 text-center">
+                <Uploader
+                  handleDrop={(files) =>
+                    !isViewOrReview && handleFileDrop(files, "banner")
+                  }
+                >
+                  <div className="w-full h-full flex flex-col items-center justify-center p-4 text-center">
+                    {bannerPreview ? (
+                      <img
+                        src={bannerPreview}
+                        alt="Banner"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <>
+                        <span className="text-4xl mb-2">🌄</span>
+                        <p className="text-xs dark:text-secondary">
+                          Click or Drop Banner
+                        </p>
+                      </>
+                    )}
+                    {!isViewOrReview && (
+                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-sm font-medium">
+                        Change Image
+                      </div>
+                    )}
+                  </div>
+                </Uploader>
+                <input
+                  type="file"
+                  ref={bannerInputRef}
+                  className="hidden"
+                  accept="image/*"
+                  onChange={(e) => handleFileSelect(e, "banner")}
+                  disabled={isViewOrReview}
+                />
+              </div>
+            ) : (
+              <div className="flex flex-col gap-4">
+                <div className="h-12">
+                  <FloatInput
+                    label="Banner URL"
+                    name="bannerUrl"
+                    value={state.film.bannerUrl || ""}
+                    disable={isViewOrReview}
+                    onChange={(e) => {
+                      const url = e.target.value;
+                      updateState({ bannerUrl: url });
+                      setBannerPreview(getImageUrl(url));
+                    }}
+                  />
+                </div>
+                <div className="w-full aspect-video bg-gray-100 dark:bg-surface-1 rounded-lg overflow-hidden border dark:border-border relative flex items-center justify-center">
                   {bannerPreview ? (
-                    <img
-                      src={bannerPreview}
-                      alt="Banner"
-                      className="w-full h-full object-cover"
-                    />
+                    <img src={bannerPreview} alt="Banner" className="w-full h-full object-cover" />
                   ) : (
-                    <>
-                      <span className="text-4xl mb-2">🌄</span>
-                      <p className="text-xs dark:text-secondary">
-                        Click or Drop Banner
-                      </p>
-                    </>
-                  )}
-                  {!isViewOrReview && (
-                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-sm font-medium">
-                      Change Image
-                    </div>
+                    <span className="text-xs text-gray-400">Preview Images</span>
                   )}
                 </div>
-              </Uploader>
-              <input
-                type="file"
-                ref={bannerInputRef}
-                className="hidden"
-                accept="image/*"
-                onChange={(e) => handleFileSelect(e, "banner")}
-                disabled={isViewOrReview}
-              />
-            </div>
+              </div>
+            )}
           </div>
 
           {/* Logo */}
           <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium dark:text-secondary">
-              Logo Image
-            </label>
-            <div
-              className={`w-full aspect-video bg-gray-100 dark:bg-surface-1 rounded-lg overflow-hidden border-2 border-dashed dark:border-border relative group ${!isViewOrReview ? "cursor-pointer" : ""}`}
-              onClick={() => !isViewOrReview && logoInputRef.current?.click()}
-            >
-              <Uploader
-                handleDrop={(files) =>
-                  !isViewOrReview && handleFileDrop(files, "logo")
-                }
+            <div className="flex justify-between items-center">
+              <label className="text-sm font-medium dark:text-secondary">
+                Logo Image
+              </label>
+              {!isViewOrReview && (
+                <div className="flex bg-gray-100 dark:bg-surface-2 p-1 rounded-lg">
+                  <button
+                    type="button"
+                    className={`px-3 py-1 text-xs rounded-md transition-colors ${logoMode === "upload" ? "bg-white dark:bg-surface-1 shadow text-primary" : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"}`}
+                    onClick={() => setLogoMode("upload")}
+                  >Upload</button>
+                  <button
+                    type="button"
+                    className={`px-3 py-1 text-xs rounded-md transition-colors ${logoMode === "url" ? "bg-white dark:bg-surface-1 shadow text-primary" : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"}`}
+                    onClick={() => setLogoMode("url")}
+                  >URL</button>
+                </div>
+              )}
+            </div>
+
+            {logoMode === "upload" ? (
+              <div
+                className={`w-full aspect-video bg-gray-100 dark:bg-surface-1 rounded-lg overflow-hidden border-2 border-dashed dark:border-border relative group ${!isViewOrReview ? "cursor-pointer" : ""}`}
+                onClick={() => !isViewOrReview && logoInputRef.current?.click()}
               >
-                <div className="w-full h-full flex flex-col items-center justify-center p-4 text-center">
+                <Uploader
+                  handleDrop={(files) =>
+                    !isViewOrReview && handleFileDrop(files, "logo")
+                  }
+                >
+                  <div className="w-full h-full flex flex-col items-center justify-center p-4 text-center">
+                    {logoPreview ? (
+                      <img
+                        src={logoPreview}
+                        alt="Logo"
+                        className="w-full h-full object-contain p-2"
+                      />
+                    ) : (
+                      <>
+                        <span className="text-3xl mb-2">💎</span>
+                        <p className="text-xs dark:text-secondary">
+                          Click or Drop Logo
+                        </p>
+                      </>
+                    )}
+                    {!isViewOrReview && (
+                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-sm font-medium">
+                        Change Image
+                      </div>
+                    )}
+                  </div>
+                </Uploader>
+                <input
+                  type="file"
+                  ref={logoInputRef}
+                  className="hidden"
+                  accept="image/*"
+                  onChange={(e) => handleFileSelect(e, "logo")}
+                  disabled={isViewOrReview}
+                />
+              </div>
+            ) : (
+              <div className="flex flex-col gap-4">
+                <div className="h-12">
+                  <FloatInput
+                    label="Logo URL"
+                    name="logoUrl"
+                    value={state.film.logoUrl || ""}
+                    disable={isViewOrReview}
+                    onChange={(e) => {
+                      const url = e.target.value;
+                      updateState({ logoUrl: url });
+                      setLogoPreview(getImageUrl(url));
+                    }}
+                  />
+                </div>
+                <div className="w-full aspect-video bg-gray-100 dark:bg-surface-1 rounded-lg overflow-hidden border dark:border-border relative flex items-center justify-center">
                   {logoPreview ? (
-                    <img
-                      src={logoPreview}
-                      alt="Logo"
-                      className="w-full h-full object-contain p-2"
-                    />
+                    <img src={logoPreview} alt="Logo" className="w-full h-full object-contain p-2" />
                   ) : (
-                    <>
-                      <span className="text-3xl mb-2">💎</span>
-                      <p className="text-xs dark:text-secondary">
-                        Click or Drop Logo
-                      </p>
-                    </>
-                  )}
-                  {!isViewOrReview && (
-                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-sm font-medium">
-                      Change Image
-                    </div>
+                    <span className="text-xs text-gray-400">Preview Images</span>
                   )}
                 </div>
-              </Uploader>
-              <input
-                type="file"
-                ref={logoInputRef}
-                className="hidden"
-                accept="image/*"
-                onChange={(e) => handleFileSelect(e, "logo")}
-                disabled={isViewOrReview}
-              />
-            </div>
+              </div>
+            )}
           </div>
         </div>
 

@@ -18,7 +18,7 @@ const schema: Schema = {
     interestIds: createSchemaItem("interestIds").isRequired("Interest is required"),
 }
 
-export async function createFilm(film: Film, logoFile: File, posterFile: File, bannerFile: File) {
+export async function createFilm(film: Film, logoFile: File | null, posterFile: File | null, bannerFile: File | null) {
     try {
 
         const errs = InputValidate.object(schema).validate<Film>(film);
@@ -31,10 +31,10 @@ export async function createFilm(film: Film, logoFile: File, posterFile: File, b
         const MAX_LOGO_SIZE = 2 * 1024 * 1024; // 2MB
         const MAX_GALLERY_SIZE = 5 * 1024 * 1024; // 5MB
 
-        if (logoFile.size > MAX_LOGO_SIZE) {
+        if (logoFile && logoFile.size > MAX_LOGO_SIZE) {
             return { errMsg: "Logo size must be less than 2MB" };
         }
-        if (posterFile.size > MAX_GALLERY_SIZE || bannerFile.size > MAX_GALLERY_SIZE) {
+        if ((posterFile && posterFile.size > MAX_GALLERY_SIZE) || (bannerFile && bannerFile.size > MAX_GALLERY_SIZE)) {
             return { errMsg: "Poster and Banner must be less than 5MB each" };
         }
 
@@ -51,7 +51,7 @@ export async function createFilm(film: Film, logoFile: File, posterFile: File, b
             return { errMsg: "Film created failed!" };
         }
 
-    } catch (e) {
+    } catch (e: any) {
         if (e instanceof ResponseError) {
             switch (e.status) {
                 case 422:
