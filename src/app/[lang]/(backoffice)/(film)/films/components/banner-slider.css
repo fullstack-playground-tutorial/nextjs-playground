@@ -1,4 +1,13 @@
-@keyframes animateProgress {
+@keyframes animateProgressX {
+  0% {
+    width: 0;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+@keyframes animateProgressY {
   0% {
     height: 0;
   }
@@ -7,6 +16,10 @@
   }
 }
 
-div.animateProgress::after {
-  animation: animateProgress var(--progress-duration, 10s) forwards;
+div.animateProgressX::after {
+  animation: animateProgressX var(--progress-duration, 10s) forwards;
+}
+
+div.animateProgressY::after {
+  animation: animateProgressY var(--progress-duration, 10s) forwards;
 }

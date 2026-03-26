@@ -81,6 +81,18 @@ export default function Banner({ films, duration = 5000 }: Props) {
     return [];
   };
 
+  const getTrailerUrl = (url: string) => {
+    try {
+      const urlObj = new URL(url);
+      const v = urlObj.searchParams.get("v");
+      if (v) return `https://www.youtube.com/embed/${v}`;
+      if (urlObj.hostname.includes("youtu.be")) return `https://www.youtube.com/embed${urlObj.pathname}`;
+    } catch (e) {
+      // Fallback
+    }
+    return url.replace("watch?v=", "embed/");
+  };
+
   useEffect(() => {
     if (switchRef.current) {
       switchRef.current.style.setProperty(
@@ -96,6 +108,7 @@ export default function Banner({ films, duration = 5000 }: Props) {
   const handleIsDisplayed = (filmId: string) => {
     return filmId == displayFilm?.id;
   };
+
   const { trailerVisible } = state;
 
   useEffect(() => {
@@ -136,14 +149,14 @@ export default function Banner({ films, duration = 5000 }: Props) {
 
       {/* Banner Slider Switch */}
       <div
-        className="absolute flex flex-col items-center justify-center gap-4 left-0 top-1/2 -translate-y-1/2 ml-4"
+        className="absolute flex flex-col items-center justify-center gap-3 md:gap-4 right-4 md:right-8 top-1/2 -translate-y-1/2 z-20 drop-shadow-xl"
         ref={switchRef}
       >
         {films.map((f, index) => (
           <div
-            className={`rounded-full relative w-2 transition-all origin-center flex bg-gray-400 ${index === state.filmCurrentIdx
-              ? `h-16 rounded overflow-hidden after:w-full after:block after:content-[''] after:bg-orange-600 after:transition-all after:ease-linear animateProgress after:animate-pulse`
-              : "h-2"
+            className={`rounded-full relative w-1.5 md:w-2 transition-all outline-none cursor-pointer overflow-hidden origin-center flex bg-white/40 hover:bg-white/80 backdrop-blur-sm shadow-lg ${index === state.filmCurrentIdx
+              ? `h-12 md:h-16 after:w-full after:block after:content-[''] after:bg-orange-500 after:transition-all after:ease-linear animateProgressY`
+              : "h-3 md:h-4"
               } `}
             key={f.id}
             onClick={() => onFilmButtonSelected(index)}
@@ -151,26 +164,24 @@ export default function Banner({ films, duration = 5000 }: Props) {
         ))}
       </div>
 
-      {/* Youtube */}
       <div
-        className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center"
-        hidden={!trailerVisible}
+        className={`fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center transition-all duration-300 ${trailerVisible ? "opacity-100 visible" : "opacity-0 invisible"
+          }`}
       >
         <button
-          className="cursor-pointer absolute top-4 right-4 text-white text-3xl font-bold hover:text-red-500"
+          className="cursor-pointer absolute top-6 right-6 lg:top-10 lg:right-10 w-12 h-12 flex items-center justify-center rounded-full bg-white/10 hover:bg-red-500 text-white text-2xl font-bold transition-all"
           onClick={() => {
             setState((prev) => ({ ...prev, trailerVisible: false }));
           }}
         >
           &times;
         </button>
-        {displayFilm?.sources && (
-          <div className="w-[50vw] max-w-5xl aspect-video">
+        {displayFilm?.trailerUrl && (
+          <div className="w-[90vw] md:w-[80vw] lg:w-[60vw] max-w-6xl aspect-video rounded-xl overflow-hidden shadow-2xl border border-white/10 bg-black">
             <iframe
               className="aspect-video w-full h-full"
-              src={displayFilm.sources[0].sourceUrls["auto"] || ""}
+              src={getTrailerUrl(displayFilm.trailerUrl)}
               title="YouTube video player"
-              frameBorder="0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               referrerPolicy="strict-origin-when-cross-origin"
               allowFullScreen={true}

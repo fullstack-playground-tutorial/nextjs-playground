@@ -169,7 +169,7 @@ export default async function Page(props: {
                     </div>
 
                     {/* Trailer Section */}
-                    {film.trailerURL && (
+                    {film.trailerUrl && (
                         <div className="bg-gradient-to-br from-surface-1/40 to-transparent rounded-[2rem] p-10 border dark:border-white/5 backdrop-blur-md">
                             <h3 className="text-2xl font-black mb-8 flex items-center gap-3 dark:text-primary">
                                 <span className="w-2 h-8 bg-accent-0 rounded-full shadow-[0_0_15px_rgba(255,183,77,0.5)]"></span>
@@ -177,7 +177,19 @@ export default async function Page(props: {
                             </h3>
                             <div className="aspect-video relative rounded-3xl overflow-hidden shadow-[0_30px_60px_rgba(0,0,0,0.4)] border border-white/5">
                                 <iframe
-                                    src={film.trailerURL.replace("watch?v=", "embed/")}
+                                    src={(() => {
+                                        const url = film.trailerUrl;
+                                        if (!url) return "";
+                                        try {
+                                            const urlObj = new URL(url);
+                                            const v = urlObj.searchParams.get("v");
+                                            if (v) return `https://www.youtube.com/embed/${v}`;
+                                            if (urlObj.hostname.includes("youtu.be")) return `https://www.youtube.com/embed${urlObj.pathname}`;
+                                        } catch (e) {
+                                            // Fallback
+                                        }
+                                        return url.replace("watch?v=", "embed/");
+                                    })()}
                                     className="absolute inset-0 w-full h-full"
                                     allowFullScreen
                                     title={`${film.title} Trailer`}

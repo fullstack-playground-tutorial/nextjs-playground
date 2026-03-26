@@ -32,7 +32,7 @@ const getDefaultFilm = (): Film => ({
   subTitle: "",
   description: "",
   numberOfEpisodes: 0,
-  trailerURL: "",
+  trailerUrl: "",
   interests: [],
   interestIds: [],
   slug: "",
@@ -238,9 +238,9 @@ export default function FilmForm({ film, suggestions }: Props) {
       try {
         let res;
         if (mode === "create") {
-          if ((logoMode === "upload" && !logoFile) || (logoMode === "url" && !payload.logoUrl) || 
-              (posterMode === "upload" && !posterFile) || (posterMode === "url" && !payload.posterUrl) || 
-              (bannerMode === "upload" && !bannerFile) || (bannerMode === "url" && !payload.bannerUrl)) {
+          if ((logoMode === "upload" && !logoFile) || (logoMode === "url" && !payload.logoUrl) ||
+            (posterMode === "upload" && !posterFile) || (posterMode === "url" && !payload.posterUrl) ||
+            (bannerMode === "upload" && !bannerFile) || (bannerMode === "url" && !payload.bannerUrl)) {
             toast.addToast("error", "Please provide all required images (upload or URL)");
             return;
           }
@@ -256,10 +256,10 @@ export default function FilmForm({ film, suggestions }: Props) {
             return;
           }
 
-          res = await patchFilm(state.film.id, payload, { 
-            logo: logoMode === "upload" ? logoFile : null, 
-            poster: posterMode === "upload" ? posterFile : null, 
-            banner: bannerMode === "upload" ? bannerFile : null 
+          res = await patchFilm(state.film.id, payload, {
+            logo: logoMode === "upload" ? logoFile : null,
+            poster: posterMode === "upload" ? posterFile : null,
+            banner: bannerMode === "upload" ? bannerFile : null
           });
           if (res?.fieldErrors) {
             setFieldErrors(res.fieldErrors);
@@ -333,7 +333,7 @@ export default function FilmForm({ film, suggestions }: Props) {
                 </div>
               )}
             </div>
-            
+
             {posterMode === "upload" ? (
               <div
                 className={`w-full aspect-[2/3] bg-gray-100 dark:bg-surface-1 rounded-lg overflow-hidden border-2 border-dashed dark:border-border relative group ${!isViewOrReview ? "cursor-pointer" : ""}`}
@@ -605,7 +605,7 @@ export default function FilmForm({ film, suggestions }: Props) {
             {fieldErrors["subTitle"] && <span className="text-sm text-alert-0">{fieldErrors["subTitle"]}</span>}
           </div>
           <div className="flex flex-col gap-2">
-            <FloatInput required label="Trailer URL" name="trailerURL" value={state.film.trailerURL || ""} disable={isViewOrReview} onChange={handleChange} />
+            <FloatInput required label="Trailer URL" name="trailerURL" value={state.film.trailerUrl || ""} disable={isViewOrReview} onChange={handleChange} />
             {fieldErrors["trailerURL"] && <span className="text-sm text-alert-0">{fieldErrors["trailerURL"]}</span>}
           </div>
 

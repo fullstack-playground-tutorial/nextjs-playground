@@ -20,7 +20,7 @@ export type Film = {
   publishedAt?: Date;
   interests: Interest[];
   interestIds: string[];
-  trailerURL?: string;
+  trailerUrl?: string;
   director?: string;
 };
 
