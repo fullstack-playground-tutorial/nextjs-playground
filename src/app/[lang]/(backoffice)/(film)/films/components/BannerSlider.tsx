@@ -125,7 +125,7 @@ export default function Banner({ films, duration = 5000 }: Props) {
 
   return (
     <div
-      className={`relative justify-between w-full gap-4 mt-2 h-full rounded-t-lg bg-transparent`}
+      className={`relative justify-between w-full h-full rounded-2xl bg-transparent overflow-hidden shadow-2xl`}
     >
       {films.map((f) => (
         <BannerCard
@@ -137,10 +137,10 @@ export default function Banner({ films, duration = 5000 }: Props) {
           logoUrl={f.logoUrl}
           title={f.title}
           description={truncate(f.description ?? "", 120)}
-          totalOfEpisodes={f.episodes?.length ?? 0}
+          totalOfEpisodes={f.numberOfEpisodes ?? 0}
           interests={f.interests}
           newestEpisodes={getNewestEpisodes(f)}
-          numberOfCurrentEpisode={f.episodes?.length ?? 0}
+          numberOfCurrentEpisode={f.numberOfCurrentEpisodes ?? 0}
           watchTrailer={() =>
             setState((prev) => ({ ...prev, trailerVisible: true }))
           }

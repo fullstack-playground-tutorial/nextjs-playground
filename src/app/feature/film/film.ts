@@ -16,12 +16,14 @@ export type Film = {
   posterUrl?: string;
   bannerUrl?: string;
   numberOfEpisodes?: number;
-  newestEpisode?: number;
   publishedAt?: Date;
   interests: Interest[];
   interestIds: string[];
   trailerUrl?: string;
   director?: string;
+  numberOfCurrentEpisodes?: number;
+  newestEpisode?: number;
+
 };
 
 export type FilmImages = {
