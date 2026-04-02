@@ -48,7 +48,7 @@ function TimeUnit({ value, label }: { value: number; label: string }) {
   return (
     <div className="flex flex-col items-center bg-black/40 backdrop-blur-sm px-2 py-1 rounded min-w-[45px] border border-white/10">
       <span className="text-accent-0 font-bold text-sm leading-none">{value.toString().padStart(2, '0')}</span>
-      <span className="text-[8px] text-white/60 uppercase font-bold tracking-tighter mt-1">{label}</span>
+      <span className="text-xs text-white/60 uppercase font-bold tracking-tighter mt-1">{label}</span>
     </div>
   );
 }

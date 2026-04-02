@@ -37,6 +37,8 @@ export default async function Page(props: {
                         fill
                         className="object-cover transition-transform duration-1000 hover:scale-105"
                         priority
+                        placeholder="blur"
+                        blurDataURL={blurPlaceholder}
                     />
                 ) : (
                     <div className="h-full w-full bg-gradient-to-r from-surface-1 to-surface-3 flex items-center justify-center">

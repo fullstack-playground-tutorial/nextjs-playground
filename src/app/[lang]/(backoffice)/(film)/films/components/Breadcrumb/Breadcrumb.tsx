@@ -2,7 +2,9 @@
 import { forwardRef, useCallback, useContext, useMemo } from "react";
 import Link from "next/link";
 import { BreadcrumbsContext, type BreadcrumbItem } from "./context";
-import Separator from "./separator.svg";
+import SeparatorRaw from "./separator.svg";
+const Separator = SeparatorRaw as React.FC<React.SVGProps<SVGSVGElement>>;
+
 import { BreadcrumItemView } from "./Item";
 
 interface BreadcrumbProps {
