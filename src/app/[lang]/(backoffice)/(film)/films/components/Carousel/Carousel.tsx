@@ -71,9 +71,8 @@ const Carousel = <T,>({
     <button
       onClick={onClick}
       disabled={disabled}
-      className={`absolute top-1/2 -translate-y-1/2 z-20 p-4 rounded-full bg-black/40 backdrop-blur-xl border border-white/20 text-white transition-all duration-300 hover:bg-black/60 hover:scale-110 active:scale-95 disabled:opacity-0 disabled:pointer-events-none group shadow-2xl ${
-        direction === 'left' ? '-left-6 md:-left-8' : '-right-6 md:-right-8'
-      }`}
+      className={`absolute top-1/2 -translate-y-1/2 z-20 p-4 rounded-full bg-black/40 backdrop-blur-xl border border-white/20 text-white transition-all duration-300 hover:bg-black/60 hover:scale-110 active:scale-95 disabled:opacity-0 disabled:pointer-events-none group shadow-2xl ${direction === 'left' ? '-left-6 md:-left-8' : '-right-6 md:-right-8'
+        }`}
     >
       <div className="group-hover:scale-110 transition-transform">
         {children}
@@ -100,8 +99,8 @@ const Carousel = <T,>({
           }}
         >
           {items.map((item, i) => (
-            <div 
-              key={i} 
+            <div
+              key={i}
               style={{ flex: `0 0 ${itemWidth}%` }}
               className="px-3 md:px-4"
             >
@@ -122,11 +121,10 @@ const Carousel = <T,>({
       {/* Pagination Indicator (Subtle) */}
       <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 flex gap-2 overflow-hidden px-2 py-1">
         {Array.from({ length: Math.max(0, items.length - responsiveVisibleCount + 1) }).map((_, i) => (
-          <div 
-            key={i} 
-            className={`h-1 rounded-full transition-all duration-500 ${
-              i === currentIndex ? "w-8 bg-accent-0" : "w-2 bg-white/20"
-            }`}
+          <div
+            key={i}
+            className={`h-1 rounded-full transition-all duration-500 ${i === currentIndex ? "w-8 bg-accent-0" : "w-2 bg-white/20"
+              }`}
           />
         ))}
       </div>

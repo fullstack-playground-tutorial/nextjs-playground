@@ -63,7 +63,7 @@ const Navbar = ({ interests, logo }: NavbarProps) => {
 
   return (
     <nav
-      className={`sticky top-0 z-[100] transition-all duration-500 border-b border-white/5 py-4 mb-6 bg-surface-1/40 backdrop-blur-md rounded-2xl ${isScrolled ? "shadow-[0_10px_30px_rgba(0,0,0,0.4)] border-white/10" : ""
+      className={`sticky top-0 z-[50] transition-all duration-500 border-b border-white/5 py-4 mb-6 bg-surface-1/40 backdrop-blur-md rounded-2xl ${isScrolled ? "shadow-[0_10px_30px_rgba(0,0,0,0.4)] border-white/10" : ""
         }`}
     >
       <div className="max-w-full mx-auto px-6 flex items-center justify-between">

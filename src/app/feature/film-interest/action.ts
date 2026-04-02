@@ -1,6 +1,6 @@
 "use server"
-import { ActionState } from "@/app/[lang]/(backoffice)/(film)/films/interests/components/DeleteForm";
-import { UpsertActionState } from "@/app/[lang]/(backoffice)/(film)/films/interests/components/InterestForm";
+import { ActionState } from "@/app/[lang]/(backoffice)/(film)/film-management/interests/components/DeleteForm";
+import { UpsertActionState } from "@/app/[lang]/(backoffice)/(film)/film-management/interests/components/InterestForm";
 import { getFilmInterestService } from "@/app/core/server/context";
 import { CACHE_TAG } from "@/app/utils/cache/tag";
 import { refresh, updateTag } from "next/cache";

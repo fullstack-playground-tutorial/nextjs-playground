@@ -1,17 +1,16 @@
-import { Episode, Interest } from "@/app/feature/film";
+import { Interest } from "@/app/feature/film";
 import Link from "next/link";
 import React from "react";
 
 interface Props {
   filmId: string;
-  firstEpId?: string;
+  slug: string;
   bannerUrl?: string;
   logoUrl?: string;
   title: string;
   description?: string;
   totalOfEpisodes: number;
   interests: Interest[];
-  newestEpisodes: Episode[];
   numberOfCurrentEpisode: number;
   watchTrailer: () => void;
   isDisplayed: (filmId: string) => boolean;
@@ -19,35 +18,18 @@ interface Props {
 
 export default function BannerCard({
   logoUrl,
-  firstEpId,
   title,
   description,
   totalOfEpisodes,
   interests,
   numberOfCurrentEpisode,
   filmId,
-  newestEpisodes,
+  slug,
   bannerUrl,
   watchTrailer,
   isDisplayed,
 }: Props) {
-  const renderNewestEpisodes = () => {
-    if (newestEpisodes.length === 0) return null;
-    return (
-      <div className="flex flex-row gap-2 mt-2 flex-wrap items-center">
-        <span className="font-semibold text-sm text-gray-300 mr-2 hidden md:block">Newest:</span>
-        {newestEpisodes.map((item) => (
-          <Link
-            key={item.id}
-            href={`/cinematic/details/${filmId}/${item.id}`}
-            className="border border-white/40 bg-white/10 backdrop-blur-md hover:bg-orange-500 hover:border-orange-500 hover:text-white transition-all text-xs font-semibold px-4 py-1.5 rounded-full flex items-center justify-center cursor-pointer shadow-lg"
-          >
-            {item.title}
-          </Link>
-        ))}
-      </div>
-    );
-  };
+
 
   return (
     <div
@@ -56,9 +38,8 @@ export default function BannerCard({
           "--img-url": `url(${bannerUrl})`,
         } as React.CSSProperties
       }
-      className={`absolute h-full w-full left-0 top-0 overflow-hidden bg-center bg-cover bg-no-repeat z-0 rounded-lg bg-[image:var(--img-url)] transition-opacity duration-1000 ${
-        isDisplayed(filmId) ? "opacity-100" : "opacity-0 pointer-events-none"
-      }`}
+      className={`absolute h-full w-full left-0 top-0 overflow-hidden bg-center bg-cover bg-no-repeat z-0 rounded-lg bg-[image:var(--img-url)] transition-opacity duration-1000 ${isDisplayed(filmId) ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
     >
       <div className="absolute h-full w-full from-[#0a0a0a]/90 via-[#0a0a0a]/50 to-transparent bg-gradient-to-r left-0 top-0 pointer-events-none"></div>
       <div className="absolute h-full bottom-0 left-0 w-full from-[#0a0a0a] via-transparent to-transparent bg-gradient-to-t pointer-events-none"></div>
@@ -104,21 +85,17 @@ export default function BannerCard({
             {description}
           </p>
 
-          {renderNewestEpisodes()}
-
           {/* button groups */}
           <div className="flex flex-row gap-3 md:gap-4 mt-2 md:mt-4">
-            {numberOfCurrentEpisode > 0 && (
-              <Link
-                href={`/cinematic/details/${filmId}/${firstEpId}`}
-                className="flex items-center justify-center min-w-[120px] md:min-w-[140px] gap-2 font-bold px-4 md:px-6 py-2.5 md:py-3 bg-white text-black rounded-lg hover:bg-white/80 transition-all duration-300 shadow-xl hover:scale-105"
-              >
-                <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 md:w-6 md:h-6">
-                  <path fillRule="evenodd" d="M4.5 5.653c0-1.426 1.529-2.33 2.779-1.643l11.54 6.348c1.295.712 1.295 2.573 0 3.285L7.28 19.991c-1.25.687-2.779-.217-2.779-1.643V5.653z" clipRule="evenodd" />
-                </svg>
-                Play
-              </Link>
-            )}
+            <Link
+              href={`films/${slug}-${filmId}`}
+              className="flex items-center justify-center min-w-[120px] md:min-w-[140px] gap-2 font-bold px-4 md:px-6 py-2.5 md:py-3 bg-white text-black rounded-lg hover:bg-white/80 transition-all duration-300 shadow-xl hover:scale-105"
+            >
+              <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 md:w-6 md:h-6">
+                <path fillRule="evenodd" d="M4.5 5.653c0-1.426 1.529-2.33 2.779-1.643l11.54 6.348c1.295.712 1.295 2.573 0 3.285L7.28 19.991c-1.25.687-2.779-.217-2.779-1.643V5.653z" clipRule="evenodd" />
+              </svg>
+              Play
+            </Link>
             <button
               className="flex items-center justify-center min-w-[120px] md:min-w-[140px] gap-2 font-bold px-4 md:px-6 py-2.5 md:py-3 bg-gray-500/40 text-white rounded-lg hover:bg-gray-500/60 transition-all duration-300 shadow-xl backdrop-blur-md hover:scale-105 border border-white/20 hover:border-white/40"
               onClick={watchTrailer}

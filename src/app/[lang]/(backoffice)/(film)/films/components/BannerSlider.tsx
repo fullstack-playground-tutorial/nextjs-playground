@@ -72,15 +72,6 @@ export default function Banner({ films, duration = 5000 }: Props) {
     [state.filmCurrentIdx, films],
   );
 
-  const getNewestEpisodes = (film: Film, epDisplayNumber: number = 3) => {
-    const max = epDisplayNumber;
-    if (film.episodes) {
-      const eps = film.episodes.slice(-max);
-      return eps;
-    }
-    return [];
-  };
-
   const getTrailerUrl = (url: string) => {
     try {
       const urlObj = new URL(url);
@@ -130,16 +121,15 @@ export default function Banner({ films, duration = 5000 }: Props) {
       {films.map((f) => (
         <BannerCard
           key={f.id}
-          firstEpId={f.episodes?.[0].id}
           isDisplayed={handleIsDisplayed}
           filmId={f.id}
+          slug={f.slug}
           bannerUrl={f.bannerUrl}
           logoUrl={f.logoUrl}
           title={f.title}
           description={truncate(f.description ?? "", 120)}
           totalOfEpisodes={f.numberOfEpisodes ?? 0}
           interests={f.interests}
-          newestEpisodes={getNewestEpisodes(f)}
           numberOfCurrentEpisode={f.numberOfCurrentEpisodes ?? 0}
           watchTrailer={() =>
             setState((prev) => ({ ...prev, trailerVisible: true }))
