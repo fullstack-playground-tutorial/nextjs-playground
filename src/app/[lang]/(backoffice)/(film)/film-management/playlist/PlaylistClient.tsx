@@ -100,7 +100,10 @@ function getCurrentEpisode(episodes: Episode[]) {
       episode,
       time: parseDate(episode.publishedAt)?.getTime(),
     }))
-    .filter((item) => item.time !== undefined) as { episode: Episode; time: number }[];
+    .filter((item) => item.time !== undefined) as {
+    episode: Episode;
+    time: number;
+  }[];
 
   if (withDate.length === 0) {
     return null;
@@ -114,11 +117,36 @@ function getCurrentEpisode(episodes: Episode[]) {
   return withDate.sort((a, b) => a.time - b.time)[0].episode;
 }
 
-export default function PlaylistClient({ playlistName }: { playlistName: string }) {
-  const [episodes, setEpisodes] = useState<Episode[]>(seedEpisodes);
-  const [newEpisode, setNewEpisode] = useState<NewEpisode>(emptyNewEpisode);
-  const [newVideoFile, setNewVideoFile] = useState<File | null>(null);
-  const [newTranslateFile, setNewTranslateFile] = useState<File | null>(null);
+interface InternalState {
+  episodes: Episode[];
+  newEpisode: NewEpisode;
+  newVideoFile: File | null;
+  newTranslateFile: File | null;
+  editingId: string | null;
+  editDraft: EditDraft | null;
+  editVideoFile: File | null;
+  editTranslateFile: File | null;
+  errorMessage: string;
+  draggingId: string | null;
+}
+
+export default function PlaylistClient({
+  playlistName,
+}: {
+  playlistName: string;
+}) {
+  const [state, setState] = useState<InternalState>({
+    episodes: seedEpisodes,
+    newEpisode: emptyNewEpisode,
+    newVideoFile: null,
+    newTranslateFile: null,
+    editingId: null,
+    editDraft: null,
+    editVideoFile: null,
+    editTranslateFile: null,
+    errorMessage: "",
+    draggingId: null,
+  });
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editDraft, setEditDraft] = useState<EditDraft | null>(null);
   const [editVideoFile, setEditVideoFile] = useState<File | null>(null);
@@ -132,61 +160,70 @@ export default function PlaylistClient({ playlistName }: { playlistName: string 
   const editTranslateInputRef = useRef<HTMLInputElement>(null);
 
   const stats = useMemo(() => {
-    const total = episodes.length;
-    const upcoming = episodes.filter(
-      (episode) => getStatusLabel(episode.publishedAt) === STATUS_LABELS.upcoming
+    const total = state.episodes.length;
+    const upcoming = state.episodes.filter(
+      (episode) =>
+        getStatusLabel(episode.publishedAt) === STATUS_LABELS.upcoming,
     ).length;
-    const airing = episodes.filter(
-      (episode) => getStatusLabel(episode.publishedAt) === STATUS_LABELS.airing
+    const airing = state.episodes.filter(
+      (episode) => getStatusLabel(episode.publishedAt) === STATUS_LABELS.airing,
     ).length;
     return { total, upcoming, airing };
-  }, [episodes]);
+  }, [state.episodes]);
 
-  const currentEpisode = useMemo(() => getCurrentEpisode(episodes), [episodes]);
+  const currentEpisode = useMemo(
+    () => getCurrentEpisode(state.episodes),
+    [state.episodes],
+  );
 
   function handleAddEpisode() {
     setErrorMessage("");
 
-    if (!newEpisode.title.trim()) {
+    if (!state.newEpisode.title.trim()) {
       setErrorMessage("Can nhap tieu de tap.");
       return;
     }
 
-    if (!newEpisode.publishedAt.trim()) {
+    if (!state.newEpisode.publishedAt.trim()) {
       setErrorMessage("Can nhap publishedAt.");
       return;
     }
 
-    if (!newEpisode.videoUrl?.trim() && !newVideoFile) {
+    if (!state.newEpisode.videoUrl?.trim() && !state.newVideoFile) {
       setErrorMessage("Can nhap link phim hoac upload video.");
       return;
     }
 
-    setEpisodes((prev) =>
-      normalizeOrder([
-        ...prev,
+    setState((prev) => ({
+      ...prev,
+      episodes: normalizeOrder([
+        ...prev.episodes,
         {
           id: `ep-${Date.now()}`,
-          number: prev.length + 1,
-          title: newEpisode.title.trim(),
-          subTitle: newEpisode.subTitle.trim(),
-          duration: newEpisode.duration.trim() || "24:00",
-          publishedAt: newEpisode.publishedAt.trim(),
-          videoUrl: newEpisode.videoUrl?.trim(),
-          videoFileName: newVideoFile?.name,
-          translateFileName: newTranslateFile?.name,
-          note: newEpisode.note?.trim() || "",
+          number: prev.episodes.length + 1,
+          title: prev.newEpisode.title.trim(),
+          subTitle: prev.newEpisode.subTitle.trim(),
+          duration: prev.newEpisode.duration.trim() || "24:00",
+          publishedAt: prev.newEpisode.publishedAt.trim(),
+          videoUrl: prev.newEpisode.videoUrl?.trim(),
+          videoFileName: prev.newVideoFile?.name,
+          translateFileName: prev.newTranslateFile?.name,
+          note: prev.newEpisode.note?.trim() || "",
         },
-      ])
-    );
-
-    setNewEpisode(emptyNewEpisode);
-    setNewVideoFile(null);
-    setNewTranslateFile(null);
+      ]),
+      newEpisode: emptyNewEpisode,
+      newVideoFile: null,
+      newTranslateFile: null,
+    }));
   }
 
   function handleDelete(id: string) {
-    setEpisodes((prev) => normalizeOrder(prev.filter((episode) => episode.id !== id)));
+    setState((prev) => ({
+      ...prev,
+      episodes: normalizeOrder(
+        prev.episodes.filter((episode) => episode.id !== id),
+      ),
+    }));
   }
 
   function startEdit(episode: Episode) {
@@ -213,13 +250,18 @@ export default function PlaylistClient({ playlistName }: { playlistName: string 
     if (!editDraft.publishedAt.trim()) {
       return;
     }
-    if (!editDraft.videoUrl?.trim() && !editDraft.videoFileName && !editVideoFile) {
+    if (
+      !editDraft.videoUrl?.trim() &&
+      !editDraft.videoFileName &&
+      !editVideoFile
+    ) {
       return;
     }
 
-    setEpisodes((prev) =>
-      normalizeOrder(
-        prev.map((episode) =>
+    setState((prev) => ({
+      ...prev,
+      episodes: normalizeOrder(
+        prev.episodes.map((episode) =>
           episode.id === editDraft.id
             ? {
                 ...episode,
@@ -229,13 +271,14 @@ export default function PlaylistClient({ playlistName }: { playlistName: string 
                 publishedAt: editDraft.publishedAt.trim(),
                 videoUrl: editDraft.videoUrl?.trim(),
                 videoFileName: editVideoFile?.name ?? editDraft.videoFileName,
-                translateFileName: editTranslateFile?.name ?? editDraft.translateFileName,
+                translateFileName:
+                  editTranslateFile?.name ?? editDraft.translateFileName,
                 note: editDraft.note?.trim() || "",
               }
-            : episode
-        )
-      )
-    );
+            : episode,
+        ),
+      ),
+    }));
 
     cancelEdit();
   }
@@ -245,17 +288,19 @@ export default function PlaylistClient({ playlistName }: { playlistName: string 
       return;
     }
 
-    setEpisodes((prev) => {
-      const sourceIndex = prev.findIndex((episode) => episode.id === sourceId);
-      const targetIndex = prev.findIndex((episode) => episode.id === targetId);
-      if (sourceIndex < 0 || targetIndex < 0) {
-        return prev;
-      }
-      const next = [...prev];
-      const [moved] = next.splice(sourceIndex, 1);
-      next.splice(targetIndex, 0, moved);
-      return normalizeOrder(next);
-    });
+    setState((prev) => ({
+      ...prev,
+      episodes: normalizeOrder(
+        prev.episodes.map((episode) =>
+          episode.id === sourceId
+            ? {
+                ...episode,
+                episodeNo: prev.episodes.find((e) => e.id === targetId)?.number,
+              }
+            : episode,
+        ),
+      ),
+    }));
   }
 
   function handleDragStart(id: string, event: React.DragEvent<HTMLDivElement>) {
@@ -269,7 +314,10 @@ export default function PlaylistClient({ playlistName }: { playlistName: string 
     event.dataTransfer.dropEffect = "move";
   }
 
-  function handleDrop(targetId: string, event: React.DragEvent<HTMLDivElement>) {
+  function handleDrop(
+    targetId: string,
+    event: React.DragEvent<HTMLDivElement>,
+  ) {
     event.preventDefault();
     const sourceId = event.dataTransfer.getData("text/plain");
     if (!sourceId) {
@@ -306,7 +354,12 @@ export default function PlaylistClient({ playlistName }: { playlistName: string 
                 <button
                   type="button"
                   className="px-5 py-3 rounded-2xl bg-surface-1 border border-border/40 text-sm font-semibold hover:-translate-y-0.5 transition"
-                  onClick={() => setEpisodes((prev) => normalizeOrder([...prev]))}
+                  onClick={() =>
+                    setState((prev) => ({
+                      ...prev,
+                      episodes: normalizeOrder([...prev.episodes]),
+                    }))
+                  }
                 >
                   Tu dong danh so
                 </button>
@@ -321,16 +374,26 @@ export default function PlaylistClient({ playlistName }: { playlistName: string 
 
             <div className="grid gap-4 md:grid-cols-3">
               <div className="rounded-2xl bg-surface-1/60 border border-border/30 p-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-secondary">Tong tap</p>
+                <p className="text-xs uppercase tracking-[0.2em] text-secondary">
+                  Tong tap
+                </p>
                 <p className="text-2xl font-bold text-primary">{stats.total}</p>
               </div>
               <div className="rounded-2xl bg-surface-1/60 border border-border/30 p-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-secondary">Sap chieu</p>
-                <p className="text-2xl font-bold text-primary">{stats.upcoming}</p>
+                <p className="text-xs uppercase tracking-[0.2em] text-secondary">
+                  Sap chieu
+                </p>
+                <p className="text-2xl font-bold text-primary">
+                  {stats.upcoming}
+                </p>
               </div>
               <div className="rounded-2xl bg-surface-1/60 border border-border/30 p-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-secondary">Dang chieu</p>
-                <p className="text-2xl font-bold text-primary">{stats.airing}</p>
+                <p className="text-xs uppercase tracking-[0.2em] text-secondary">
+                  Dang chieu
+                </p>
+                <p className="text-2xl font-bold text-primary">
+                  {stats.airing}
+                </p>
               </div>
             </div>
           </div>
@@ -347,7 +410,7 @@ export default function PlaylistClient({ playlistName }: { playlistName: string 
           </div>
 
           <div className="flex flex-col gap-4">
-            {episodes.map((episode) => {
+            {state.episodes.map((episode) => {
               const statusLabel = getStatusLabel(episode.publishedAt);
               const isEditing = editingId === episode.id;
               const isDragging = draggingId === episode.id;
@@ -381,7 +444,8 @@ export default function PlaylistClient({ playlistName }: { playlistName: string 
                           </span>
                         </div>
                         <p className="text-sm text-secondary mt-1">
-                          {episode.subTitle} • {episode.duration} • {episode.publishedAt}
+                          {episode.subTitle} • {episode.duration} •{" "}
+                          {episode.publishedAt}
                         </p>
                         {episode.videoUrl && (
                           <p className="text-xs text-secondary mt-1">
@@ -399,7 +463,9 @@ export default function PlaylistClient({ playlistName }: { playlistName: string 
                           </p>
                         )}
                         {episode.note && (
-                          <p className="text-xs text-secondary mt-2">{episode.note}</p>
+                          <p className="text-xs text-secondary mt-2">
+                            {episode.note}
+                          </p>
                         )}
                       </div>
                     </div>
@@ -503,14 +569,17 @@ export default function PlaylistClient({ playlistName }: { playlistName: string 
                       <div className="grid gap-4 md:grid-cols-2 mt-4">
                         <div className="flex flex-col gap-2">
                           <label className="text-sm text-secondary">
-                            Upload video (1 trong 2)<span className="text-alert-0">*</span>
+                            Upload video (1 trong 2)
+                            <span className="text-alert-0">*</span>
                           </label>
                           <div
                             className="w-full rounded-2xl border-2 border-dashed border-border/50 bg-surface-0/70 p-4 cursor-pointer hover:border-accent-0/60 transition"
                             onClick={() => editVideoInputRef.current?.click()}
                           >
                             <Uploader
-                              handleDrop={(files) => setEditVideoFile(files[0] ?? null)}
+                              handleDrop={(files) =>
+                                setEditVideoFile(files[0] ?? null)
+                              }
                             >
                               <div className="flex flex-col items-center justify-center text-center gap-2 py-2">
                                 <div className="text-xs uppercase tracking-[0.2em] text-secondary">
@@ -535,13 +604,19 @@ export default function PlaylistClient({ playlistName }: { playlistName: string 
                           />
                         </div>
                         <div className="flex flex-col gap-2">
-                          <label className="text-sm text-secondary">Translate track (optional)</label>
+                          <label className="text-sm text-secondary">
+                            Translate track (optional)
+                          </label>
                           <div
                             className="w-full rounded-2xl border-2 border-dashed border-border/50 bg-surface-0/70 p-4 cursor-pointer hover:border-accent-0/60 transition"
-                            onClick={() => editTranslateInputRef.current?.click()}
+                            onClick={() =>
+                              editTranslateInputRef.current?.click()
+                            }
                           >
                             <Uploader
-                              handleDrop={(files) => setEditTranslateFile(files[0] ?? null)}
+                              handleDrop={(files) =>
+                                setEditTranslateFile(files[0] ?? null)
+                              }
                             >
                               <div className="flex flex-col items-center justify-center text-center gap-2 py-2">
                                 <div className="text-xs uppercase tracking-[0.2em] text-secondary">
@@ -561,7 +636,9 @@ export default function PlaylistClient({ playlistName }: { playlistName: string 
                             className="hidden"
                             accept=".vtt,.srt"
                             onChange={(event) =>
-                              setEditTranslateFile(event.target.files?.[0] ?? null)
+                              setEditTranslateFile(
+                                event.target.files?.[0] ?? null,
+                              )
                             }
                           />
                         </div>
@@ -610,19 +687,24 @@ export default function PlaylistClient({ playlistName }: { playlistName: string 
 
         <section className="flex flex-col gap-6">
           <div className="rounded-[28px] border border-border/40 bg-surface-1/40 p-6 shadow-xl">
-            <h2 className="text-2xl font-bold text-primary mb-4">Them tap moi</h2>
+            <h2 className="text-2xl font-bold text-primary mb-4">
+              Them tap moi
+            </h2>
             <div className="grid gap-4">
               <div className="h-12">
                 <FloatInput
                   name="newTitle"
                   label="Tieu de tap"
-                  value={newEpisode.title}
+                  value={state.newEpisode.title}
                   disable={false}
                   required
                   onChange={(event) =>
-                    setNewEpisode({
-                      ...newEpisode,
-                      title: event.target.value,
+                    setState({
+                      ...state,
+                      newEpisode: {
+                        ...state.newEpisode,
+                        title: event.target.value,
+                      },
                     })
                   }
                 />
@@ -631,12 +713,15 @@ export default function PlaylistClient({ playlistName }: { playlistName: string 
                 <FloatInput
                   name="newSubTitle"
                   label="Tieu de phu"
-                  value={newEpisode.subTitle}
+                  value={state.newEpisode.subTitle}
                   disable={false}
                   onChange={(event) =>
-                    setNewEpisode({
-                      ...newEpisode,
-                      subTitle: event.target.value,
+                    setState({
+                      ...state,
+                      newEpisode: {
+                        ...state.newEpisode,
+                        subTitle: event.target.value,
+                      },
                     })
                   }
                 />
@@ -645,12 +730,15 @@ export default function PlaylistClient({ playlistName }: { playlistName: string 
                 <FloatInput
                   name="newDuration"
                   label="Thoi luong"
-                  value={newEpisode.duration}
+                  value={state.newEpisode.duration}
                   disable={false}
                   onChange={(event) =>
-                    setNewEpisode({
-                      ...newEpisode,
-                      duration: event.target.value,
+                    setState({
+                      ...state,
+                      newEpisode: {
+                        ...state.newEpisode,
+                        duration: event.target.value,
+                      },
                     })
                   }
                 />
@@ -659,13 +747,16 @@ export default function PlaylistClient({ playlistName }: { playlistName: string 
                 <FloatInput
                   name="newPublishedAt"
                   label="PublishedAt (YYYY-MM-DD HH:mm)"
-                  value={newEpisode.publishedAt}
+                  value={state.newEpisode.publishedAt}
                   disable={false}
                   required
                   onChange={(event) =>
-                    setNewEpisode({
-                      ...newEpisode,
-                      publishedAt: event.target.value,
+                    setState({
+                      ...state,
+                      newEpisode: {
+                        ...state.newEpisode,
+                        publishedAt: event.target.value,
+                      },
                     })
                   }
                 />
@@ -674,13 +765,16 @@ export default function PlaylistClient({ playlistName }: { playlistName: string 
                 <FloatInput
                   name="newVideoUrl"
                   label="Link phim (1 trong 2)"
-                  value={newEpisode.videoUrl ?? ""}
+                  value={state.newEpisode.videoUrl ?? ""}
                   disable={false}
                   required
                   onChange={(event) =>
-                    setNewEpisode({
-                      ...newEpisode,
-                      videoUrl: event.target.value,
+                    setState({
+                      ...state,
+                      newEpisode: {
+                        ...state.newEpisode,
+                        videoUrl: event.target.value,
+                      },
                     })
                   }
                 />
@@ -689,21 +783,28 @@ export default function PlaylistClient({ playlistName }: { playlistName: string 
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="flex flex-col gap-2">
                   <label className="text-sm text-secondary">
-                    Upload video (1 trong 2)<span className="text-alert-0">*</span>
+                    Upload video (1 trong 2)
+                    <span className="text-alert-0">*</span>
                   </label>
                   <div
                     className="w-full rounded-2xl border-2 border-dashed border-border/50 bg-surface-0/70 p-4 cursor-pointer hover:border-accent-0/60 transition"
                     onClick={() => newVideoInputRef.current?.click()}
                   >
                     <Uploader
-                      handleDrop={(files) => setNewVideoFile(files[0] ?? null)}
+                      handleDrop={(files) =>
+                        setState({
+                          ...state,
+                          newVideoFile: files[0] ?? null,
+                        })
+                      }
                     >
                       <div className="flex flex-col items-center justify-center text-center gap-2 py-2">
                         <div className="text-xs uppercase tracking-[0.2em] text-secondary">
                           Video
                         </div>
                         <div className="text-sm text-secondary">
-                          {newVideoFile?.name ?? "Keo tha video vao day hoac click"}
+                          {state.newVideoFile?.name ??
+                            "Keo tha video vao day hoac click"}
                         </div>
                       </div>
                     </Uploader>
@@ -713,24 +814,40 @@ export default function PlaylistClient({ playlistName }: { playlistName: string 
                     ref={newVideoInputRef}
                     className="hidden"
                     accept="video/*"
-                    onChange={(event) => setNewVideoFile(event.target.files?.[0] ?? null)}
+                    onChange={(event) =>
+                      setState({
+                        ...state,
+                        newVideoFile: event.target.files?.[0] ?? null,
+                      })
+                    }
                   />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <label className="text-sm text-secondary">Translate track (optional)</label>
+                  <label className="text-sm text-secondary">
+                    Translate track (optional)
+                  </label>
                   <div
                     className="w-full rounded-2xl border-2 border-dashed border-border/50 bg-surface-0/70 p-4 cursor-pointer hover:border-accent-0/60 transition"
                     onClick={() => newTranslateInputRef.current?.click()}
                   >
                     <Uploader
-                      handleDrop={(files) => setNewTranslateFile(files[0] ?? null)}
+                      handleDrop={(files) =>
+                        setState({
+                          ...state,
+                          newEpisode: {
+                            ...state.newEpisode,
+                          },
+                          newTranslateFile: files[0] ?? null,
+                        })
+                      }
                     >
                       <div className="flex flex-col items-center justify-center text-center gap-2 py-2">
                         <div className="text-xs uppercase tracking-[0.2em] text-secondary">
                           Subtitle
                         </div>
                         <div className="text-sm text-secondary">
-                          {newTranslateFile?.name ?? "Keo tha file subtitle .vtt/.srt"}
+                          {state.newTranslateFile?.name ??
+                            "Keo tha file subtitle .vtt/.srt"}
                         </div>
                       </div>
                     </Uploader>
@@ -741,7 +858,10 @@ export default function PlaylistClient({ playlistName }: { playlistName: string 
                     className="hidden"
                     accept=".vtt,.srt"
                     onChange={(event) =>
-                      setNewTranslateFile(event.target.files?.[0] ?? null)
+                      setState({
+                        ...state,
+                        newTranslateFile: event.target.files?.[0] ?? null,
+                      })
                     }
                   />
                 </div>
@@ -751,12 +871,15 @@ export default function PlaylistClient({ playlistName }: { playlistName: string 
                 <FloatTextarea
                   name="newNote"
                   label="Ghi chu"
-                  value={newEpisode.note ?? ""}
+                  value={state.newEpisode.note ?? ""}
                   disable={false}
                   onChange={(event) =>
-                    setNewEpisode({
-                      ...newEpisode,
-                      note: event.target.value,
+                    setState({
+                      ...state,
+                      newEpisode: {
+                        ...state.newEpisode,
+                        note: event.target.value,
+                      },
                     })
                   }
                 />
@@ -774,19 +897,26 @@ export default function PlaylistClient({ playlistName }: { playlistName: string 
                 Them tap
               </button>
               <p className="text-xs text-secondary">
-                Bat buoc co link phim hoac upload video. Status tu dong tinh theo publishedAt.
+                Bat buoc co link phim hoac upload video. Status tu dong tinh
+                theo publishedAt.
               </p>
             </div>
           </div>
 
           <div className="rounded-[28px] border border-border/40 bg-surface-1/40 p-6 shadow-xl">
-            <h3 className="text-xl font-semibold text-primary">Tap dang chieu</h3>
+            <h3 className="text-xl font-semibold text-primary">
+              Tap dang chieu
+            </h3>
             {currentEpisode ? (
               <div className="mt-4 rounded-2xl bg-surface-0/70 border border-border/30 p-4">
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-sm text-secondary">Tap {currentEpisode.number}</p>
-                    <p className="text-lg font-semibold text-primary">{currentEpisode.title}</p>
+                    <p className="text-sm text-secondary">
+                      Tap {currentEpisode.number}
+                    </p>
+                    <p className="text-lg font-semibold text-primary">
+                      {currentEpisode.title}
+                    </p>
                   </div>
                   <span className="text-xs uppercase tracking-[0.2em] text-accent-0">
                     {getStatusLabel(currentEpisode.publishedAt)}

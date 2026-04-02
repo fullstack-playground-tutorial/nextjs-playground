@@ -1,3 +1,4 @@
+import { getFilmService } from "@/app/core/server/context";
 import PlaylistClient from "./PlaylistClient";
 
 export default async function Page(props: {
@@ -15,5 +16,14 @@ export default async function Page(props: {
     );
   }
 
-  return <PlaylistClient playlistName={searchParams.list} />;
+  const film = await getFilmService().load(searchParams.list);
+  if (!film) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-surface-0 text-primary">
+        Playlist not found
+      </div>
+    );
+  }
+
+  return <PlaylistClient playlistName={film.title} />;
 }
