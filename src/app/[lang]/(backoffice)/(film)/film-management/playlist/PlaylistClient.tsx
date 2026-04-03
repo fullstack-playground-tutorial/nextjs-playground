@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import FloatInput from "@/app/[lang]/(backoffice)/components/FloatInput";
 import FloatTextarea from "@/app/[lang]/(backoffice)/components/FloatTextarea";
 import { Episode } from "@/app/feature/episode";
+import { DurationInput } from "../../../components/DurationInput";
 
 const STATUS_LABELS = {
   upcoming: "Sắp chiếu",
@@ -11,23 +12,18 @@ const STATUS_LABELS = {
   unknown: "Chưa xác định",
 } as const;
 
-
 type NewEpisode = Omit<Episode, "id" | "episodeNo"> & {
   publishedAtStr: string;
-  durationStr: string;
 };
 
 type EditDraft = Episode & {
   publishedAtStr: string;
-  durationStr: string;
 };
-
 
 const emptyNewEpisode: NewEpisode = {
   title: "",
   subTitle: "",
   duration: 0,
-  durationStr: "0",
   videoUrl: "",
   description: "",
   filmId: "",
@@ -46,7 +42,8 @@ function getStatusLabel(publishedAt?: Date | string) {
   if (!publishedAt) {
     return STATUS_LABELS.unknown;
   }
-  const date = typeof publishedAt === 'string' ? new Date(publishedAt) : publishedAt;
+  const date =
+    typeof publishedAt === "string" ? new Date(publishedAt) : publishedAt;
   return date.getTime() > Date.now()
     ? STATUS_LABELS.upcoming
     : STATUS_LABELS.airing;
@@ -57,14 +54,16 @@ function getCurrentEpisode(episodes: Episode[]) {
   const withDate = episodes
     .map((episode) => {
       const time = episode.publishedAt
-        ? (typeof episode.publishedAt === 'string' ? new Date(episode.publishedAt).getTime() : episode.publishedAt.getTime())
+        ? typeof episode.publishedAt === "string"
+          ? new Date(episode.publishedAt).getTime()
+          : episode.publishedAt.getTime()
         : undefined;
       return { episode, time };
     })
     .filter((item) => item.time !== undefined) as {
-      episode: Episode;
-      time: number;
-    }[];
+    episode: Episode;
+    time: number;
+  }[];
 
   if (withDate.length === 0) {
     return null;
@@ -92,10 +91,7 @@ interface InternalState {
   draggingId: string | null;
 }
 
-export default function PlaylistClient({
-  playlistName,
-  episodes,
-}: Props) {
+export default function PlaylistClient({ playlistName, episodes }: Props) {
   const [state, setState] = useState<InternalState>({
     episodes: episodes,
     newEpisode: {
@@ -111,7 +107,6 @@ export default function PlaylistClient({
   const [editDraft, setEditDraft] = useState<EditDraft | null>(null);
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [draggingId, setDraggingId] = useState<string | null>(null);
-
 
   const stats = useMemo(() => {
     const total = state.episodes.length;
@@ -148,7 +143,7 @@ export default function PlaylistClient({
       return;
     }
 
-    const duration = parseInt(state.newEpisode.durationStr) || 0;
+    const duration = state.newEpisode.duration;
     const publishedAt = parseDate(state.newEpisode.publishedAtStr) || undefined;
 
     setState((prev) => ({
@@ -183,13 +178,17 @@ export default function PlaylistClient({
 
   function startEdit(episode: Episode) {
     setEditingId(episode.id);
-    const pubAt = episode.publishedAt ? (typeof episode.publishedAt === 'string' ? new Date(episode.publishedAt) : episode.publishedAt) : null;
+    const pubAt = episode.publishedAt
+      ? typeof episode.publishedAt === "string"
+        ? new Date(episode.publishedAt)
+        : episode.publishedAt
+      : null;
     setEditDraft({
       ...episode,
       publishedAtStr: pubAt
         ? pubAt.toISOString().slice(0, 16).replace("T", " ")
         : "",
-      durationStr: episode.duration.toString(),
+      duration: episode.duration,
     });
   }
 
@@ -212,7 +211,7 @@ export default function PlaylistClient({
       return;
     }
 
-    const duration = parseInt(editDraft.durationStr) || 0;
+    const duration = editDraft.duration;
     const publishedAt = parseDate(editDraft.publishedAtStr) || undefined;
 
     setState((prev) => ({
@@ -220,14 +219,14 @@ export default function PlaylistClient({
       episodes: prev.episodes.map((episode) =>
         episode.id === editDraft.id
           ? {
-            ...episode,
-            title: editDraft.title?.trim(),
-            subTitle: editDraft.subTitle.trim(),
-            duration: duration,
-            publishedAt: publishedAt,
-            videoUrl: editDraft.videoUrl?.trim(),
-            description: editDraft.description?.trim() || "",
-          }
+              ...episode,
+              title: editDraft.title?.trim(),
+              subTitle: editDraft.subTitle.trim(),
+              duration: duration,
+              publishedAt: publishedAt,
+              videoUrl: editDraft.videoUrl?.trim(),
+              description: editDraft.description?.trim() || "",
+            }
           : episode,
       ),
     }));
@@ -384,10 +383,11 @@ export default function PlaylistClient({
                   onDragOver={handleDragOver}
                   onDrop={(event) => handleDrop(episode.id, event)}
                   onDragEnd={handleDragEnd}
-                  className={`rounded-2xl border p-4 transition cursor-grab ${isDragging
-                    ? "border-accent-0 bg-[rgba(255,183,77,0.12)]"
-                    : "border-border/30 bg-surface-0/60"
-                    }`}
+                  className={`rounded-2xl border p-4 transition cursor-grab ${
+                    isDragging
+                      ? "border-accent-0 bg-[rgba(255,183,77,0.12)]"
+                      : "border-border/30 bg-surface-0/60"
+                  }`}
                 >
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="flex items-start gap-4">
@@ -405,7 +405,11 @@ export default function PlaylistClient({
                         </div>
                         <p className="text-sm text-secondary mt-1">
                           {episode.subTitle} • {episode.duration}s •{" "}
-                          {episode.publishedAt ? (typeof episode.publishedAt === 'string' ? new Date(episode.publishedAt).toLocaleString() : episode.publishedAt.toLocaleString()) : ""}
+                          {episode.publishedAt
+                            ? typeof episode.publishedAt === "string"
+                              ? new Date(episode.publishedAt).toLocaleString()
+                              : episode.publishedAt.toLocaleString()
+                            : ""}
                         </p>
                         {episode.videoUrl && (
                           <p className="text-xs text-secondary mt-1">
@@ -471,15 +475,15 @@ export default function PlaylistClient({
                           />
                         </div>
                         <div className="h-12">
-                          <FloatInput
+                          <DurationInput
                             name="editDuration"
                             label="Thời lượng (giây)"
-                            value={editDraft.durationStr}
-                            disable={false}
-                            onChange={(event) =>
+                            duration={editDraft.duration}
+                            disabled={false}
+                            onChange={(_, d) =>
                               setEditDraft({
                                 ...editDraft,
-                                durationStr: event.target.value,
+                                duration: d,
                               })
                             }
                           />
@@ -515,7 +519,6 @@ export default function PlaylistClient({
                           />
                         </div>
                       </div>
-
 
                       <div className="mt-4">
                         <div className="h-24">
@@ -600,17 +603,17 @@ export default function PlaylistClient({
                 />
               </div>
               <div className="h-12">
-                <FloatInput
+                <DurationInput
                   name="newDuration"
                   label="Thời lượng (giây)"
-                  value={state.newEpisode.durationStr}
-                  disable={false}
-                  onChange={(event) =>
+                  duration={state.newEpisode.duration}
+                  disabled={false}
+                  onChange={(_, d) =>
                     setState({
                       ...state,
                       newEpisode: {
                         ...state.newEpisode,
-                        durationStr: event.target.value,
+                        duration: d,
                       },
                     })
                   }
@@ -653,7 +656,6 @@ export default function PlaylistClient({
                 />
               </div>
 
-
               <div className="h-24">
                 <FloatTextarea
                   name="newDescription"
@@ -684,7 +686,8 @@ export default function PlaylistClient({
                 Thêm tập
               </button>
               <p className="text-xs text-secondary">
-                Bắt buộc có link phim. Status tự động tính theo thời điểm phát hành.
+                Bắt buộc có link phim. Status tự động tính theo thời điểm phát
+                hành.
               </p>
             </div>
           </div>
