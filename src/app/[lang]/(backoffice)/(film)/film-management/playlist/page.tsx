@@ -1,4 +1,4 @@
-import { getFilmService } from "@/app/core/server/context";
+import { getEpisodeService, getFilmService } from "@/app/core/server/context";
 import PlaylistClient from "./PlaylistClient";
 
 export default async function Page(props: {
@@ -25,5 +25,7 @@ export default async function Page(props: {
     );
   }
 
-  return <PlaylistClient playlistName={film.title} />;
+  const episode = await getEpisodeService().getCollection(searchParams.list);
+
+  return <PlaylistClient playlistName={film.title} episodes={episode} />;
 }

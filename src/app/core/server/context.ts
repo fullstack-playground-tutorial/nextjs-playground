@@ -27,6 +27,7 @@ import { createFilmService, FilmService } from "@/app/feature/film";
 import { createQuizService, QuizService } from "@/app/feature/quiz";
 import { createFlashcardService, FlashcardService } from "@/app/feature/flashcard";
 import { createQuizAttemptService, QuizAttemptService } from "@/app/feature/quiz-attempt";
+import { createEpisodeService, EpisodeService } from "@/app/feature/episode/service";
 
 
 class ApplicationContext {
@@ -49,6 +50,7 @@ class ApplicationContext {
   private quizService?: QuizService;
   private flashcardService?: FlashcardService;
   private quizAttemptService?: QuizAttemptService;
+  private episodeService?: EpisodeService;
 
   constructor(private httpService: HTTPService) {
     this.getAuthService = this.getAuthService.bind(this);
@@ -217,6 +219,13 @@ class ApplicationContext {
     return this.quizAttemptService;
   };
 
+  getEpisodeService = () => {
+    if (!this.episodeService) {
+      this.episodeService = createEpisodeService(this.httpService, config.film_url);
+    }
+    return this.episodeService;
+  };
+
   // getApiEnglishNoteService = () => {
   //   if (!this.apiEnglishNoteService) {
   //     const englishNoteRepo = new EnglishNoteMongoRepository(
@@ -324,4 +333,5 @@ export const {
   getQuizService,
   getFlashcardService,
   getQuizAttemptService,
+  getEpisodeService,
 } = appContext;

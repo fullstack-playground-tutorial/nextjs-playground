@@ -1,79 +1,38 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import FloatInput from "@/app/[lang]/(backoffice)/components/FloatInput";
 import FloatTextarea from "@/app/[lang]/(backoffice)/components/FloatTextarea";
-import Uploader from "@/app/components/Upload";
+import { Episode } from "@/app/feature/episode";
 
 const STATUS_LABELS = {
-  upcoming: "Sap chieu",
-  airing: "Dang chieu",
-  unknown: "Chua xac dinh",
+  upcoming: "Sắp chiếu",
+  airing: "Đang chiếu",
+  unknown: "Chưa xác định",
 } as const;
 
-type Episode = {
-  id: string;
-  number: number;
-  title: string;
-  subTitle: string;
-  duration: string;
-  publishedAt: string;
-  videoUrl?: string;
-  videoFileName?: string;
-  translateFileName?: string;
-  note?: string;
+
+type NewEpisode = Omit<Episode, "id" | "episodeNo"> & {
+  publishedAtStr: string;
+  durationStr: string;
 };
 
-type NewEpisode = Omit<Episode, "id" | "number">;
+type EditDraft = Episode & {
+  publishedAtStr: string;
+  durationStr: string;
+};
 
-type EditDraft = Episode;
-
-const seedEpisodes: Episode[] = [
-  {
-    id: "ep-01",
-    number: 1,
-    title: "Doi gio tren pho den",
-    subTitle: "Phan mo dau",
-    duration: "24:10",
-    publishedAt: "2025-12-20 20:00",
-    videoUrl: "https://example.com/anime/ep1",
-  },
-  {
-    id: "ep-02",
-    number: 2,
-    title: "Chuyen tam giua pho dong",
-    subTitle: "Gap go",
-    duration: "23:48",
-    publishedAt: "2026-01-05 20:00",
-    videoUrl: "https://example.com/anime/ep2",
-  },
-  {
-    id: "ep-03",
-    number: 3,
-    title: "Ngay mua mat",
-    subTitle: "Tinh ban moi",
-    duration: "24:03",
-    publishedAt: "2026-04-01 20:00",
-    videoUrl: "https://example.com/anime/ep3",
-    translateFileName: "ep3-vi.vtt",
-  },
-];
 
 const emptyNewEpisode: NewEpisode = {
   title: "",
   subTitle: "",
-  duration: "24:00",
-  publishedAt: "",
+  duration: 0,
+  durationStr: "0",
   videoUrl: "",
-  note: "",
+  description: "",
+  filmId: "",
+  publishedAtStr: "",
 };
-
-function normalizeOrder(list: Episode[]): Episode[] {
-  return list.map((episode, index) => ({
-    ...episode,
-    number: index + 1,
-  }));
-}
 
 function parseDate(value: string): Date | null {
   const parsed = new Date(value.replace(" ", "T"));
@@ -83,12 +42,12 @@ function parseDate(value: string): Date | null {
   return parsed;
 }
 
-function getStatusLabel(publishedAt: string) {
-  const parsed = parseDate(publishedAt);
-  if (!parsed) {
+function getStatusLabel(publishedAt?: Date | string) {
+  if (!publishedAt) {
     return STATUS_LABELS.unknown;
   }
-  return parsed.getTime() > Date.now()
+  const date = typeof publishedAt === 'string' ? new Date(publishedAt) : publishedAt;
+  return date.getTime() > Date.now()
     ? STATUS_LABELS.upcoming
     : STATUS_LABELS.airing;
 }
@@ -96,14 +55,16 @@ function getStatusLabel(publishedAt: string) {
 function getCurrentEpisode(episodes: Episode[]) {
   const now = Date.now();
   const withDate = episodes
-    .map((episode) => ({
-      episode,
-      time: parseDate(episode.publishedAt)?.getTime(),
-    }))
+    .map((episode) => {
+      const time = episode.publishedAt
+        ? (typeof episode.publishedAt === 'string' ? new Date(episode.publishedAt).getTime() : episode.publishedAt.getTime())
+        : undefined;
+      return { episode, time };
+    })
     .filter((item) => item.time !== undefined) as {
-    episode: Episode;
-    time: number;
-  }[];
+      episode: Episode;
+      time: number;
+    }[];
 
   if (withDate.length === 0) {
     return null;
@@ -117,47 +78,40 @@ function getCurrentEpisode(episodes: Episode[]) {
   return withDate.sort((a, b) => a.time - b.time)[0].episode;
 }
 
+interface Props {
+  playlistName: string;
+  episodes: Episode[];
+}
+
 interface InternalState {
   episodes: Episode[];
   newEpisode: NewEpisode;
-  newVideoFile: File | null;
-  newTranslateFile: File | null;
   editingId: string | null;
   editDraft: EditDraft | null;
-  editVideoFile: File | null;
-  editTranslateFile: File | null;
   errorMessage: string;
   draggingId: string | null;
 }
 
 export default function PlaylistClient({
   playlistName,
-}: {
-  playlistName: string;
-}) {
+  episodes,
+}: Props) {
   const [state, setState] = useState<InternalState>({
-    episodes: seedEpisodes,
-    newEpisode: emptyNewEpisode,
-    newVideoFile: null,
-    newTranslateFile: null,
+    episodes: episodes,
+    newEpisode: {
+      ...emptyNewEpisode,
+      filmId: episodes.length > 0 ? episodes[0].filmId : "",
+    },
     editingId: null,
     editDraft: null,
-    editVideoFile: null,
-    editTranslateFile: null,
     errorMessage: "",
     draggingId: null,
   });
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editDraft, setEditDraft] = useState<EditDraft | null>(null);
-  const [editVideoFile, setEditVideoFile] = useState<File | null>(null);
-  const [editTranslateFile, setEditTranslateFile] = useState<File | null>(null);
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [draggingId, setDraggingId] = useState<string | null>(null);
 
-  const newVideoInputRef = useRef<HTMLInputElement>(null);
-  const newTranslateInputRef = useRef<HTMLInputElement>(null);
-  const editVideoInputRef = useRef<HTMLInputElement>(null);
-  const editTranslateInputRef = useRef<HTMLInputElement>(null);
 
   const stats = useMemo(() => {
     const total = state.episodes.length;
@@ -179,104 +133,102 @@ export default function PlaylistClient({
   function handleAddEpisode() {
     setErrorMessage("");
 
-    if (!state.newEpisode.title.trim()) {
-      setErrorMessage("Can nhap tieu de tap.");
+    if (!state.newEpisode.title?.trim()) {
+      setErrorMessage("Cần nhập tiêu đề tập.");
       return;
     }
 
-    if (!state.newEpisode.publishedAt.trim()) {
-      setErrorMessage("Can nhap publishedAt.");
+    if (!state.newEpisode.publishedAtStr.trim()) {
+      setErrorMessage("Cần nhập thời gian phát hành.");
       return;
     }
 
-    if (!state.newEpisode.videoUrl?.trim() && !state.newVideoFile) {
-      setErrorMessage("Can nhap link phim hoac upload video.");
+    if (!state.newEpisode.videoUrl?.trim()) {
+      setErrorMessage("Cần nhập link phim.");
       return;
     }
+
+    const duration = parseInt(state.newEpisode.durationStr) || 0;
+    const publishedAt = parseDate(state.newEpisode.publishedAtStr) || undefined;
 
     setState((prev) => ({
       ...prev,
-      episodes: normalizeOrder([
+      episodes: [
         ...prev.episodes,
         {
           id: `ep-${Date.now()}`,
-          number: prev.episodes.length + 1,
-          title: prev.newEpisode.title.trim(),
+          episodeNo: prev.episodes.length + 1,
+          title: prev.newEpisode.title?.trim(),
           subTitle: prev.newEpisode.subTitle.trim(),
-          duration: prev.newEpisode.duration.trim() || "24:00",
-          publishedAt: prev.newEpisode.publishedAt.trim(),
+          duration: duration,
+          publishedAt: publishedAt,
           videoUrl: prev.newEpisode.videoUrl?.trim(),
-          videoFileName: prev.newVideoFile?.name,
-          translateFileName: prev.newTranslateFile?.name,
-          note: prev.newEpisode.note?.trim() || "",
+          description: prev.newEpisode.description?.trim() || "",
+          filmId: prev.newEpisode.filmId,
         },
-      ]),
-      newEpisode: emptyNewEpisode,
-      newVideoFile: null,
-      newTranslateFile: null,
+      ],
+      newEpisode: {
+        ...emptyNewEpisode,
+        filmId: prev.newEpisode.filmId,
+      },
     }));
   }
 
   function handleDelete(id: string) {
     setState((prev) => ({
       ...prev,
-      episodes: normalizeOrder(
-        prev.episodes.filter((episode) => episode.id !== id),
-      ),
+      episodes: prev.episodes.filter((episode) => episode.id !== id),
     }));
   }
 
   function startEdit(episode: Episode) {
     setEditingId(episode.id);
-    setEditDraft({ ...episode });
-    setEditVideoFile(null);
-    setEditTranslateFile(null);
+    const pubAt = episode.publishedAt ? (typeof episode.publishedAt === 'string' ? new Date(episode.publishedAt) : episode.publishedAt) : null;
+    setEditDraft({
+      ...episode,
+      publishedAtStr: pubAt
+        ? pubAt.toISOString().slice(0, 16).replace("T", " ")
+        : "",
+      durationStr: episode.duration.toString(),
+    });
   }
 
   function cancelEdit() {
     setEditingId(null);
     setEditDraft(null);
-    setEditVideoFile(null);
-    setEditTranslateFile(null);
   }
 
   function saveEdit() {
     if (!editDraft) {
       return;
     }
-    if (!editDraft.title.trim()) {
+    if (!editDraft.title?.trim()) {
       return;
     }
-    if (!editDraft.publishedAt.trim()) {
+    if (!editDraft.publishedAtStr.trim()) {
       return;
     }
-    if (
-      !editDraft.videoUrl?.trim() &&
-      !editDraft.videoFileName &&
-      !editVideoFile
-    ) {
+    if (!editDraft.videoUrl?.trim()) {
       return;
     }
 
+    const duration = parseInt(editDraft.durationStr) || 0;
+    const publishedAt = parseDate(editDraft.publishedAtStr) || undefined;
+
     setState((prev) => ({
       ...prev,
-      episodes: normalizeOrder(
-        prev.episodes.map((episode) =>
-          episode.id === editDraft.id
-            ? {
-                ...episode,
-                title: editDraft.title.trim(),
-                subTitle: editDraft.subTitle.trim(),
-                duration: editDraft.duration.trim() || "24:00",
-                publishedAt: editDraft.publishedAt.trim(),
-                videoUrl: editDraft.videoUrl?.trim(),
-                videoFileName: editVideoFile?.name ?? editDraft.videoFileName,
-                translateFileName:
-                  editTranslateFile?.name ?? editDraft.translateFileName,
-                note: editDraft.note?.trim() || "",
-              }
-            : episode,
-        ),
+      episodes: prev.episodes.map((episode) =>
+        episode.id === editDraft.id
+          ? {
+            ...episode,
+            title: editDraft.title?.trim(),
+            subTitle: editDraft.subTitle.trim(),
+            duration: duration,
+            publishedAt: publishedAt,
+            videoUrl: editDraft.videoUrl?.trim(),
+            description: editDraft.description?.trim() || "",
+          }
+          : episode,
       ),
     }));
 
@@ -288,18 +240,24 @@ export default function PlaylistClient({
       return;
     }
 
+    const updatedEpisodes = [...state.episodes];
+    const sourceIndex = updatedEpisodes.findIndex((e) => e.id === sourceId);
+    const targetIndex = updatedEpisodes.findIndex((e) => e.id === targetId);
+
+    if (sourceIndex === -1 || targetIndex === -1) return;
+
+    const [moved] = updatedEpisodes.splice(sourceIndex, 1);
+    updatedEpisodes.splice(targetIndex, 0, moved);
+
+    // Update episodeNo based on new order
+    const reordered = updatedEpisodes.map((ep, idx) => ({
+      ...ep,
+      episodeNo: idx + 1,
+    }));
+
     setState((prev) => ({
       ...prev,
-      episodes: normalizeOrder(
-        prev.episodes.map((episode) =>
-          episode.id === sourceId
-            ? {
-                ...episode,
-                episodeNo: prev.episodes.find((e) => e.id === targetId)?.number,
-              }
-            : episode,
-        ),
-      ),
+      episodes: reordered,
     }));
   }
 
@@ -346,8 +304,8 @@ export default function PlaylistClient({
                   {playlistName}
                 </h1>
                 <p className="text-secondary mt-2 max-w-2xl">
-                  Quan ly danh sach tap phim, sap xep thu tu, va cap nhat trang
-                  thai theo publishedAt.
+                  Quản lý danh sách tập phim, sắp xếp thứ tự, và cập nhật trạng
+                  thái theo thời điểm phát hành.
                 </p>
               </div>
               <div className="flex gap-3">
@@ -357,17 +315,20 @@ export default function PlaylistClient({
                   onClick={() =>
                     setState((prev) => ({
                       ...prev,
-                      episodes: normalizeOrder([...prev.episodes]),
+                      episodes: prev.episodes.map((ep, idx) => ({
+                        ...ep,
+                        episodeNo: idx + 1,
+                      })),
                     }))
                   }
                 >
-                  Tu dong danh so
+                  Tự động đánh số
                 </button>
                 <button
                   type="button"
                   className="px-5 py-3 rounded-2xl bg-accent-0 text-white text-sm font-semibold shadow-[0_12px_30px_rgba(255,183,77,0.25)] hover:-translate-y-0.5 transition"
                 >
-                  Luu thay doi
+                  Lưu thay đổi
                 </button>
               </div>
             </div>
@@ -375,13 +336,13 @@ export default function PlaylistClient({
             <div className="grid gap-4 md:grid-cols-3">
               <div className="rounded-2xl bg-surface-1/60 border border-border/30 p-4">
                 <p className="text-xs uppercase tracking-[0.2em] text-secondary">
-                  Tong tap
+                  Tổng tập
                 </p>
                 <p className="text-2xl font-bold text-primary">{stats.total}</p>
               </div>
               <div className="rounded-2xl bg-surface-1/60 border border-border/30 p-4">
                 <p className="text-xs uppercase tracking-[0.2em] text-secondary">
-                  Sap chieu
+                  Sắp chiếu
                 </p>
                 <p className="text-2xl font-bold text-primary">
                   {stats.upcoming}
@@ -389,7 +350,7 @@ export default function PlaylistClient({
               </div>
               <div className="rounded-2xl bg-surface-1/60 border border-border/30 p-4">
                 <p className="text-xs uppercase tracking-[0.2em] text-secondary">
-                  Dang chieu
+                  Đang chiếu
                 </p>
                 <p className="text-2xl font-bold text-primary">
                   {stats.airing}
@@ -403,9 +364,9 @@ export default function PlaylistClient({
       <div className="max-w-6xl mx-auto px-6 pb-16 grid lg:grid-cols-[1.2fr_0.8fr] gap-8">
         <section className="rounded-[28px] border border-border/40 bg-surface-1/40 p-6 shadow-xl">
           <div className="flex items-center justify-between mb-5">
-            <h2 className="text-2xl font-bold text-primary">Danh sach tap</h2>
+            <h2 className="text-2xl font-bold text-primary">Danh sách tập</h2>
             <span className="text-xs uppercase tracking-[0.2em] text-secondary">
-              Keo tha de sap xep
+              Kéo thả để sắp xếp
             </span>
           </div>
 
@@ -423,16 +384,15 @@ export default function PlaylistClient({
                   onDragOver={handleDragOver}
                   onDrop={(event) => handleDrop(episode.id, event)}
                   onDragEnd={handleDragEnd}
-                  className={`rounded-2xl border p-4 transition cursor-grab ${
-                    isDragging
-                      ? "border-accent-0 bg-[rgba(255,183,77,0.12)]"
-                      : "border-border/30 bg-surface-0/60"
-                  }`}
+                  className={`rounded-2xl border p-4 transition cursor-grab ${isDragging
+                    ? "border-accent-0 bg-[rgba(255,183,77,0.12)]"
+                    : "border-border/30 bg-surface-0/60"
+                    }`}
                 >
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="flex items-start gap-4">
                       <div className="h-12 w-12 rounded-2xl flex items-center justify-center font-bold text-lg bg-surface-1 text-primary">
-                        {episode.number}
+                        {episode.episodeNo}
                       </div>
                       <div>
                         <div className="flex items-center gap-3">
@@ -444,27 +404,17 @@ export default function PlaylistClient({
                           </span>
                         </div>
                         <p className="text-sm text-secondary mt-1">
-                          {episode.subTitle} • {episode.duration} •{" "}
-                          {episode.publishedAt}
+                          {episode.subTitle} • {episode.duration}s •{" "}
+                          {episode.publishedAt ? (typeof episode.publishedAt === 'string' ? new Date(episode.publishedAt).toLocaleString() : episode.publishedAt.toLocaleString()) : ""}
                         </p>
                         {episode.videoUrl && (
                           <p className="text-xs text-secondary mt-1">
                             Link: {episode.videoUrl}
                           </p>
                         )}
-                        {episode.videoFileName && (
-                          <p className="text-xs text-secondary mt-1">
-                            Video: {episode.videoFileName}
-                          </p>
-                        )}
-                        {episode.translateFileName && (
-                          <p className="text-xs text-secondary mt-1">
-                            Translate: {episode.translateFileName}
-                          </p>
-                        )}
-                        {episode.note && (
+                        {episode.description && (
                           <p className="text-xs text-secondary mt-2">
-                            {episode.note}
+                            {episode.description}
                           </p>
                         )}
                       </div>
@@ -476,14 +426,14 @@ export default function PlaylistClient({
                         className="px-3 py-2 text-xs rounded-xl bg-white/5 border border-border/30 hover:-translate-y-0.5 transition"
                         onClick={() => startEdit(episode)}
                       >
-                        Sua
+                        Sửa
                       </button>
                       <button
                         type="button"
                         className="px-3 py-2 text-xs rounded-xl bg-red-500/10 text-red-200 border border-red-500/30 hover:-translate-y-0.5 transition"
                         onClick={() => handleDelete(episode.id)}
                       >
-                        Xoa
+                        Xóa
                       </button>
                     </div>
                   </div>
@@ -494,7 +444,7 @@ export default function PlaylistClient({
                         <div className="h-12">
                           <FloatInput
                             name="editTitle"
-                            label="Tieu de tap"
+                            label="Tiêu đề tập"
                             value={editDraft.title}
                             disable={false}
                             required
@@ -509,7 +459,7 @@ export default function PlaylistClient({
                         <div className="h-12">
                           <FloatInput
                             name="editSubTitle"
-                            label="Tieu de phu"
+                            label="Tiêu đề phụ"
                             value={editDraft.subTitle}
                             disable={false}
                             onChange={(event) =>
@@ -523,13 +473,13 @@ export default function PlaylistClient({
                         <div className="h-12">
                           <FloatInput
                             name="editDuration"
-                            label="Thoi luong"
-                            value={editDraft.duration}
+                            label="Thời lượng (giây)"
+                            value={editDraft.durationStr}
                             disable={false}
                             onChange={(event) =>
                               setEditDraft({
                                 ...editDraft,
-                                duration: event.target.value,
+                                durationStr: event.target.value,
                               })
                             }
                           />
@@ -537,14 +487,14 @@ export default function PlaylistClient({
                         <div className="h-12">
                           <FloatInput
                             name="editPublishedAt"
-                            label="PublishedAt (YYYY-MM-DD HH:mm)"
-                            value={editDraft.publishedAt}
+                            label="Ngày chiếu (YYYY-MM-DD HH:mm)"
+                            value={editDraft.publishedAtStr}
                             disable={false}
                             required
                             onChange={(event) =>
                               setEditDraft({
                                 ...editDraft,
-                                publishedAt: event.target.value,
+                                publishedAtStr: event.target.value,
                               })
                             }
                           />
@@ -552,7 +502,7 @@ export default function PlaylistClient({
                         <div className="h-12 md:col-span-2">
                           <FloatInput
                             name="editVideoUrl"
-                            label="Link phim (1 trong 2)"
+                            label="Link phim"
                             value={editDraft.videoUrl ?? ""}
                             disable={false}
                             required
@@ -566,95 +516,18 @@ export default function PlaylistClient({
                         </div>
                       </div>
 
-                      <div className="grid gap-4 md:grid-cols-2 mt-4">
-                        <div className="flex flex-col gap-2">
-                          <label className="text-sm text-secondary">
-                            Upload video (1 trong 2)
-                            <span className="text-alert-0">*</span>
-                          </label>
-                          <div
-                            className="w-full rounded-2xl border-2 border-dashed border-border/50 bg-surface-0/70 p-4 cursor-pointer hover:border-accent-0/60 transition"
-                            onClick={() => editVideoInputRef.current?.click()}
-                          >
-                            <Uploader
-                              handleDrop={(files) =>
-                                setEditVideoFile(files[0] ?? null)
-                              }
-                            >
-                              <div className="flex flex-col items-center justify-center text-center gap-2 py-2">
-                                <div className="text-xs uppercase tracking-[0.2em] text-secondary">
-                                  Video
-                                </div>
-                                <div className="text-sm text-secondary">
-                                  {editVideoFile?.name ??
-                                    editDraft.videoFileName ??
-                                    "Keo tha video vao day hoac click"}
-                                </div>
-                              </div>
-                            </Uploader>
-                          </div>
-                          <input
-                            type="file"
-                            ref={editVideoInputRef}
-                            className="hidden"
-                            accept="video/*"
-                            onChange={(event) =>
-                              setEditVideoFile(event.target.files?.[0] ?? null)
-                            }
-                          />
-                        </div>
-                        <div className="flex flex-col gap-2">
-                          <label className="text-sm text-secondary">
-                            Translate track (optional)
-                          </label>
-                          <div
-                            className="w-full rounded-2xl border-2 border-dashed border-border/50 bg-surface-0/70 p-4 cursor-pointer hover:border-accent-0/60 transition"
-                            onClick={() =>
-                              editTranslateInputRef.current?.click()
-                            }
-                          >
-                            <Uploader
-                              handleDrop={(files) =>
-                                setEditTranslateFile(files[0] ?? null)
-                              }
-                            >
-                              <div className="flex flex-col items-center justify-center text-center gap-2 py-2">
-                                <div className="text-xs uppercase tracking-[0.2em] text-secondary">
-                                  Subtitle
-                                </div>
-                                <div className="text-sm text-secondary">
-                                  {editTranslateFile?.name ??
-                                    editDraft.translateFileName ??
-                                    "Keo tha file subtitle .vtt/.srt"}
-                                </div>
-                              </div>
-                            </Uploader>
-                          </div>
-                          <input
-                            type="file"
-                            ref={editTranslateInputRef}
-                            className="hidden"
-                            accept=".vtt,.srt"
-                            onChange={(event) =>
-                              setEditTranslateFile(
-                                event.target.files?.[0] ?? null,
-                              )
-                            }
-                          />
-                        </div>
-                      </div>
 
                       <div className="mt-4">
                         <div className="h-24">
                           <FloatTextarea
-                            name="editNote"
-                            label="Ghi chu"
-                            value={editDraft.note ?? ""}
+                            name="editDescription"
+                            label="Mô tả"
+                            value={editDraft.description ?? ""}
                             disable={false}
                             onChange={(event) =>
                               setEditDraft({
                                 ...editDraft,
-                                note: event.target.value,
+                                description: event.target.value,
                               })
                             }
                           />
@@ -667,14 +540,14 @@ export default function PlaylistClient({
                           className="px-4 py-2 rounded-xl bg-accent-0 text-white text-sm font-semibold"
                           onClick={saveEdit}
                         >
-                          Luu
+                          Lưu
                         </button>
                         <button
                           type="button"
                           className="px-4 py-2 rounded-xl bg-surface-1 text-sm font-semibold"
                           onClick={cancelEdit}
                         >
-                          Huy
+                          Hủy
                         </button>
                       </div>
                     </div>
@@ -688,13 +561,13 @@ export default function PlaylistClient({
         <section className="flex flex-col gap-6">
           <div className="rounded-[28px] border border-border/40 bg-surface-1/40 p-6 shadow-xl">
             <h2 className="text-2xl font-bold text-primary mb-4">
-              Them tap moi
+              Thêm tập mới
             </h2>
             <div className="grid gap-4">
               <div className="h-12">
                 <FloatInput
                   name="newTitle"
-                  label="Tieu de tap"
+                  label="Tiêu đề tập"
                   value={state.newEpisode.title}
                   disable={false}
                   required
@@ -712,7 +585,7 @@ export default function PlaylistClient({
               <div className="h-12">
                 <FloatInput
                   name="newSubTitle"
-                  label="Tieu de phu"
+                  label="Tiêu đề phụ"
                   value={state.newEpisode.subTitle}
                   disable={false}
                   onChange={(event) =>
@@ -729,15 +602,15 @@ export default function PlaylistClient({
               <div className="h-12">
                 <FloatInput
                   name="newDuration"
-                  label="Thoi luong"
-                  value={state.newEpisode.duration}
+                  label="Thời lượng (giây)"
+                  value={state.newEpisode.durationStr}
                   disable={false}
                   onChange={(event) =>
                     setState({
                       ...state,
                       newEpisode: {
                         ...state.newEpisode,
-                        duration: event.target.value,
+                        durationStr: event.target.value,
                       },
                     })
                   }
@@ -746,8 +619,8 @@ export default function PlaylistClient({
               <div className="h-12">
                 <FloatInput
                   name="newPublishedAt"
-                  label="PublishedAt (YYYY-MM-DD HH:mm)"
-                  value={state.newEpisode.publishedAt}
+                  label="Ngày chiếu (YYYY-MM-DD HH:mm)"
+                  value={state.newEpisode.publishedAtStr}
                   disable={false}
                   required
                   onChange={(event) =>
@@ -755,7 +628,7 @@ export default function PlaylistClient({
                       ...state,
                       newEpisode: {
                         ...state.newEpisode,
-                        publishedAt: event.target.value,
+                        publishedAtStr: event.target.value,
                       },
                     })
                   }
@@ -764,7 +637,7 @@ export default function PlaylistClient({
               <div className="h-12">
                 <FloatInput
                   name="newVideoUrl"
-                  label="Link phim (1 trong 2)"
+                  label="Link phim"
                   value={state.newEpisode.videoUrl ?? ""}
                   disable={false}
                   required
@@ -780,105 +653,19 @@ export default function PlaylistClient({
                 />
               </div>
 
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="flex flex-col gap-2">
-                  <label className="text-sm text-secondary">
-                    Upload video (1 trong 2)
-                    <span className="text-alert-0">*</span>
-                  </label>
-                  <div
-                    className="w-full rounded-2xl border-2 border-dashed border-border/50 bg-surface-0/70 p-4 cursor-pointer hover:border-accent-0/60 transition"
-                    onClick={() => newVideoInputRef.current?.click()}
-                  >
-                    <Uploader
-                      handleDrop={(files) =>
-                        setState({
-                          ...state,
-                          newVideoFile: files[0] ?? null,
-                        })
-                      }
-                    >
-                      <div className="flex flex-col items-center justify-center text-center gap-2 py-2">
-                        <div className="text-xs uppercase tracking-[0.2em] text-secondary">
-                          Video
-                        </div>
-                        <div className="text-sm text-secondary">
-                          {state.newVideoFile?.name ??
-                            "Keo tha video vao day hoac click"}
-                        </div>
-                      </div>
-                    </Uploader>
-                  </div>
-                  <input
-                    type="file"
-                    ref={newVideoInputRef}
-                    className="hidden"
-                    accept="video/*"
-                    onChange={(event) =>
-                      setState({
-                        ...state,
-                        newVideoFile: event.target.files?.[0] ?? null,
-                      })
-                    }
-                  />
-                </div>
-                <div className="flex flex-col gap-2">
-                  <label className="text-sm text-secondary">
-                    Translate track (optional)
-                  </label>
-                  <div
-                    className="w-full rounded-2xl border-2 border-dashed border-border/50 bg-surface-0/70 p-4 cursor-pointer hover:border-accent-0/60 transition"
-                    onClick={() => newTranslateInputRef.current?.click()}
-                  >
-                    <Uploader
-                      handleDrop={(files) =>
-                        setState({
-                          ...state,
-                          newEpisode: {
-                            ...state.newEpisode,
-                          },
-                          newTranslateFile: files[0] ?? null,
-                        })
-                      }
-                    >
-                      <div className="flex flex-col items-center justify-center text-center gap-2 py-2">
-                        <div className="text-xs uppercase tracking-[0.2em] text-secondary">
-                          Subtitle
-                        </div>
-                        <div className="text-sm text-secondary">
-                          {state.newTranslateFile?.name ??
-                            "Keo tha file subtitle .vtt/.srt"}
-                        </div>
-                      </div>
-                    </Uploader>
-                  </div>
-                  <input
-                    type="file"
-                    ref={newTranslateInputRef}
-                    className="hidden"
-                    accept=".vtt,.srt"
-                    onChange={(event) =>
-                      setState({
-                        ...state,
-                        newTranslateFile: event.target.files?.[0] ?? null,
-                      })
-                    }
-                  />
-                </div>
-              </div>
 
               <div className="h-24">
                 <FloatTextarea
-                  name="newNote"
-                  label="Ghi chu"
-                  value={state.newEpisode.note ?? ""}
+                  name="newDescription"
+                  label="Mô tả"
+                  value={state.newEpisode.description ?? ""}
                   disable={false}
                   onChange={(event) =>
                     setState({
                       ...state,
                       newEpisode: {
                         ...state.newEpisode,
-                        note: event.target.value,
+                        description: event.target.value,
                       },
                     })
                   }
@@ -894,25 +681,24 @@ export default function PlaylistClient({
                 className="mt-2 px-5 py-3 rounded-2xl bg-accent-0 text-white text-sm font-semibold hover:-translate-y-0.5 transition"
                 onClick={handleAddEpisode}
               >
-                Them tap
+                Thêm tập
               </button>
               <p className="text-xs text-secondary">
-                Bat buoc co link phim hoac upload video. Status tu dong tinh
-                theo publishedAt.
+                Bắt buộc có link phim. Status tự động tính theo thời điểm phát hành.
               </p>
             </div>
           </div>
 
           <div className="rounded-[28px] border border-border/40 bg-surface-1/40 p-6 shadow-xl">
             <h3 className="text-xl font-semibold text-primary">
-              Tap dang chieu
+              Tập đang chiếu
             </h3>
             {currentEpisode ? (
               <div className="mt-4 rounded-2xl bg-surface-0/70 border border-border/30 p-4">
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <p className="text-sm text-secondary">
-                      Tap {currentEpisode.number}
+                      Tập {currentEpisode.episodeNo}
                     </p>
                     <p className="text-lg font-semibold text-primary">
                       {currentEpisode.title}
@@ -924,7 +710,7 @@ export default function PlaylistClient({
                 </div>
               </div>
             ) : (
-              <p className="text-sm text-secondary mt-4">Chua co tap.</p>
+              <p className="text-sm text-secondary mt-4">Chưa có tập.</p>
             )}
           </div>
         </section>

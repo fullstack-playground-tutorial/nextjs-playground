@@ -34,7 +34,6 @@
       "@/features/*": [
         "./src/app/features/*"
       ],
-     
     },
     "target": "ES2017"
   },
