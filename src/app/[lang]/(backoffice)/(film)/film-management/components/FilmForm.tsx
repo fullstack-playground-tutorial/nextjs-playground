@@ -79,7 +79,12 @@ export default function FilmForm({ film, suggestions }: Props) {
 
   const getImageUrl = (url: string) => {
     if (!url) return "";
-    if (url.startsWith("blob:") || url.startsWith("data:") || url.startsWith("http")) return url;
+    if (
+      url.startsWith("blob:") ||
+      url.startsWith("data:") ||
+      url.startsWith("http")
+    )
+      return url;
     return `${config.image_url_host}/${url}.image/webp.webp`;
   };
 
@@ -95,7 +100,9 @@ export default function FilmForm({ film, suggestions }: Props) {
   );
 
   const [logoFile, setLogoFile] = useState<File | null>(null);
-  const [logoPreview, setLogoPreview] = useState<string>(getImageUrl(film?.logoUrl || ""));
+  const [logoPreview, setLogoPreview] = useState<string>(
+    getImageUrl(film?.logoUrl || ""),
+  );
 
   const [posterMode, setPosterMode] = useState<"upload" | "url">("upload");
   const [bannerMode, setBannerMode] = useState<"upload" | "url">("upload");
@@ -132,10 +139,12 @@ export default function FilmForm({ film, suggestions }: Props) {
   }, [debouncedQ]);
 
   const updateState = (vals: Partial<Film>) => {
-    setState(prev => ({ ...prev, film: { ...prev.film, ...vals } }));
+    setState((prev) => ({ ...prev, film: { ...prev.film, ...vals } }));
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     const { name, value } = e.target;
     // Handle number fields
     if (name === "numberOfEpisodes") {
@@ -145,24 +154,30 @@ export default function FilmForm({ film, suggestions }: Props) {
     }
   };
 
-  const handleFileDrop = (files: FileList, type: 'poster' | 'banner' | 'logo') => {
+  const handleFileDrop = (
+    files: FileList,
+    type: "poster" | "banner" | "logo",
+  ) => {
     if (files && files[0]) {
       const file = files[0];
 
       // Validate file size
-      const isLogo = type === 'logo';
+      const isLogo = type === "logo";
       const limit = isLogo ? 2 * 1024 * 1024 : 5 * 1024 * 1024; // 2MB for Logo, 5MB for others
 
       if (file.size > limit) {
-        toast.addToast("error", `${isLogo ? 'Thumbnail' : 'Gallery image'} must be smaller than ${isLogo ? '1-2 MB' : '5 MB'}`);
+        toast.addToast(
+          "error",
+          `${isLogo ? "Thumbnail" : "Gallery image"} must be smaller than ${isLogo ? "1-2 MB" : "5 MB"}`,
+        );
         return;
       }
 
       const url = URL.createObjectURL(file);
-      if (type === 'poster') {
+      if (type === "poster") {
         setPosterFile(file);
         setPosterPreview(url);
-      } else if (type === 'banner') {
+      } else if (type === "banner") {
         setBannerFile(file);
         setBannerPreview(url);
       } else {
@@ -187,7 +202,7 @@ export default function FilmForm({ film, suggestions }: Props) {
   const getChangeDiff = (original: Film, current: Film): Partial<Film> => {
     return (Object.keys(current) as Array<keyof Film>).reduce((acc, key) => {
       // ignore UI-only fields or read-only fields that shouldn't be patched
-      if (key === 'interests' || key === 'slug') return acc;
+      if (key === "interests" || key === "slug") return acc;
 
       const val1 = original[key];
       const val2 = current[key];
@@ -218,11 +233,17 @@ export default function FilmForm({ film, suggestions }: Props) {
   const getPayload = (): Partial<Film> | Film => {
     const base: Film = {
       ...state.film,
-      logoUrl: logoMode === "upload" && logoFile ? logoFile.name : state.film.logoUrl,
-      posterUrl: posterMode === "upload" && posterFile ? posterFile.name : state.film.posterUrl,
-      bannerUrl: bannerMode === "upload" && bannerFile ? bannerFile.name : state.film.bannerUrl,
+      logoUrl:
+        logoMode === "upload" && logoFile ? logoFile.name : state.film.logoUrl,
+      posterUrl:
+        posterMode === "upload" && posterFile
+          ? posterFile.name
+          : state.film.posterUrl,
+      bannerUrl:
+        bannerMode === "upload" && bannerFile
+          ? bannerFile.name
+          : state.film.bannerUrl,
     };
-
 
     if (mode === "create") return base;
     const original = originalFilmRef.current;
@@ -238,28 +259,48 @@ export default function FilmForm({ film, suggestions }: Props) {
       try {
         let res;
         if (mode === "create") {
-          if ((logoMode === "upload" && !logoFile) || (logoMode === "url" && !payload.logoUrl) ||
-            (posterMode === "upload" && !posterFile) || (posterMode === "url" && !payload.posterUrl) ||
-            (bannerMode === "upload" && !bannerFile) || (bannerMode === "url" && !payload.bannerUrl)) {
-            toast.addToast("error", "Please provide all required images (upload or URL)");
+          if (
+            (logoMode === "upload" && !logoFile) ||
+            (logoMode === "url" && !payload.logoUrl) ||
+            (posterMode === "upload" && !posterFile) ||
+            (posterMode === "url" && !payload.posterUrl) ||
+            (bannerMode === "upload" && !bannerFile) ||
+            (bannerMode === "url" && !payload.bannerUrl)
+          ) {
+            toast.addToast(
+              "error",
+              "Please provide all required images (upload or URL)",
+            );
             return;
           }
-          res = await createFilm({ ...payload } as Film, logoMode === "upload" ? logoFile : null, posterMode === "upload" ? posterFile : null, bannerMode === "upload" ? bannerFile : null);
+          res = await createFilm(
+            { ...payload } as Film,
+            logoMode === "upload" ? logoFile : null,
+            posterMode === "upload" ? posterFile : null,
+            bannerMode === "upload" ? bannerFile : null,
+          );
           if (res?.fieldErrors) {
             setFieldErrors(res.fieldErrors);
             return;
           }
-
         } else if (mode === "edit" || mode === "review") {
-          if (Object.keys(payload).length === 0 && !logoFile && !posterFile && !bannerFile) {
-            toast.addToast("error", "Please provide at least one field to update");
+          if (
+            Object.keys(payload).length === 0 &&
+            !logoFile &&
+            !posterFile &&
+            !bannerFile
+          ) {
+            toast.addToast(
+              "error",
+              "Please provide at least one field to update",
+            );
             return;
           }
 
           res = await patchFilm(state.film.id, payload, {
             logo: logoMode === "upload" ? logoFile : null,
             poster: posterMode === "upload" ? posterFile : null,
-            banner: bannerMode === "upload" ? bannerFile : null
+            banner: bannerMode === "upload" ? bannerFile : null,
           });
           if (res?.fieldErrors) {
             setFieldErrors(res.fieldErrors);
@@ -284,7 +325,7 @@ export default function FilmForm({ film, suggestions }: Props) {
   useEffect(() => {
     const slug = state.film.title.toLowerCase().replace(/\s+/g, "-");
     updateState({ slug });
-  }, [state.film.title])
+  }, [state.film.title]);
 
   return (
     <div className="flex flex-col h-screen items-start mx-auto max-w-5xl p-6">
@@ -324,12 +365,16 @@ export default function FilmForm({ film, suggestions }: Props) {
                     type="button"
                     className={`px-3 py-1 text-xs rounded-md transition-colors ${posterMode === "upload" ? "bg-white dark:bg-surface-1 shadow text-primary" : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"}`}
                     onClick={() => setPosterMode("upload")}
-                  >Upload</button>
+                  >
+                    Upload
+                  </button>
                   <button
                     type="button"
                     className={`px-3 py-1 text-xs rounded-md transition-colors ${posterMode === "url" ? "bg-white dark:bg-surface-1 shadow text-primary" : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"}`}
                     onClick={() => setPosterMode("url")}
-                  >URL</button>
+                  >
+                    URL
+                  </button>
                 </div>
               )}
             </div>
@@ -337,7 +382,9 @@ export default function FilmForm({ film, suggestions }: Props) {
             {posterMode === "upload" ? (
               <div
                 className={`w-full aspect-[2/3] bg-gray-100 dark:bg-surface-1 rounded-lg overflow-hidden border-2 border-dashed dark:border-border relative group ${!isViewOrReview ? "cursor-pointer" : ""}`}
-                onClick={() => !isViewOrReview && posterInputRef.current?.click()}
+                onClick={() =>
+                  !isViewOrReview && posterInputRef.current?.click()
+                }
               >
                 <Uploader
                   handleDrop={(files) =>
@@ -382,7 +429,7 @@ export default function FilmForm({ film, suggestions }: Props) {
                     label="Poster URL"
                     name="posterUrl"
                     value={state.film.posterUrl || ""}
-                    disable={isViewOrReview}
+                    disabled={isViewOrReview}
                     onChange={(e) => {
                       const url = e.target.value;
                       updateState({ posterUrl: url });
@@ -392,9 +439,15 @@ export default function FilmForm({ film, suggestions }: Props) {
                 </div>
                 <div className="w-full aspect-[2/3] bg-gray-100 dark:bg-surface-1 rounded-lg overflow-hidden border dark:border-border relative flex items-center justify-center">
                   {posterPreview ? (
-                    <img src={posterPreview} alt="Poster" className="w-full h-full object-cover" />
+                    <img
+                      src={posterPreview}
+                      alt="Poster"
+                      className="w-full h-full object-cover"
+                    />
                   ) : (
-                    <span className="text-xs text-gray-400">Preview Images</span>
+                    <span className="text-xs text-gray-400">
+                      Preview Images
+                    </span>
                   )}
                 </div>
               </div>
@@ -413,12 +466,16 @@ export default function FilmForm({ film, suggestions }: Props) {
                     type="button"
                     className={`px-3 py-1 text-xs rounded-md transition-colors ${bannerMode === "upload" ? "bg-white dark:bg-surface-1 shadow text-primary" : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"}`}
                     onClick={() => setBannerMode("upload")}
-                  >Upload</button>
+                  >
+                    Upload
+                  </button>
                   <button
                     type="button"
                     className={`px-3 py-1 text-xs rounded-md transition-colors ${bannerMode === "url" ? "bg-white dark:bg-surface-1 shadow text-primary" : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"}`}
                     onClick={() => setBannerMode("url")}
-                  >URL</button>
+                  >
+                    URL
+                  </button>
                 </div>
               )}
             </div>
@@ -426,7 +483,9 @@ export default function FilmForm({ film, suggestions }: Props) {
             {bannerMode === "upload" ? (
               <div
                 className={`w-full aspect-video bg-gray-100 dark:bg-surface-1 rounded-lg overflow-hidden border-2 border-dashed dark:border-border relative group ${!isViewOrReview ? "cursor-pointer" : ""}`}
-                onClick={() => !isViewOrReview && bannerInputRef.current?.click()}
+                onClick={() =>
+                  !isViewOrReview && bannerInputRef.current?.click()
+                }
               >
                 <Uploader
                   handleDrop={(files) =>
@@ -471,7 +530,7 @@ export default function FilmForm({ film, suggestions }: Props) {
                     label="Banner URL"
                     name="bannerUrl"
                     value={state.film.bannerUrl || ""}
-                    disable={isViewOrReview}
+                    disabled={isViewOrReview}
                     onChange={(e) => {
                       const url = e.target.value;
                       updateState({ bannerUrl: url });
@@ -481,9 +540,15 @@ export default function FilmForm({ film, suggestions }: Props) {
                 </div>
                 <div className="w-full aspect-video bg-gray-100 dark:bg-surface-1 rounded-lg overflow-hidden border dark:border-border relative flex items-center justify-center">
                   {bannerPreview ? (
-                    <img src={bannerPreview} alt="Banner" className="w-full h-full object-cover" />
+                    <img
+                      src={bannerPreview}
+                      alt="Banner"
+                      className="w-full h-full object-cover"
+                    />
                   ) : (
-                    <span className="text-xs text-gray-400">Preview Images</span>
+                    <span className="text-xs text-gray-400">
+                      Preview Images
+                    </span>
                   )}
                 </div>
               </div>
@@ -502,12 +567,16 @@ export default function FilmForm({ film, suggestions }: Props) {
                     type="button"
                     className={`px-3 py-1 text-xs rounded-md transition-colors ${logoMode === "upload" ? "bg-white dark:bg-surface-1 shadow text-primary" : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"}`}
                     onClick={() => setLogoMode("upload")}
-                  >Upload</button>
+                  >
+                    Upload
+                  </button>
                   <button
                     type="button"
                     className={`px-3 py-1 text-xs rounded-md transition-colors ${logoMode === "url" ? "bg-white dark:bg-surface-1 shadow text-primary" : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"}`}
                     onClick={() => setLogoMode("url")}
-                  >URL</button>
+                  >
+                    URL
+                  </button>
                 </div>
               )}
             </div>
@@ -560,7 +629,7 @@ export default function FilmForm({ film, suggestions }: Props) {
                     label="Logo URL"
                     name="logoUrl"
                     value={state.film.logoUrl || ""}
-                    disable={isViewOrReview}
+                    disabled={isViewOrReview}
                     onChange={(e) => {
                       const url = e.target.value;
                       updateState({ logoUrl: url });
@@ -570,9 +639,15 @@ export default function FilmForm({ film, suggestions }: Props) {
                 </div>
                 <div className="w-full aspect-video bg-gray-100 dark:bg-surface-1 rounded-lg overflow-hidden border dark:border-border relative flex items-center justify-center">
                   {logoPreview ? (
-                    <img src={logoPreview} alt="Logo" className="w-full h-full object-contain p-2" />
+                    <img
+                      src={logoPreview}
+                      alt="Logo"
+                      className="w-full h-full object-contain p-2"
+                    />
                   ) : (
-                    <span className="text-xs text-gray-400">Preview Images</span>
+                    <span className="text-xs text-gray-400">
+                      Preview Images
+                    </span>
                   )}
                 </div>
               </div>
@@ -584,29 +659,59 @@ export default function FilmForm({ film, suggestions }: Props) {
         <div className="lg:col-span-2 bg-white dark:bg-surface-1 rounded-lg border dark:border-border shadow-lg p-6 flex flex-col gap-6 h-fit">
           <div className="flex flex-col gap-2">
             <div className="h-12">
-              <FloatInput required label="Title" name="title" value={state.film.title} disable={isViewOrReview} onChange={handleChange} />
+              <FloatInput
+                required
+                label="Title"
+                name="title"
+                value={state.film.title}
+                disabled={isViewOrReview}
+                onChange={handleChange}
+              />
             </div>
 
-            {fieldErrors["title"] && <span className="text-sm text-alert-0">{fieldErrors["title"]}</span>}
+            {fieldErrors["title"] && (
+              <span className="text-sm text-alert-0">
+                {fieldErrors["title"]}
+              </span>
+            )}
             <p
               className={`text-xs text-tertiary-0 w-full min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-start mt-2 `}
             >
-              <span className="font-bold text-secondary shrink-0">
-                Slug:
-              </span>{" "}
-
+              <span className="font-bold text-secondary shrink-0">Slug:</span>{" "}
               {state.film.slug}
             </p>
           </div>
           <div className="flex flex-col gap-2">
             <div className="h-12">
-              <FloatInput required label="Sub Title" name="subTitle" value={state.film.subTitle || ""} disable={isViewOrReview} onChange={handleChange} />
+              <FloatInput
+                required
+                label="Sub Title"
+                name="subTitle"
+                value={state.film.subTitle || ""}
+                disabled={isViewOrReview}
+                onChange={handleChange}
+              />
             </div>
-            {fieldErrors["subTitle"] && <span className="text-sm text-alert-0">{fieldErrors["subTitle"]}</span>}
+            {fieldErrors["subTitle"] && (
+              <span className="text-sm text-alert-0">
+                {fieldErrors["subTitle"]}
+              </span>
+            )}
           </div>
           <div className="flex flex-col gap-2">
-            <FloatInput required label="Trailer URL" name="trailerURL" value={state.film.trailerUrl || ""} disable={isViewOrReview} onChange={handleChange} />
-            {fieldErrors["trailerURL"] && <span className="text-sm text-alert-0">{fieldErrors["trailerURL"]}</span>}
+            <FloatInput
+              required
+              label="Trailer URL"
+              name="trailerURL"
+              value={state.film.trailerUrl || ""}
+              disabled={isViewOrReview}
+              onChange={handleChange}
+            />
+            {fieldErrors["trailerURL"] && (
+              <span className="text-sm text-alert-0">
+                {fieldErrors["trailerURL"]}
+              </span>
+            )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -614,8 +719,20 @@ export default function FilmForm({ film, suggestions }: Props) {
             {/* In real app, date picker would be better */}
             {/* Using text input for compatibility with previous code logic */}
             <div className="h-12">
-              <FloatInput type="number" label="Number of Episodes" name="numberOfEpisodes" required value={String(state.film.numberOfEpisodes || "0")} disable={isViewOrReview} onChange={handleChange} />
-              {fieldErrors["numberOfEpisodes"] && <span className="text-sm text-alert">{fieldErrors["numberOfEpisodes"]}</span>}
+              <FloatInput
+                type="number"
+                label="Number of Episodes"
+                name="numberOfEpisodes"
+                required
+                value={String(state.film.numberOfEpisodes || "0")}
+                disabled={isViewOrReview}
+                onChange={handleChange}
+              />
+              {fieldErrors["numberOfEpisodes"] && (
+                <span className="text-sm text-alert">
+                  {fieldErrors["numberOfEpisodes"]}
+                </span>
+              )}
             </div>
           </div>
 
@@ -624,20 +741,39 @@ export default function FilmForm({ film, suggestions }: Props) {
               label="Interests"
               name="interests"
               q={state.interestQ}
-              onQChange={(q) => setState(prev => ({ ...prev, interestQ: q }))}
+              onQChange={(q) => setState((prev) => ({ ...prev, interestQ: q }))}
               suggestions={suggestions || []}
               selected={state.film.interests}
-              onTagChange={(items) => updateState({ interestIds: items.map(item => item.id), interests: items })}
+              onTagChange={(items) =>
+                updateState({
+                  interestIds: items.map((item) => item.id),
+                  interests: items,
+                })
+              }
               maxTags={10}
               disable={isViewOrReview}
               required
             />
-            {fieldErrors["interestIds"] && <span className="text-sm text-alert-0">{fieldErrors["interestIds"]}</span>}
+            {fieldErrors["interestIds"] && (
+              <span className="text-sm text-alert-0">
+                {fieldErrors["interestIds"]}
+              </span>
+            )}
           </div>
 
           <div className="h-48">
-            <FloatTextarea label="Description" name="description" value={state.film.description || ""} disable={isViewOrReview} onChange={handleChange} />
-            {fieldErrors["description"] && <span className="text-sm text-alert-0">{fieldErrors["description"]}</span>}
+            <FloatTextarea
+              label="Description"
+              name="description"
+              value={state.film.description || ""}
+              disable={isViewOrReview}
+              onChange={handleChange}
+            />
+            {fieldErrors["description"] && (
+              <span className="text-sm text-alert-0">
+                {fieldErrors["description"]}
+              </span>
+            )}
           </div>
 
           <ActionButtons

@@ -1,10 +1,14 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import FloatInput from "@/app/[lang]/(backoffice)/components/FloatInput";
 import FloatTextarea from "@/app/[lang]/(backoffice)/components/FloatTextarea";
+import FloatDateInput from "@/app/[lang]/(backoffice)/components/FloatDateInput/FloatDateInput";
 import { Episode } from "@/app/feature/episode";
+import { createEpisode, updateEpisode } from "@/app/feature/episode/action";
 import { DurationInput } from "../../../components/DurationInput";
+import { Slugify } from "@/app/utils/string";
+import useToast from "@/components/Toast";
 
 const STATUS_LABELS = {
   upcoming: "Sắp chiếu",
@@ -80,6 +84,7 @@ function getCurrentEpisode(episodes: Episode[]) {
 interface Props {
   playlistName: string;
   episodes: Episode[];
+  playlistId: string;
 }
 
 interface InternalState {
@@ -91,7 +96,11 @@ interface InternalState {
   draggingId: string | null;
 }
 
-export default function PlaylistClient({ playlistName, episodes }: Props) {
+export default function PlaylistClient({
+  playlistName,
+  episodes,
+  playlistId,
+}: Props) {
   const [state, setState] = useState<InternalState>({
     episodes: episodes,
     newEpisode: {
@@ -107,6 +116,14 @@ export default function PlaylistClient({ playlistName, episodes }: Props) {
   const [editDraft, setEditDraft] = useState<EditDraft | null>(null);
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [draggingId, setDraggingId] = useState<string | null>(null);
+  const [isPending, setIsPending] = useState<boolean>(false);
+  const [isMounted, setIsMounted] = useState<boolean>(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  const toast = useToast();
 
   const stats = useMemo(() => {
     const total = state.episodes.length;
@@ -125,11 +142,10 @@ export default function PlaylistClient({ playlistName, episodes }: Props) {
     [state.episodes],
   );
 
-  function handleAddEpisode() {
-    setErrorMessage("");
-
+  async function handleAddEpisode() {
     if (!state.newEpisode.title?.trim()) {
       setErrorMessage("Cần nhập tiêu đề tập.");
+      toast.addToast;
       return;
     }
 
@@ -146,27 +162,46 @@ export default function PlaylistClient({ playlistName, episodes }: Props) {
     const duration = state.newEpisode.duration;
     const publishedAt = parseDate(state.newEpisode.publishedAtStr) || undefined;
 
-    setState((prev) => ({
-      ...prev,
-      episodes: [
-        ...prev.episodes,
-        {
-          id: `ep-${Date.now()}`,
-          episodeNo: prev.episodes.length + 1,
-          title: prev.newEpisode.title?.trim(),
-          subTitle: prev.newEpisode.subTitle.trim(),
-          duration: duration,
-          publishedAt: publishedAt,
-          videoUrl: prev.newEpisode.videoUrl?.trim(),
-          description: prev.newEpisode.description?.trim() || "",
+    const newEp: Episode = {
+      id: "",
+      episodeNo: state.episodes.length + 1,
+      title: state.newEpisode.title?.trim(),
+      subTitle: state.newEpisode.subTitle?.trim(),
+      slug: Slugify(state.newEpisode.title),
+      duration: duration,
+      publishedAt: publishedAt,
+      videoUrl: state.newEpisode.videoUrl?.trim(),
+      description: state.newEpisode.description?.trim() || "",
+      filmId: state.newEpisode.filmId,
+    };
+
+    setIsPending(true);
+    try {
+      const res = await createEpisode(playlistId, newEp);
+      if (res?.fieldErrors || res?.errMsg) {
+        setErrorMessage(res.errMsg || "Có lỗi xảy ra khi tạo tập.");
+        return;
+      }
+
+      setState((prev) => ({
+        ...prev,
+        episodes: [
+          ...prev.episodes,
+          {
+            ...newEp,
+            id: `ep-${Date.now()}`,
+          },
+        ],
+        newEpisode: {
+          ...emptyNewEpisode,
           filmId: prev.newEpisode.filmId,
         },
-      ],
-      newEpisode: {
-        ...emptyNewEpisode,
-        filmId: prev.newEpisode.filmId,
-      },
-    }));
+      }));
+    } catch (e) {
+      toast.addToast("error", "Lỗi hệ thống khi thêm tập");
+    } finally {
+      setIsPending(false);
+    }
   }
 
   function handleDelete(id: string) {
@@ -186,7 +221,7 @@ export default function PlaylistClient({ playlistName, episodes }: Props) {
     setEditDraft({
       ...episode,
       publishedAtStr: pubAt
-        ? pubAt.toISOString().slice(0, 16).replace("T", " ")
+        ? pubAt.toISOString().slice(0, 16)
         : "",
       duration: episode.duration,
     });
@@ -197,7 +232,7 @@ export default function PlaylistClient({ playlistName, episodes }: Props) {
     setEditDraft(null);
   }
 
-  function saveEdit() {
+  async function saveEdit() {
     if (!editDraft) {
       return;
     }
@@ -214,24 +249,41 @@ export default function PlaylistClient({ playlistName, episodes }: Props) {
     const duration = editDraft.duration;
     const publishedAt = parseDate(editDraft.publishedAtStr) || undefined;
 
-    setState((prev) => ({
-      ...prev,
-      episodes: prev.episodes.map((episode) =>
-        episode.id === editDraft.id
-          ? {
-              ...episode,
-              title: editDraft.title?.trim(),
-              subTitle: editDraft.subTitle.trim(),
-              duration: duration,
-              publishedAt: publishedAt,
-              videoUrl: editDraft.videoUrl?.trim(),
-              description: editDraft.description?.trim() || "",
-            }
-          : episode,
-      ),
-    }));
+    const epDataToUpdate: Episode = {
+      ...editDraft,
+      title: editDraft.title?.trim(),
+      subTitle: editDraft.subTitle?.trim(),
+      duration: duration,
+      publishedAt: publishedAt,
+      videoUrl: editDraft.videoUrl?.trim(),
+      description: editDraft.description?.trim() || "",
+    };
 
-    cancelEdit();
+    setIsPending(true);
+    try {
+      const res = await updateEpisode(
+        editDraft.id,
+        editDraft.filmId,
+        epDataToUpdate,
+      );
+      if (res?.fieldErrors || res?.errMsg) {
+        setErrorMessage(res.errMsg || "Có lỗi xảy ra khi cập nhật tập.");
+        return;
+      }
+
+      setState((prev) => ({
+        ...prev,
+        episodes: prev.episodes.map((episode) =>
+          episode.id === editDraft.id ? epDataToUpdate : episode,
+        ),
+      }));
+
+      cancelEdit();
+    } catch (e) {
+      toast.addToast("error", "Lỗi hệ thống khi cập nhật tập");
+    } finally {
+      setIsPending(false);
+    }
   }
 
   function reorderEpisodes(sourceId: string, targetId: string) {
@@ -306,29 +358,6 @@ export default function PlaylistClient({ playlistName, episodes }: Props) {
                   Quản lý danh sách tập phim, sắp xếp thứ tự, và cập nhật trạng
                   thái theo thời điểm phát hành.
                 </p>
-              </div>
-              <div className="flex gap-3">
-                <button
-                  type="button"
-                  className="px-5 py-3 rounded-2xl bg-surface-1 border border-border/40 text-sm font-semibold hover:-translate-y-0.5 transition"
-                  onClick={() =>
-                    setState((prev) => ({
-                      ...prev,
-                      episodes: prev.episodes.map((ep, idx) => ({
-                        ...ep,
-                        episodeNo: idx + 1,
-                      })),
-                    }))
-                  }
-                >
-                  Tự động đánh số
-                </button>
-                <button
-                  type="button"
-                  className="px-5 py-3 rounded-2xl bg-accent-0 text-white text-sm font-semibold shadow-[0_12px_30px_rgba(255,183,77,0.25)] hover:-translate-y-0.5 transition"
-                >
-                  Lưu thay đổi
-                </button>
               </div>
             </div>
 
@@ -405,11 +434,13 @@ export default function PlaylistClient({ playlistName, episodes }: Props) {
                         </div>
                         <p className="text-sm text-secondary mt-1">
                           {episode.subTitle} • {episode.duration}s •{" "}
-                          {episode.publishedAt
-                            ? typeof episode.publishedAt === "string"
-                              ? new Date(episode.publishedAt).toLocaleString()
-                              : episode.publishedAt.toLocaleString()
-                            : ""}
+                          <span>
+                            {isMounted && episode.publishedAt
+                              ? typeof episode.publishedAt === "string"
+                                ? new Date(episode.publishedAt).toLocaleString()
+                                : episode.publishedAt.toLocaleString()
+                              : ""}
+                          </span>
                         </p>
                         {episode.videoUrl && (
                           <p className="text-xs text-secondary mt-1">
@@ -450,7 +481,7 @@ export default function PlaylistClient({ playlistName, episodes }: Props) {
                             name="editTitle"
                             label="Tiêu đề tập"
                             value={editDraft.title}
-                            disable={false}
+                            disabled={false}
                             required
                             onChange={(event) =>
                               setEditDraft({
@@ -465,7 +496,7 @@ export default function PlaylistClient({ playlistName, episodes }: Props) {
                             name="editSubTitle"
                             label="Tiêu đề phụ"
                             value={editDraft.subTitle}
-                            disable={false}
+                            disabled={false}
                             onChange={(event) =>
                               setEditDraft({
                                 ...editDraft,
@@ -477,7 +508,7 @@ export default function PlaylistClient({ playlistName, episodes }: Props) {
                         <div className="h-12">
                           <DurationInput
                             name="editDuration"
-                            label="Thời lượng (giây)"
+                            label="Thời lượng"
                             duration={editDraft.duration}
                             disabled={false}
                             onChange={(_, d) =>
@@ -489,12 +520,11 @@ export default function PlaylistClient({ playlistName, episodes }: Props) {
                           />
                         </div>
                         <div className="h-12">
-                          <FloatInput
+                          <FloatDateInput
                             name="editPublishedAt"
-                            label="Ngày chiếu (YYYY-MM-DD HH:mm)"
+                            label="Ngày chiếu"
                             value={editDraft.publishedAtStr}
-                            disable={false}
-                            required
+                            disabled={false}
                             onChange={(event) =>
                               setEditDraft({
                                 ...editDraft,
@@ -508,7 +538,7 @@ export default function PlaylistClient({ playlistName, episodes }: Props) {
                             name="editVideoUrl"
                             label="Link phim"
                             value={editDraft.videoUrl ?? ""}
-                            disable={false}
+                            disabled={false}
                             required
                             onChange={(event) =>
                               setEditDraft({
@@ -540,10 +570,11 @@ export default function PlaylistClient({ playlistName, episodes }: Props) {
                       <div className="flex gap-3 mt-4">
                         <button
                           type="button"
-                          className="px-4 py-2 rounded-xl bg-accent-0 text-white text-sm font-semibold"
+                          className="px-4 py-2 rounded-xl bg-accent-0 text-white text-sm font-semibold disabled:opacity-50"
                           onClick={saveEdit}
+                          disabled={isPending}
                         >
-                          Lưu
+                          {isPending ? "Đang lưu..." : "Lưu"}
                         </button>
                         <button
                           type="button"
@@ -572,7 +603,7 @@ export default function PlaylistClient({ playlistName, episodes }: Props) {
                   name="newTitle"
                   label="Tiêu đề tập"
                   value={state.newEpisode.title}
-                  disable={false}
+                  disabled={false}
                   required
                   onChange={(event) =>
                     setState({
@@ -590,7 +621,7 @@ export default function PlaylistClient({ playlistName, episodes }: Props) {
                   name="newSubTitle"
                   label="Tiêu đề phụ"
                   value={state.newEpisode.subTitle}
-                  disable={false}
+                  disabled={false}
                   onChange={(event) =>
                     setState({
                       ...state,
@@ -605,7 +636,7 @@ export default function PlaylistClient({ playlistName, episodes }: Props) {
               <div className="h-12">
                 <DurationInput
                   name="newDuration"
-                  label="Thời lượng (giây)"
+                  label="Thời lượng"
                   duration={state.newEpisode.duration}
                   disabled={false}
                   onChange={(_, d) =>
@@ -620,12 +651,11 @@ export default function PlaylistClient({ playlistName, episodes }: Props) {
                 />
               </div>
               <div className="h-12">
-                <FloatInput
+                <FloatDateInput
                   name="newPublishedAt"
-                  label="Ngày chiếu (YYYY-MM-DD HH:mm)"
+                  label="Ngày chiếu"
                   value={state.newEpisode.publishedAtStr}
-                  disable={false}
-                  required
+                  disabled={false}
                   onChange={(event) =>
                     setState({
                       ...state,
@@ -642,7 +672,7 @@ export default function PlaylistClient({ playlistName, episodes }: Props) {
                   name="newVideoUrl"
                   label="Link phim"
                   value={state.newEpisode.videoUrl ?? ""}
-                  disable={false}
+                  disabled={false}
                   required
                   onChange={(event) =>
                     setState({
@@ -680,10 +710,11 @@ export default function PlaylistClient({ playlistName, episodes }: Props) {
 
               <button
                 type="button"
-                className="mt-2 px-5 py-3 rounded-2xl bg-accent-0 text-white text-sm font-semibold hover:-translate-y-0.5 transition"
+                className="mt-2 px-5 py-3 rounded-2xl bg-accent-0 text-white text-sm font-semibold hover:-translate-y-0.5 transition disabled:opacity-50 disabled:hover:translate-y-0"
                 onClick={handleAddEpisode}
+                disabled={isPending}
               >
-                Thêm tập
+                {isPending ? "Đang xử lý..." : "Thêm tập"}
               </button>
               <p className="text-xs text-secondary">
                 Bắt buộc có link phim. Status tự động tính theo thời điểm phát

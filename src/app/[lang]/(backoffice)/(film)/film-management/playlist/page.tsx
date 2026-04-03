@@ -27,5 +27,11 @@ export default async function Page(props: {
 
   const episode = await getEpisodeService().getCollection(searchParams.list);
 
-  return <PlaylistClient playlistName={film.title} episodes={episode} />;
+  return (
+    <PlaylistClient
+      playlistName={film.title}
+      episodes={episode}
+      playlistId={searchParams.list}
+    />
+  );
 }

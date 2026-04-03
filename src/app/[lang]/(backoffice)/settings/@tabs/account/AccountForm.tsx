@@ -57,7 +57,7 @@ export default function AccountForm() {
               label={localize("settings_account_full_name")}
               value={formData.fullName}
               onChange={handleChange}
-              disable={false}
+              disabled={false}
             />
           </div>
           <div className="h-14">
@@ -66,7 +66,7 @@ export default function AccountForm() {
               label={localize("settings_account_bio")}
               value={formData.bio}
               onChange={handleChange}
-              disable={false}
+              disabled={false}
             />
           </div>
         </div>
@@ -84,7 +84,7 @@ export default function AccountForm() {
               label={localize("settings_account_email")}
               value={formData.email}
               onChange={handleChange}
-              disable={false}
+              disabled={false}
               type="email"
             />
           </div>
@@ -94,7 +94,7 @@ export default function AccountForm() {
               label={localize("settings_account_phone")}
               value={formData.phone}
               onChange={handleChange}
-              disable={false}
+              disabled={false}
             />
           </div>
         </div>
@@ -117,7 +117,7 @@ export default function AccountForm() {
                 label={localize("settings_account_current_password")}
                 value={formData.currentPassword}
                 onChange={handleChange}
-                disable={false}
+                disabled={false}
                 type="password"
               />
             </div>
@@ -127,7 +127,7 @@ export default function AccountForm() {
                 label={localize("settings_account_new_password")}
                 value={formData.newPassword}
                 onChange={handleChange}
-                disable={false}
+                disabled={false}
                 type="password"
               />
             </div>
@@ -137,7 +137,7 @@ export default function AccountForm() {
                 label={localize("settings_account_confirm_password")}
                 value={formData.confirmPassword}
                 onChange={handleChange}
-                disable={false}
+                disabled={false}
                 type="password"
               />
             </div>

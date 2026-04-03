@@ -23,16 +23,13 @@ export default function ImagePlugin() {
   };
   const onUploadImage = () => {
     imageInputRef.current?.click();
-
-  }
+  };
   const onAddImage = () => {
     if (!imageURL && !imageFile) {
       return;
     }
     editor.update(() => {
-      const src = imageFile
-        ? URL.createObjectURL(imageFile)
-        : imageURL ?? "";
+      const src = imageFile ? URL.createObjectURL(imageFile) : (imageURL ?? "");
       const node = $createImageNode({ src, alt: "Dummy Text" });
       $insertNodes([node]);
     });
@@ -45,7 +42,7 @@ export default function ImagePlugin() {
   };
 
   const onURLImageChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     setImageURL(e.currentTarget.value);
   };
@@ -89,7 +86,7 @@ export default function ImagePlugin() {
                 name={"image"}
                 value={imageURL}
                 label={"image url"}
-                disable={false}
+                disabled={false}
               />
             </div>
             <button

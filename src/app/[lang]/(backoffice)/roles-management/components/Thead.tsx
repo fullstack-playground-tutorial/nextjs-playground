@@ -42,13 +42,13 @@ export default function Thead({
 
   const { mode, tooltipShow } = state;
   const handleTitleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     setState((prev) => ({ ...prev, title: e.target.value }));
   };
 
   const handleIdChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     setState((prev) => ({ ...prev, id: e.target.value, tooltipShow: false }));
   };
@@ -70,7 +70,7 @@ export default function Thead({
         if (error.status == 409) {
           toast.addToast(
             "error",
-            "Delete role failed. User must be unassigned from this role before deleting"
+            "Delete role failed. User must be unassigned from this role before deleting",
           );
         }
       } else {
@@ -161,14 +161,14 @@ export default function Thead({
                 name={"id"}
                 value={state.id}
                 label={"Id"}
-                disable={mode != "create"}
+                disabled={mode != "create"}
                 onChange={handleIdChange}
               />
               <FloatInput
                 name={"title"}
                 value={state.title}
                 label={"Title"}
-                disable={false}
+                disabled={false}
                 onChange={handleTitleChange}
               />
 

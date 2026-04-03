@@ -1,25 +1,33 @@
-"use client"
+"use client";
 type Props = {
   name: string;
   value: string | undefined;
   label: string;
-  disable: boolean;
+  disabled: boolean;
   required?: boolean;
-  type?: "text" | "email" | "password" | "number";
+  type?: "text" | "email" | "password" | "number" | "date";
   onChange: (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => void;
 };
-function FloatInput({ onChange, value, label, name, disable, required, type = "text" }: Props) {
+function FloatInput({
+  onChange,
+  value,
+  label,
+  name,
+  disabled,
+  required,
+  type = "text",
+}: Props) {
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     onChange(e);
   };
   return (
     <div className="relative w-full h-full">
       <input
-        disabled={disable}
+        disabled={disabled}
         type={type}
         id={name}
         name={name}
@@ -38,7 +46,8 @@ function FloatInput({ onChange, value, label, name, disable, required, type = "t
         text-secondary
         peer-focus:top-1.5 peer-focus:-translate-y-0 peer-focus:text-sm peer-focus:font-normal dark:peer-focus:text-accent-0"
       >
-        {label}{required && <span className="text-alert-0">*</span>}
+        {label}
+        {required && <span className="text-alert-0">*</span>}
       </label>
     </div>
   );

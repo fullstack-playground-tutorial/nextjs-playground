@@ -17,7 +17,7 @@ import {
 
 const CKEditorComponent = dynamic(
   () => import("../../../components/CKEditor"),
-  { ssr: false }
+  { ssr: false },
 );
 
 type InternalState = {
@@ -154,7 +154,7 @@ export default function TopicForm({ user, topic, tagSuggestions }: Props) {
   };
 
   const handleTopicChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
     let newTopic: Topic = { ...state.topic };
@@ -304,7 +304,7 @@ export default function TopicForm({ user, topic, tagSuggestions }: Props) {
                   onChange={handleTopicChange}
                   name={"title"}
                   value={title}
-                  disable={mode === "view" || mode === "review"}
+                  disabled={mode === "view" || mode === "review"}
                   label={"Title"}
                   required
                 />
@@ -351,7 +351,7 @@ export default function TopicForm({ user, topic, tagSuggestions }: Props) {
           <div className="flex flex-row items-center gap-4 mb-4 focus-within:[&>label]:dark:text-accent-0">
             <div className="w-full h-12">
               <FloatInput
-                disable={mode === "view" || mode === "review"}
+                disabled={mode === "view" || mode === "review"}
                 onChange={handleTopicChange}
                 name={"thumbnailUrl"}
                 value={thumbnailUrl}
