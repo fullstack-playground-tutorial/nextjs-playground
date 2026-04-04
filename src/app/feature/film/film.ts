@@ -52,6 +52,9 @@ export type Source = {
 export interface FilmFilter extends SearchFilter {
   title?: string;
   publishedAt?: Date;
+  fromYear?: number;
+  toYear?: number;
+  interestIds?: string[];
 }
 
 export type Track = {

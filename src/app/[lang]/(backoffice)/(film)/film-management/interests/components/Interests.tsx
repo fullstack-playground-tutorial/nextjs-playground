@@ -154,7 +154,6 @@ function InterestsManagement({ hasPermission, limit, currentPage, data }: Props)
                 <div className={`transition-all ${filterVisible ? "mt-2" : "h-0"}`}>
                     <FilterBar visible={filterVisible}>
                         <FilterDropdown
-                            name={"sort"}
                             selectedList={selectedList}
                             placeHolder="Sort by"
                             onItemSelected={(val) => handleSortSelected(val)}
@@ -195,7 +194,7 @@ function InterestsManagement({ hasPermission, limit, currentPage, data }: Props)
                 </div>}
                 <div className="mt-6 md:mt-8 lg:mt-10 self-center">
                     <Pagination
-                        pageTotal={pageTotal}
+                        total={pageTotal}
                         currentPage={currentPage}
                         onPageChanged={handlePageChange}
                     />

@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { SearchBar } from "@/components/Search";
 import { Tag } from "@/app/feature/tags";
+import { useRouter } from "next/navigation";
 
 type Interests = {
   list: Tag[];
@@ -15,6 +16,7 @@ type NavbarProps = {
 };
 
 const Navbar = ({ interests, logo }: NavbarProps) => {
+  const router = useRouter();
   const [isScrolled, setIsScrolled] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
 
@@ -63,7 +65,7 @@ const Navbar = ({ interests, logo }: NavbarProps) => {
 
   return (
     <nav
-      className={`sticky top-0 z-[50] transition-all duration-500 border-b border-white/5 py-4 mb-6 bg-surface-1/40 backdrop-blur-md rounded-2xl ${isScrolled ? "shadow-[0_10px_30px_rgba(0,0,0,0.4)] border-white/10" : ""
+      className={`sticky top-0 z-[50] transition-all duration-500 border-b border-white/5 py-4 mb-6 bg-surface-1/40 backdrop-blur-md shadow-sm rounded-2xl ${isScrolled ? "shadow-[0_10px_30px_rgba(0,0,0,0.4)] border-white/10" : ""
         }`}
     >
       <div className="max-w-full mx-auto px-6 flex items-center justify-between">
@@ -166,7 +168,7 @@ const Navbar = ({ interests, logo }: NavbarProps) => {
           <div className={`relative transition-all duration-500 flex items-center h-10 ${showSearch ? "w-64" : "w-10"}`}>
             {showSearch ? (
               <div className="w-full h-full animate-in fade-in slide-in-from-right-4 duration-300">
-                <SearchBar placeHolder={"Tìm kiếm phim..."} />
+                <SearchBar placeHolder={"Tìm kiếm phim..."} onSearch={(q) => { router.push(`/films/search?q=${q}`); }} />
                 <button
                   onClick={() => setShowSearch(false)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white transition-colors"
