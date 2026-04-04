@@ -5,10 +5,17 @@ import FloatInput from "@/app/[lang]/(backoffice)/components/FloatInput";
 import FloatTextarea from "@/app/[lang]/(backoffice)/components/FloatTextarea";
 import FloatDateInput from "@/app/[lang]/(backoffice)/components/FloatDateInput/FloatDateInput";
 import { Episode } from "@/app/feature/episode";
-import { createEpisode, updateEpisode } from "@/app/feature/episode/action";
+import {
+  createEpisode,
+  updateEpisode,
+  reorderEpisode,
+  deleteEpisode,
+} from "@/app/feature/episode/action";
 import { DurationInput } from "../../../components/DurationInput";
 import { Slugify } from "@/app/utils/string";
 import useToast from "@/components/Toast";
+import { useRouter, useParams } from "next/navigation";
+import BackArrow from "@/assets/images/icons/back_arrow.svg";
 
 const STATUS_LABELS = {
   upcoming: "Sắp chiếu",
@@ -42,7 +49,7 @@ function parseDate(value: string): Date | null {
   return parsed;
 }
 
-function getStatusLabel(publishedAt?: Date | string) {
+function getStatusLabel(publishedAt?: Date | string | null) {
   if (!publishedAt) {
     return STATUS_LABELS.unknown;
   }
@@ -96,26 +103,34 @@ interface InternalState {
   draggingId: string | null;
 }
 
+function formatDuration(seconds?: number) {
+  if (!seconds || seconds <= 0) return "không xác định";
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = seconds % 60;
+  return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+}
+
 export default function PlaylistClient({
   playlistName,
   episodes,
   playlistId,
 }: Props) {
+  const toast = useToast();
+  const router = useRouter();
+  const params = useParams();
+  const lang = params?.lang as string;
   const [state, setState] = useState<InternalState>({
     episodes: episodes,
     newEpisode: {
       ...emptyNewEpisode,
-      filmId: episodes.length > 0 ? episodes[0].filmId : "",
+      filmId: playlistId,
     },
     editingId: null,
     editDraft: null,
     errorMessage: "",
     draggingId: null,
   });
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editDraft, setEditDraft] = useState<EditDraft | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string>("");
-  const [draggingId, setDraggingId] = useState<string | null>(null);
   const [isPending, setIsPending] = useState<boolean>(false);
   const [isMounted, setIsMounted] = useState<boolean>(false);
 
@@ -123,7 +138,12 @@ export default function PlaylistClient({
     setIsMounted(true);
   }, []);
 
-  const toast = useToast();
+  useEffect(() => {
+    setState((prev) => ({
+      ...prev,
+      episodes: episodes,
+    }));
+  }, [episodes]);
 
   const stats = useMemo(() => {
     const total = state.episodes.length;
@@ -143,31 +163,15 @@ export default function PlaylistClient({
   );
 
   async function handleAddEpisode() {
-    if (!state.newEpisode.title?.trim()) {
-      setErrorMessage("Cần nhập tiêu đề tập.");
-      toast.addToast;
-      return;
-    }
-
-    if (!state.newEpisode.publishedAtStr.trim()) {
-      setErrorMessage("Cần nhập thời gian phát hành.");
-      return;
-    }
-
-    if (!state.newEpisode.videoUrl?.trim()) {
-      setErrorMessage("Cần nhập link phim.");
-      return;
-    }
-
     const duration = state.newEpisode.duration;
-    const publishedAt = parseDate(state.newEpisode.publishedAtStr) || undefined;
+    const publishedAt = parseDate(state.newEpisode.publishedAtStr) || null;
 
     const newEp: Episode = {
       id: "",
       episodeNo: state.episodes.length + 1,
       title: state.newEpisode.title?.trim(),
       subTitle: state.newEpisode.subTitle?.trim(),
-      slug: Slugify(state.newEpisode.title),
+      slug: Slugify(state.newEpisode.title || ""),
       duration: duration,
       publishedAt: publishedAt,
       videoUrl: state.newEpisode.videoUrl?.trim(),
@@ -179,24 +183,22 @@ export default function PlaylistClient({
     try {
       const res = await createEpisode(playlistId, newEp);
       if (res?.fieldErrors || res?.errMsg) {
-        setErrorMessage(res.errMsg || "Có lỗi xảy ra khi tạo tập.");
+        setState((prev) => ({
+          ...prev,
+          errorMessage: res.errMsg || "Có lỗi xảy ra khi tạo tập.",
+        }));
         return;
       }
 
       setState((prev) => ({
         ...prev,
-        episodes: [
-          ...prev.episodes,
-          {
-            ...newEp,
-            id: `ep-${Date.now()}`,
-          },
-        ],
         newEpisode: {
           ...emptyNewEpisode,
-          filmId: prev.newEpisode.filmId,
+          filmId: playlistId,
         },
+        errorMessage: "",
       }));
+      toast.addToast("success", "Thêm tập thành công");
     } catch (e) {
       toast.addToast("error", "Lỗi hệ thống khi thêm tập");
     } finally {
@@ -204,79 +206,81 @@ export default function PlaylistClient({
     }
   }
 
-  function handleDelete(id: string) {
-    setState((prev) => ({
-      ...prev,
-      episodes: prev.episodes.filter((episode) => episode.id !== id),
-    }));
+  async function handleDelete(id: string) {
+    setIsPending(true);
+    try {
+      const res = await deleteEpisode(id, playlistId);
+      if (res?.fieldErrors || res?.errMsg) {
+        toast.addToast("error", res.errMsg || "Có lỗi xảy ra khi xóa tập.");
+        return;
+      }
+      toast.addToast("success", "Xóa tập thành công");
+    } catch (e) {
+      toast.addToast("error", "Lỗi hệ thống khi xóa tập");
+    } finally {
+      setIsPending(false);
+    }
   }
 
   function startEdit(episode: Episode) {
-    setEditingId(episode.id);
     const pubAt = episode.publishedAt
       ? typeof episode.publishedAt === "string"
         ? new Date(episode.publishedAt)
         : episode.publishedAt
       : null;
-    setEditDraft({
-      ...episode,
-      publishedAtStr: pubAt
-        ? pubAt.toISOString().slice(0, 16)
-        : "",
-      duration: episode.duration,
-    });
+    setState((prev) => ({
+      ...prev,
+      editingId: episode.id,
+      editDraft: {
+        ...episode,
+        publishedAtStr: pubAt ? pubAt.toISOString().slice(0, 16) : "",
+        duration: episode.duration,
+      },
+    }));
   }
 
   function cancelEdit() {
-    setEditingId(null);
-    setEditDraft(null);
+    setState((prev) => ({
+      ...prev,
+      editingId: null,
+      editDraft: null,
+    }));
   }
 
   async function saveEdit() {
-    if (!editDraft) {
+    if (!state.editDraft) {
       return;
     }
-    if (!editDraft.title?.trim()) {
+    if (!state.editDraft.title?.trim()) {
       return;
     }
-    if (!editDraft.publishedAtStr.trim()) {
-      return;
-    }
-    if (!editDraft.videoUrl?.trim()) {
-      return;
-    }
-
-    const duration = editDraft.duration;
-    const publishedAt = parseDate(editDraft.publishedAtStr) || undefined;
+    const duration = state.editDraft.duration;
+    const publishedAt = parseDate(state.editDraft.publishedAtStr) || null;
 
     const epDataToUpdate: Episode = {
-      ...editDraft,
-      title: editDraft.title?.trim(),
-      subTitle: editDraft.subTitle?.trim(),
+      ...state.editDraft,
+      title: state.editDraft.title?.trim(),
+      subTitle: state.editDraft.subTitle?.trim(),
       duration: duration,
       publishedAt: publishedAt,
-      videoUrl: editDraft.videoUrl?.trim(),
-      description: editDraft.description?.trim() || "",
+      videoUrl: state.editDraft.videoUrl?.trim(),
+      description: state.editDraft.description?.trim() || "",
     };
 
     setIsPending(true);
     try {
       const res = await updateEpisode(
-        editDraft.id,
-        editDraft.filmId,
+        state.editDraft.id,
+        state.editDraft.filmId,
         epDataToUpdate,
       );
       if (res?.fieldErrors || res?.errMsg) {
-        setErrorMessage(res.errMsg || "Có lỗi xảy ra khi cập nhật tập.");
+        setState((prev) => ({
+          ...prev,
+          errorMessage: res.errMsg || "Có lỗi xảy ra khi cập nhật tập.",
+        }));
         return;
       }
-
-      setState((prev) => ({
-        ...prev,
-        episodes: prev.episodes.map((episode) =>
-          episode.id === editDraft.id ? epDataToUpdate : episode,
-        ),
-      }));
 
       cancelEdit();
     } catch (e) {
@@ -286,10 +290,12 @@ export default function PlaylistClient({
     }
   }
 
-  function reorderEpisodes(sourceId: string, targetId: string) {
-    if (sourceId === targetId) {
+  async function reorderEpisodes(sourceId: string, targetId: string) {
+    if (isPending || sourceId === targetId) {
       return;
     }
+
+    const previousEpisodes = [...state.episodes];
 
     const updatedEpisodes = [...state.episodes];
     const sourceIndex = updatedEpisodes.findIndex((e) => e.id === sourceId);
@@ -298,7 +304,9 @@ export default function PlaylistClient({
     if (sourceIndex === -1 || targetIndex === -1) return;
 
     const [moved] = updatedEpisodes.splice(sourceIndex, 1);
-    updatedEpisodes.splice(targetIndex, 0, moved);
+    const insertIndex =
+      sourceIndex < targetIndex ? targetIndex - 1 : targetIndex;
+    updatedEpisodes.splice(insertIndex, 0, moved);
 
     // Update episodeNo based on new order
     const reordered = updatedEpisodes.map((ep, idx) => ({
@@ -310,10 +318,50 @@ export default function PlaylistClient({
       ...prev,
       episodes: reordered,
     }));
+
+    const newIndex = insertIndex;
+    const prevId = newIndex > 0 ? reordered[newIndex - 1]?.id : undefined;
+
+    const nextId =
+      newIndex < reordered.length - 1 ? reordered[newIndex + 1]?.id : undefined;
+    setIsPending(true);
+
+    try {
+      const res = await reorderEpisode(sourceId, moved.filmId, {
+        prevId,
+        nextId,
+      });
+
+      if (res?.fieldErrors || res?.errMsg) {
+        toast.addToast(
+          "error",
+          res.errMsg || "Có lỗi xảy ra khi đổi vị trí tập.",
+        );
+        setState((prev) => ({
+          ...prev,
+          episodes: previousEpisodes,
+        }));
+      }
+    } catch (e) {
+      toast.addToast("error", "Lỗi chuyển vị trí tập.");
+      setState((prev) => ({
+        ...prev,
+        episodes: previousEpisodes,
+      }));
+    } finally {
+      setIsPending(false);
+    }
   }
 
   function handleDragStart(id: string, event: React.DragEvent<HTMLDivElement>) {
-    setDraggingId(id);
+    if (isPending) {
+      event.preventDefault();
+      return;
+    }
+    setState((prev) => ({
+      ...prev,
+      draggingId: id,
+    }));
     event.dataTransfer.effectAllowed = "move";
     event.dataTransfer.setData("text/plain", id);
   }
@@ -328,16 +376,23 @@ export default function PlaylistClient({
     event: React.DragEvent<HTMLDivElement>,
   ) {
     event.preventDefault();
+    if (isPending) return;
     const sourceId = event.dataTransfer.getData("text/plain");
     if (!sourceId) {
       return;
     }
     reorderEpisodes(sourceId, targetId);
-    setDraggingId(null);
+    setState((prev) => ({
+      ...prev,
+      draggingId: null,
+    }));
   }
 
   function handleDragEnd() {
-    setDraggingId(null);
+    setState((prev) => ({
+      ...prev,
+      draggingId: null,
+    }));
   }
 
   return (
@@ -347,42 +402,75 @@ export default function PlaylistClient({
         <div className="max-w-6xl mx-auto px-6 pt-12 pb-8 relative">
           <div className="flex flex-col gap-6">
             <div className="flex flex-wrap items-center justify-between gap-4">
-              <div>
-                <p className="text-[11px] uppercase tracking-[0.3em] text-accent-0 font-semibold">
-                  Playlist Anime
-                </p>
-                <h1 className="text-3xl md:text-4xl font-black text-primary">
+              <div className="flex flex-col">
+                <button
+                  onClick={() => router.push(`/${lang}/film-management`)}
+                  className="group flex items-center gap-2 mb-6 text-secondary hover:text-accent-0 transition-all w-fit"
+                >
+                  <div className="rounded-full size-10 flex items-center cursor-pointer justify-center bg-surface-1/80 border border-border/30 group-hover:border-accent-0/50 group-hover:bg-accent-0/10 transition shadow-sm">
+                    <BackArrow className="size-4 dark:fill-accent-0 group-hover:dark:fill-accent-0 transition-transform group-hover:-translate-x-1" />
+                  </div>
+                  <span className="text-sm font-semibold uppercase tracking-wider">
+                    Quay lại phim
+                  </span>
+                </button>
+
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="h-5 w-1 bg-accent-0 rounded-full"></div>
+                  <p className="text-xs uppercase tracking-[0.4em] text-accent-0 font-bold">
+                    Quản lý danh sách tập
+                  </p>
+                </div>
+
+                <h1 className="text-4xl md:text-6xl font-black text-primary tracking-tight leading-tight">
                   {playlistName}
                 </h1>
-                <p className="text-secondary mt-2 max-w-2xl">
-                  Quản lý danh sách tập phim, sắp xếp thứ tự, và cập nhật trạng
-                  thái theo thời điểm phát hành.
+                <p className="text-secondary mt-3 max-w-2xl text-lg opacity-80">
+                  Sắp xếp quy trình phát hành, cập nhật nội dung và quản lý kho
+                  phim của bạn một cách chuyên nghiệp.
                 </p>
               </div>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-3">
-              <div className="rounded-2xl bg-surface-1/60 border border-border/30 p-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-secondary">
-                  Tổng tập
+            <div className="grid gap-6 md:grid-cols-3">
+              <div className="group rounded-3xl bg-surface-1/40 backdrop-blur-md border border-border/20 p-6 shadow-sm hover:border-accent-0/30 transition-all duration-300">
+                <p className="text-[10px] uppercase tracking-[0.2em] text-secondary font-bold mb-1 opacity-70">
+                  Tổng số tập
                 </p>
-                <p className="text-2xl font-bold text-primary">{stats.total}</p>
+                <div className="flex items-end gap-2">
+                  <p className="text-4xl font-black text-primary group-hover:text-accent-0 transition-colors">
+                    {stats.total}
+                  </p>
+                  <p className="text-xs text-secondary mb-1.5 font-medium">
+                    phần
+                  </p>
+                </div>
               </div>
-              <div className="rounded-2xl bg-surface-1/60 border border-border/30 p-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-secondary">
-                  Sắp chiếu
+              <div className="group rounded-3xl bg-surface-1/40 backdrop-blur-md border border-border/20 p-6 shadow-sm hover:border-accent-0/30 transition-all duration-300">
+                <p className="text-[10px] uppercase tracking-[0.2em] text-secondary font-bold mb-1 opacity-70">
+                  Sắp phát hành
                 </p>
-                <p className="text-2xl font-bold text-primary">
-                  {stats.upcoming}
-                </p>
+                <div className="flex items-end gap-2">
+                  <p className="text-4xl font-black text-primary group-hover:text-accent-0 transition-colors">
+                    {stats.upcoming}
+                  </p>
+                  <p className="text-xs text-secondary mb-1.5 font-medium">
+                    tập
+                  </p>
+                </div>
               </div>
-              <div className="rounded-2xl bg-surface-1/60 border border-border/30 p-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-secondary">
-                  Đang chiếu
+              <div className="group rounded-3xl bg-surface-1/40 backdrop-blur-md border border-border/20 p-6 shadow-sm hover:border-accent-0/30 transition-all duration-300">
+                <p className="text-[10px] uppercase tracking-[0.2em] text-secondary font-bold mb-1 opacity-70">
+                  Đã công chiếu
                 </p>
-                <p className="text-2xl font-bold text-primary">
-                  {stats.airing}
-                </p>
+                <div className="flex items-end gap-2">
+                  <p className="text-4xl font-black text-primary group-hover:text-accent-0 transition-colors">
+                    {stats.airing}
+                  </p>
+                  <p className="text-xs text-secondary mb-1.5 font-medium">
+                    tập
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -394,15 +482,39 @@ export default function PlaylistClient({
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-2xl font-bold text-primary">Danh sách tập</h2>
             <span className="text-xs uppercase tracking-[0.2em] text-secondary">
-              Kéo thả để sắp xếp
+              {isPending ? (
+                <span className="flex items-center gap-2 text-accent-0">
+                  <svg className="animate-spin h-3 w-3" viewBox="0 0 24 24">
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                      fill="none"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  Đang xử lý...
+                </span>
+              ) : (
+                "Kéo thả để sắp xếp"
+              )}
             </span>
           </div>
 
-          <div className="flex flex-col gap-4">
-            {state.episodes.map((episode) => {
+          <div
+            className={`flex flex-col gap-5 transition-opacity duration-200 ${isPending ? "opacity-60 pointer-events-none" : ""}`}
+          >
+            {state.episodes.map((episode, idx) => {
               const statusLabel = getStatusLabel(episode.publishedAt);
-              const isEditing = editingId === episode.id;
-              const isDragging = draggingId === episode.id;
+              const isEditing = state.editingId === episode.id;
+              const isDragging = state.draggingId === episode.id;
 
               return (
                 <div
@@ -412,16 +524,16 @@ export default function PlaylistClient({
                   onDragOver={handleDragOver}
                   onDrop={(event) => handleDrop(episode.id, event)}
                   onDragEnd={handleDragEnd}
-                  className={`rounded-2xl border p-4 transition cursor-grab ${
+                  className={`group/item rounded-[24px] border p-5 transition-all duration-300 cursor-grab ${
                     isDragging
-                      ? "border-accent-0 bg-[rgba(255,183,77,0.12)]"
-                      : "border-border/30 bg-surface-0/60"
+                      ? "border-accent-0 bg-accent-0/10 scale-[1.02] shadow-2xl ring-2 ring-accent-0/20"
+                      : "border-border/10 bg-surface-0 hover:bg-surface-1/50 hover:border-border/30 hover:shadow-lg"
                   }`}
                 >
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="flex items-start gap-4">
                       <div className="h-12 w-12 rounded-2xl flex items-center justify-center font-bold text-lg bg-surface-1 text-primary">
-                        {episode.episodeNo}
+                        {idx + 1}
                       </div>
                       <div>
                         <div className="flex items-center gap-3">
@@ -433,13 +545,20 @@ export default function PlaylistClient({
                           </span>
                         </div>
                         <p className="text-sm text-secondary mt-1">
-                          {episode.subTitle} • {episode.duration}s •{" "}
+                          {episode.subTitle} •{" "}
+                          {formatDuration(episode.duration)} •{" "}
                           <span>
-                            {isMounted && episode.publishedAt
-                              ? typeof episode.publishedAt === "string"
-                                ? new Date(episode.publishedAt).toLocaleString()
-                                : episode.publishedAt.toLocaleString()
-                              : ""}
+                            {!episode.publishedAt ? (
+                              "chưa xác định"
+                            ) : isMounted ? (
+                              typeof episode.publishedAt === "string" ? (
+                                new Date(episode.publishedAt).toLocaleString()
+                              ) : (
+                                episode.publishedAt.toLocaleString()
+                              )
+                            ) : (
+                              <span className="opacity-0">placeholder</span>
+                            )}
                           </span>
                         </p>
                         {episode.videoUrl && (
@@ -455,39 +574,44 @@ export default function PlaylistClient({
                       </div>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-3">
                       <button
                         type="button"
-                        className="px-3 py-2 text-xs rounded-xl bg-white/5 border border-border/30 hover:-translate-y-0.5 transition"
+                        className="px-4 py-2 text-xs font-bold rounded-xl bg-surface-1 border border-border/20 hover:border-accent-0/40 hover:text-accent-0 transition-all active:scale-95"
                         onClick={() => startEdit(episode)}
                       >
-                        Sửa
+                        Chỉnh sửa
                       </button>
                       <button
                         type="button"
-                        className="px-3 py-2 text-xs rounded-xl bg-red-500/10 text-red-200 border border-red-500/30 hover:-translate-y-0.5 transition"
+                        className="px-4 py-2 text-xs font-bold rounded-xl bg-red-500/10 text-red-400 border border-red-500/10 hover:bg-red-500 hover:text-white transition-all active:scale-95"
                         onClick={() => handleDelete(episode.id)}
                       >
-                        Xóa
+                        Xóa tập
                       </button>
                     </div>
                   </div>
 
-                  {isEditing && editDraft && (
+                  {isEditing && state.editDraft && (
                     <div className="mt-4 rounded-2xl bg-surface-1/60 border border-border/30 p-4">
                       <div className="grid gap-4 md:grid-cols-2">
                         <div className="h-12">
                           <FloatInput
                             name="editTitle"
                             label="Tiêu đề tập"
-                            value={editDraft.title}
+                            value={state.editDraft.title}
                             disabled={false}
                             required
                             onChange={(event) =>
-                              setEditDraft({
-                                ...editDraft,
-                                title: event.target.value,
-                              })
+                              setState((prev) => ({
+                                ...prev,
+                                editDraft: prev.editDraft
+                                  ? {
+                                      ...prev.editDraft,
+                                      title: event.target.value,
+                                    }
+                                  : null,
+                              }))
                             }
                           />
                         </div>
@@ -495,13 +619,18 @@ export default function PlaylistClient({
                           <FloatInput
                             name="editSubTitle"
                             label="Tiêu đề phụ"
-                            value={editDraft.subTitle}
+                            value={state.editDraft.subTitle}
                             disabled={false}
                             onChange={(event) =>
-                              setEditDraft({
-                                ...editDraft,
-                                subTitle: event.target.value,
-                              })
+                              setState((prev) => ({
+                                ...prev,
+                                editDraft: prev.editDraft
+                                  ? {
+                                      ...prev.editDraft,
+                                      subTitle: event.target.value,
+                                    }
+                                  : null,
+                              }))
                             }
                           />
                         </div>
@@ -509,13 +638,18 @@ export default function PlaylistClient({
                           <DurationInput
                             name="editDuration"
                             label="Thời lượng"
-                            duration={editDraft.duration}
+                            duration={state.editDraft.duration}
                             disabled={false}
                             onChange={(_, d) =>
-                              setEditDraft({
-                                ...editDraft,
-                                duration: d,
-                              })
+                              setState((prev) => ({
+                                ...prev,
+                                editDraft: prev.editDraft
+                                  ? {
+                                      ...prev.editDraft,
+                                      duration: d,
+                                    }
+                                  : null,
+                              }))
                             }
                           />
                         </div>
@@ -523,13 +657,18 @@ export default function PlaylistClient({
                           <FloatDateInput
                             name="editPublishedAt"
                             label="Ngày chiếu"
-                            value={editDraft.publishedAtStr}
+                            value={state.editDraft.publishedAtStr}
                             disabled={false}
                             onChange={(event) =>
-                              setEditDraft({
-                                ...editDraft,
-                                publishedAtStr: event.target.value,
-                              })
+                              setState((prev) => ({
+                                ...prev,
+                                editDraft: prev.editDraft
+                                  ? {
+                                      ...prev.editDraft,
+                                      publishedAtStr: event.target.value,
+                                    }
+                                  : null,
+                              }))
                             }
                           />
                         </div>
@@ -537,14 +676,19 @@ export default function PlaylistClient({
                           <FloatInput
                             name="editVideoUrl"
                             label="Link phim"
-                            value={editDraft.videoUrl ?? ""}
+                            value={state.editDraft.videoUrl ?? ""}
                             disabled={false}
                             required
                             onChange={(event) =>
-                              setEditDraft({
-                                ...editDraft,
-                                videoUrl: event.target.value,
-                              })
+                              setState((prev) => ({
+                                ...prev,
+                                editDraft: prev.editDraft
+                                  ? {
+                                      ...prev.editDraft,
+                                      videoUrl: event.target.value,
+                                    }
+                                  : null,
+                              }))
                             }
                           />
                         </div>
@@ -555,13 +699,18 @@ export default function PlaylistClient({
                           <FloatTextarea
                             name="editDescription"
                             label="Mô tả"
-                            value={editDraft.description ?? ""}
+                            value={state.editDraft.description ?? ""}
                             disable={false}
                             onChange={(event) =>
-                              setEditDraft({
-                                ...editDraft,
-                                description: event.target.value,
-                              })
+                              setState((prev) => ({
+                                ...prev,
+                                editDraft: prev.editDraft
+                                  ? {
+                                      ...prev.editDraft,
+                                      description: event.target.value,
+                                    }
+                                  : null,
+                              }))
                             }
                           />
                         </div>
@@ -594,10 +743,11 @@ export default function PlaylistClient({
 
         <section className="flex flex-col gap-6">
           <div className="rounded-[28px] border border-border/40 bg-surface-1/40 p-6 shadow-xl">
-            <h2 className="text-2xl font-bold text-primary mb-4">
-              Thêm tập mới
-            </h2>
-            <div className="grid gap-4">
+            <div className="flex items-center gap-2 mb-6">
+              <div className="h-6 w-1.5 bg-accent-0 rounded-full"></div>
+              <h2 className="text-2xl font-black text-primary">Thêm tập mới</h2>
+            </div>
+            <div className="grid gap-5">
               <div className="h-12">
                 <FloatInput
                   name="newTitle"
@@ -704,8 +854,8 @@ export default function PlaylistClient({
                 />
               </div>
 
-              {errorMessage && (
-                <p className="text-sm text-alert-0">{errorMessage}</p>
+              {state.errorMessage && (
+                <p className="text-sm text-alert-0">{state.errorMessage}</p>
               )}
 
               <button

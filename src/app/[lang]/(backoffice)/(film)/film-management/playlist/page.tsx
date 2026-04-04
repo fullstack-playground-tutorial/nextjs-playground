@@ -1,5 +1,6 @@
 import { getEpisodeService, getFilmService } from "@/app/core/server/context";
 import PlaylistClient from "./PlaylistClient";
+import { CACHE_TAG } from "@/app/utils/cache/tag";
 
 export default async function Page(props: {
   searchParams?: Promise<{
@@ -25,7 +26,9 @@ export default async function Page(props: {
     );
   }
 
-  const episode = await getEpisodeService().getCollection(searchParams.list);
+  const episode = await getEpisodeService().getCollection(searchParams.list, {
+    tags: [CACHE_TAG.EPISODES + "-" + searchParams.list],
+  });
 
   return (
     <PlaylistClient

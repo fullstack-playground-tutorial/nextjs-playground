@@ -6,7 +6,7 @@ export type Episode = {
   episodeNo: number;
   videoUrl?: string;
   subTitle?: string;
-  publishedAt?: Date;
+  publishedAt?: Date | null;
   description?: string;
   duration: number; // seconds
 
