@@ -1,7 +1,7 @@
 
 "use server";
 
-import { getFilmService } from "@/app/core/server/context";
+import { getEpisodeService, getFilmService } from "@/app/core/server/context";
 import { config } from "@/app/config";
 import Image from "next/image";
 import Link from "next/link";
@@ -15,11 +15,12 @@ import PlayCircleIcon from "@/app/assets/images/icons/play_circle.svg";
 
 import { Breadcrumb } from "../components/Breadcrumb";
 import WrapperItem from "../components/WrapperItem";
+import { CACHE_TAG } from "@/app/utils/cache/tag";
 
 export default async function Page(props: {
     params: Promise<{ slugWithId: string; lang: string }>;
 }) {
-    const { slugWithId, lang } = await props.params;
+    const { slugWithId } = await props.params;
     const id = slugWithId.slice(-36);
 
     const film = await getFilmService().load(id);
@@ -28,44 +29,10 @@ export default async function Page(props: {
         notFound();
     }
 
-    // Mocking episodes for demonstration
-    const episodes = [
-        {
-            id: "ep-01",
-            title: "Khởi đầu mới",
-            subTitle: "Hành trình bắt đầu",
-            thumbnailUrl: film.posterUrl,
-            publishedAt: new Date().toISOString(),
-        },
-        {
-            id: "ep-02",
-            title: "Cuộc gặp gỡ định mệnh",
-            subTitle: "Bí mật được hé lộ",
-            thumbnailUrl: film.posterUrl,
-            publishedAt: new Date().toISOString(),
-        },
-        {
-            id: "ep-03",
-            title: "Thử thách đầu tiên",
-            subTitle: "Sức mạnh bộc phát",
-            thumbnailUrl: film.posterUrl,
-            publishedAt: new Date().toISOString(),
-        },
-        {
-            id: "ep-04",
-            title: "Người bạn mới",
-            subTitle: "Sự tin tưởng tuyệt đối",
-            thumbnailUrl: film.posterUrl,
-            publishedAt: new Date().toISOString(),
-        },
-        {
-            id: "ep-05",
-            title: "Bóng tối bao trùm",
-            subTitle: "Kẻ thù xuất hiện",
-            thumbnailUrl: film.posterUrl,
-            publishedAt: new Date().toISOString(),
-        },
-    ];
+    const episodes = await getEpisodeService().getCollection(id, {
+        tags: [CACHE_TAG.EPISODES + "-" + id]
+    });
+
 
     const blurPlaceholder =
         "data:image/png;base64,L042PFog4mV@%Mj[M{fk8^WB.9t7";
@@ -131,25 +98,29 @@ export default async function Page(props: {
                     {/* Poster Card */}
                     <div className="w-full lg:w-80 shrink-0">
                         <div className="relative aspect-[2/3] rounded-3xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] border-4 border-surface-1 bg-surface-2 group">
-                            {film.posterUrl ? (
-                                <Image
-                                    src={`${config.image_url_host}/${film.posterUrl}.image/webp.webp`}
-                                    alt={film.title}
-                                    fill
-                                    className="object-cover transition-transform duration-500 group-hover:scale-110"
-                                    placeholder="blur"
-                                    blurDataURL={blurPlaceholder}
-                                />
-                            ) : (
-                                <div className="h-full w-full flex items-center justify-center">
-                                    <FilmIcon className="size-20 fill-secondary opacity-50" />
+                            <Link href={episodes.length > 0 ? `/films/${slugWithId}/${episodes[0].slug}-${episodes[0].id}` : `/films/${slugWithId}`}>
+
+                                {film.posterUrl ? (
+                                    <Image
+                                        src={`${config.image_url_host}/${film.posterUrl}.image/webp.webp`}
+                                        alt={film.title}
+                                        fill
+                                        className="object-cover transition-transform duration-500 group-hover:scale-110"
+                                        placeholder="blur"
+                                        blurDataURL={blurPlaceholder}
+                                    />
+                                ) : (
+                                    <div className="h-full w-full flex items-center justify-center">
+                                        <FilmIcon className="size-20 fill-secondary opacity-50" />
+                                    </div>
+                                )}
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                    <div className="bg-accent-0 text-white p-4 rounded-full scale-90 group-hover:scale-100 transition-transform shadow-2xl">
+                                        <PlayCircleIcon className="size-10 fill-current" />
+                                    </div>
                                 </div>
-                            )}
-                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                <div className="bg-accent-0 text-white p-4 rounded-full scale-90 group-hover:scale-100 transition-transform shadow-2xl">
-                                    <PlayCircleIcon className="size-10 fill-current" />
-                                </div>
-                            </div>
+                            </Link>
+
                         </div>
 
                         {/* Metadata Sidebar */}
@@ -238,7 +209,7 @@ export default async function Page(props: {
                                     {episodes.map((ep, idx) => (
                                         <Link
                                             key={ep.id}
-                                            href={`/films/${slugWithId}/watch?episode=${ep.id}`}
+                                            href={`/films/${slugWithId}/${ep.slug + "-" + ep.id}`}
                                             className="group relative flex flex-col bg-surface-1/40 hover:bg-surface-1/60 rounded-2xl overflow-hidden border border-white/5 hover:border-accent-0/40 transition-all duration-300"
                                         >
                                             <div className="aspect-video relative overflow-hidden">
@@ -302,6 +273,6 @@ export default async function Page(props: {
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }

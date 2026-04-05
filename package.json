@@ -21,7 +21,8 @@
     "next-devtools-mcp": "^0.2.6",
     "react": "^19.2.3",
     "react-chartjs-2": "^5.3.1",
-    "react-dom": "^19.2.3"
+    "react-dom": "^19.2.3",
+    "react-player": "^3.4.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

@@ -1,3 +1,4 @@
+"use client";
 import React, {
   useCallback,
   useEffect,
@@ -16,17 +17,20 @@ import SkipIcon from "./skip.svg";
 import SettingIcon from "./settings.svg";
 import CaptionIcon from "./subtitle.svg";
 import PipIcon from "./pip.svg";
-import type { Config as ReactPlayerConf } from "react-player/types";
 import RangeSlider from "../RangeSider";
 import ReactPlayer from "react-player";
+
+type ReactPlayerConf = React.ComponentProps<typeof ReactPlayer>["config"];
 import type { CaptionSettings, Cue, Font } from "./Caption";
 import type { SettingsConf, SettingsTab } from "./Settings.type";
 import Settings from "./Settings";
 import Caption from "./Caption";
-import type { Episode } from "@/app/feature/film";
+import { Source, Track } from "@/app/feature/film";
 
 type Props = {
-  episode: Episode;
+  source: Source
+  tracks?: { [key: string]: Track };
+  thumbnailUrl: string;
   className?: string;
   defaultLang?: string;
   Spinner?: React.FC;
@@ -49,6 +53,7 @@ type PlayerState = {
   pip: boolean;
   playbackRate: number;
   error?: string;
+  isSeeking: boolean;
 
   // subtitle
   subtitleText?: string;
@@ -103,7 +108,9 @@ const reactPlayerConf: ReactPlayerConf = {
   youtube: {
     disablekb: 1,
     rel: 0,
-    color: "white",
+    cc_load_policy: 0,
+    iv_load_policy: 3,
+    fs: 0,
   },
 };
 
@@ -138,13 +145,16 @@ const initialState: PlayerState = {
     bgShadow: true,
   },
   isCaptionOn: false,
+  isSeeking: false,
 };
 
 const VideoPlayer: React.FC<Props> = ({
-  episode,
   Spinner,
   className = "",
   defaultLang = "vi",
+  tracks,
+  source,
+  thumbnailUrl,
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const videoWrapperRef = useRef<HTMLDivElement>(null);
@@ -163,17 +173,27 @@ const VideoPlayer: React.FC<Props> = ({
 
   // helper: parse timestamp like 00:01:23.450 -> seconds
   const tsToSec = (ts: string) => {
-    const parts = ts.split(":").map(Number);
+    if (!ts) return 0;
+    const parts = ts.replace(",", ".").split(":").map(Number);
     if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
     if (parts.length === 2) return parts[0] * 60 + parts[1];
-    return Number(ts);
+    return Number(parts[0]) || 0;
   };
 
   // Very lightweight WebVTT parser (works for common cases)
   const parseVTT = (text: string) => {
-    const lines = text.replace("\r\n", "\n").split(/\n/);
+    const lines = text.trim().replace(/\r\n/g, "\n").split(/\n/);
     const cues = [];
     let i = 0;
+
+    // Skip WEBVTT header and metadata
+    if (lines[i]?.startsWith("WEBVTT")) {
+      i++;
+      while (i < lines.length && lines[i].trim() !== "") {
+        i++;
+      }
+    }
+
     while (i < lines.length) {
       const line = lines[i].trim();
       if (!line) {
@@ -195,8 +215,8 @@ const VideoPlayer: React.FC<Props> = ({
       const [startRaw, endRaw] = timeLine
         .split("-->")
         .map((s) => s.trim().split(" ")[0]);
-      const start = tsToSec(startRaw.replace(",", "."));
-      const end = tsToSec(endRaw.replace(",", "."));
+      const start = tsToSec(startRaw);
+      const end = tsToSec(endRaw);
       // cue text may span multiple lines
       let j = timeLineIdx + 1;
       const textLines = [];
@@ -213,9 +233,9 @@ const VideoPlayer: React.FC<Props> = ({
 
   const isPipDisable = useMemo(() => {
     return ReactPlayer.canEnablePIP
-      ? !ReactPlayer.canEnablePIP(episode.sources.sourceType)
+      ? !ReactPlayer.canEnablePIP(source.sourceType)
       : false;
-  }, [episode.sources]);
+  }, [source]);
   const togglePlay = () => {
     setState((prev) => ({ ...prev, isPlaying: !prev.isPlaying }));
   };
@@ -227,18 +247,15 @@ const VideoPlayer: React.FC<Props> = ({
   const handleTimeUpdate = (
     e: React.SyntheticEvent<HTMLVideoElement, Event>,
   ) => {
-    const ct = e.currentTarget.currentTime;
-    setState((prev) => ({ ...prev, currentTime: ct }));
+    if (!state.isSeeking) {
+      const ct = e.currentTarget.currentTime;
+      if (Math.abs(ct - state.currentTime) > 0.05) {
+        setState((prev) => ({ ...prev, currentTime: ct }));
+      }
+    }
   };
 
   const handleDurationChange = (
-    e: React.SyntheticEvent<HTMLVideoElement, Event>,
-  ) => {
-    const d = e.currentTarget.duration;
-    setState((prev) => ({ ...prev, duration: d }));
-  };
-
-  const handleLoadMetadata = (
     e: React.SyntheticEvent<HTMLVideoElement, Event>,
   ) => {
     const d = e.currentTarget.duration;
@@ -259,8 +276,8 @@ const VideoPlayer: React.FC<Props> = ({
 
   const handleSeek = (time: number) => {
     if (videoRef.current) {
-      setState((prev) => ({ ...prev, currentTime: time }));
       videoRef.current.currentTime = time;
+      setState((prev) => ({ ...prev, currentTime: time }));
     }
   };
 
@@ -283,10 +300,15 @@ const VideoPlayer: React.FC<Props> = ({
   };
 
   const formatTime = (time: number) => {
-    const minutes = Math.floor(time / 60);
+    const hours = Math.floor(time / 3600);
+    const minutes = Math.floor((time % 3600) / 60);
     const seconds = Math.floor(time % 60)
       .toString()
       .padStart(2, "0");
+
+    if (hours > 0) {
+      return `${hours}:${minutes.toString().padStart(2, "0")}:${seconds}`;
+    }
     return `${minutes}:${seconds}`;
   };
 
@@ -304,11 +326,11 @@ const VideoPlayer: React.FC<Props> = ({
   };
 
   const handleSeekMouseDown = () => {
-    setState((prev) => ({ ...prev, isPlaying: false }));
+    setState((prev) => ({ ...prev, isSeeking: true, isPlaying: false }));
   };
 
-  const handleSeekMouseUp = () => {
-    setState((prev) => ({ ...prev, isPlaying: true }));
+  const handleSeekMouseUp = (time?: number) => {
+    setState((prev) => ({ ...prev, isSeeking: false, isPlaying: true }));
   };
 
   const handleReady = () => {
@@ -353,7 +375,7 @@ const VideoPlayer: React.FC<Props> = ({
   };
 
   const handleEnterPictureInPicture = () => {
-    setState((prevState) => ({ ...prevState, pip: true }));
+    setState((prevState) => ({ ...prevState, pip: !prevState.pip }));
   };
 
   const handleLeavePictureInPicture = () => {
@@ -407,7 +429,7 @@ const VideoPlayer: React.FC<Props> = ({
 
     const video = videoRef.current;
     if (!video) return;
-    if (episode.tracks && episode.tracks[trackId]) {
+    if (tracks && tracks[trackId]) {
       setState((prev) => ({
         ...prev,
         selectedTrackId: trackId,
@@ -426,7 +448,6 @@ const VideoPlayer: React.FC<Props> = ({
   };
 
   const convertTrackToSettingConfArr = () => {
-    const { tracks } = episode;
     if (!tracks) return [];
     return Object.values(tracks).map<SettingsTab>(({ id, title }) => ({
       id: id,
@@ -466,9 +487,9 @@ const VideoPlayer: React.FC<Props> = ({
           eventHandle: handleTabSettingsSwitch,
           valTitle: state.isCaptionOn
             ? state.selectedTrackId !== undefined &&
-              episode.tracks &&
-              episode.tracks[state.selectedTrackId] !== undefined
-              ? episode.tracks[state.selectedTrackId].title
+              tracks &&
+              tracks[state.selectedTrackId] !== undefined
+              ? tracks[state.selectedTrackId].title
               : "off"
             : "off",
           value: "subtitle",
@@ -922,7 +943,7 @@ const VideoPlayer: React.FC<Props> = ({
       maxWidth: `${maxWidth}%`,
       width: "auto",
       textAlign: textAlign,
-      fontSize: `clamp(8px, ${fontSize / 100}vw, 64px)`,
+      fontSize: `clamp(12px, ${fontSize / 50}vw, 48px)`,
       lineHeight: lineHeight,
       color: createColor(color),
       padding: "0.35rem 0.6rem",
@@ -1075,15 +1096,20 @@ const VideoPlayer: React.FC<Props> = ({
         clearTimeout(timeoutRef.current);
       }
 
-      if (prev.isHoveringControlItem || !prev.isPlaying) {
+      if (prev.isHoveringControlItem || !prev.isPlaying || prev.isSettingsOpen) {
         return { ...prev, isControlsShow: true };
       }
 
       timeoutRef.current = setTimeout(() => {
-        setState((prev2) => ({
-          ...prev2,
-          isControlsShow: false,
-        }));
+        setState((prev2) => {
+          if (prev2.isHoveringControlItem || !prev2.isPlaying || prev2.isSettingsOpen) {
+            return prev2;
+          }
+          return {
+            ...prev2,
+            isControlsShow: false,
+          }
+        });
       }, MOUSE_HIDE_TIME);
 
       return prev;
@@ -1096,7 +1122,7 @@ const VideoPlayer: React.FC<Props> = ({
 
   const handleMouseLeave = useCallback(() => {
     setState((prev) => {
-      if (prev.isHoveringControlItem || !prev.isPlaying) {
+      if (prev.isHoveringControlItem || !prev.isPlaying || prev.isSettingsOpen) {
         return { ...prev, isControlsShow: true };
       }
 
@@ -1115,12 +1141,12 @@ const VideoPlayer: React.FC<Props> = ({
 
   useEffect(() => {
     // Setup selected track.
-    if (episode.tracks) {
-      const k = Object.keys(episode.tracks).find(
+    if (tracks) {
+      const k = Object.keys(tracks).find(
         (v) =>
-          episode.tracks &&
-          episode.tracks[v].srcLang &&
-          episode.tracks[v].srcLang === defaultLang,
+          tracks &&
+          tracks[v].srcLang &&
+          tracks[v].srcLang === defaultLang,
       );
       if (k) {
         setState((prev) => ({
@@ -1137,6 +1163,59 @@ const VideoPlayer: React.FC<Props> = ({
   }, []);
 
   useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (document.activeElement?.tagName === "INPUT" || document.activeElement?.tagName === "TEXTAREA") {
+        return;
+      }
+
+      switch (e.key.toLowerCase()) {
+        case " ":
+        case "k":
+          e.preventDefault();
+          togglePlay();
+          break;
+        case "j":
+          e.preventDefault();
+          handleSeek(Math.max(0, state.currentTime - 10));
+          break;
+        case "l":
+          e.preventDefault();
+          handleSeek(Math.min(state.duration, state.currentTime + 10));
+          break;
+        case "m":
+          e.preventDefault();
+          toggleMute();
+          break;
+        case "f":
+          e.preventDefault();
+          toggleFullScreen();
+          break;
+        case "arrowleft":
+          e.preventDefault();
+          handleSeek(Math.max(0, state.currentTime - 5));
+          break;
+        case "arrowright":
+          e.preventDefault();
+          handleSeek(Math.min(state.duration, state.currentTime + 5));
+          break;
+        case "arrowup":
+          e.preventDefault();
+          handleVolChange(Math.min(1, state.soundVol + 0.1));
+          break;
+        case "arrowdown":
+          e.preventDefault();
+          handleVolChange(Math.max(0, state.soundVol - 0.1));
+          break;
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [state.currentTime, state.duration, state.soundVol]);
+
+  useEffect(() => {
     if (!state.selectedTrackId) {
       setState((s) => ({ ...s, cues: [], subtitleText: "" }));
       return;
@@ -1144,9 +1223,9 @@ const VideoPlayer: React.FC<Props> = ({
     let cancelled = false;
     (async () => {
       try {
-        if (episode.tracks && state.selectedTrackId) {
+        if (tracks && state.selectedTrackId) {
           const res = await fetch(
-            episode.tracks[state.selectedTrackId].src ?? "",
+            tracks[state.selectedTrackId].src ?? "",
           );
           const txt = await res.text();
 
@@ -1165,26 +1244,17 @@ const VideoPlayer: React.FC<Props> = ({
   }, [state.selectedTrackId]);
 
   useEffect(() => {
-    let raf = 0;
-    const loop = () => {
-      const v = videoRef.current;
-      if (v && state.cues.length) {
-        const t = v.currentTime || 0;
-        // find the first cue that matches (cues are usually small, O(n) ok)
-        const c = state.cues.find((c) => t >= c.start && t <= c.end);
-        const txt = c ? c.text : "";
-        // only update when changed
-        if (txt !== state.subtitleText) {
-          setState((s) => ({ ...s, subtitleText: txt }));
-        }
-      } else if (!state.cues.length && state.subtitleText) {
-        setState((s) => ({ ...s, subtitleText: "" }));
+    if (state.cues.length) {
+      const t = state.currentTime || 0;
+      const c = state.cues.find((c) => t >= c.start && t <= c.end);
+      const txt = c ? c.text : "";
+      if (txt !== state.subtitleText) {
+        setState((s) => ({ ...s, subtitleText: txt }));
       }
-      raf = requestAnimationFrame(loop);
-    };
-    raf = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(raf);
-  }, [state.cues, state.subtitleText]);
+    } else if (state.subtitleText) {
+      setState((s) => ({ ...s, subtitleText: "" }));
+    }
+  }, [state.currentTime, state.cues, state.subtitleText]);
 
   const {
     error,
@@ -1207,7 +1277,7 @@ const VideoPlayer: React.FC<Props> = ({
   return (
     <div
       ref={videoWrapperRef}
-      className={`w-full max-w-2xl mx-auto bg-black rounded-lg overflow-hidden shadow-lg ${className}`}
+      className={`w-full max-w-5xl mx-auto bg-black rounded-xl overflow-hidden shadow-2xl ${className} relative group/player`}
       onMouseEnter={handleMouseEnter}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
@@ -1218,14 +1288,15 @@ const VideoPlayer: React.FC<Props> = ({
       >
         <ReactPlayer
           ref={videoRef}
-          src={episode.sources.sourceUrls}
+          src={source.sourceURL}
           muted={isMuted}
           playing={isPlaying}
           width={"100%"}
           height={"100%"}
           fallback={<div>...loading</div>}
           volume={soundVol}
-          onTimeUpdate={(e) => handleTimeUpdate(e)}
+          onTimeUpdate={handleTimeUpdate}
+          onDurationChange={handleDurationChange}
           config={reactPlayerConf}
           pip={pip}
           controls={false}
@@ -1240,22 +1311,18 @@ const VideoPlayer: React.FC<Props> = ({
           onEnded={handleEnd}
           disablePictureInPicture={isPipDisable}
           crossOrigin="anonymous"
-          onLoadedMetadata={(e) => handleLoadMetadata(e)}
-          onDurationChange={(e) => {
-            handleDurationChange(e);
-          }}
           onLeavePictureInPicture={handleLeavePictureInPicture}
-        ></ReactPlayer>
+          className="pointer-events-none"
+        />
 
         <div
-          className={`absolute size-full top-0 left-0 group ${
-            isThumbDisplayed ? "" : "hidden"
-          }`}
+          className={`absolute size-full top-0 left-0 group ${isThumbDisplayed ? "" : "hidden"
+            }`}
         >
-          <img
-            src={episode.thumbnailUrl}
+          {thumbnailUrl && <img
+            src={thumbnailUrl}
             className={`absolute top-0 left-0 size-full cursor-pointer`}
-          />
+          />}
           <PlayIcon
             className="absolute top-[50%] left-[50%] -translate-[50%] fill-orange-500 size-20 stroke-orange-500 shadow-2xs hidden group-hover:block transition cursor-pointer"
             onClick={handlePreviewClick}
@@ -1266,9 +1333,8 @@ const VideoPlayer: React.FC<Props> = ({
 
         {/* Overlay hide youtube screen */}
         <div
-          className={`flex flex-col w-full h-full cursor-pointer ${
-            !isThumbDisplayed ? "absolute top-0 left-0" : "hidden"
-          }`}
+          className={`flex flex-col w-full h-full cursor-pointer ${!isThumbDisplayed ? "absolute top-0 left-0" : "hidden"
+            }`}
         >
           <div
             className="absolute top-[50%] left-[50%] -translate-[50%] w-full h-full flex justify-center items-center"
@@ -1288,14 +1354,12 @@ const VideoPlayer: React.FC<Props> = ({
 
           {/* Settings */}
           <div
-            className={`absolute z-10 gap-2 left-2 top-2 font-semibold text-orange-white items-start transition ${
-              isControlsShow ? "flex flex-row" : "hidden"
-            }`}
+            className={`absolute z-10 gap-2 left-2 top-2 font-semibold text-orange-white items-start transition ${isControlsShow ? "flex flex-row" : "hidden"
+              }`}
           >
             <SettingIcon
-              className={`fill-orange-400 duration-600 size-6 transition ${
-                isSettingsOpen ? "rotate-180" : ""
-              }`}
+              className={`fill-orange-400 duration-600 size-6 transition ${isSettingsOpen ? "rotate-180" : ""
+                }`}
               onClick={(e: React.MouseEvent) => toggleSettings(e)}
               onMouseEnter={() =>
                 setState((prev) => ({ ...prev, isHoveringControlItem: true }))
@@ -1309,6 +1373,7 @@ const VideoPlayer: React.FC<Props> = ({
               settingId={tabSettingsIdActive}
               settingsConf={settingsConf}
               isSettingsOpen={isSettingsOpen}
+              onClose={() => setState(prev => ({ ...prev, isSettingsOpen: false }))}
             />
           </div>
           {/* Controls */}
@@ -1319,15 +1384,14 @@ const VideoPlayer: React.FC<Props> = ({
               subtitleText={subtitleText}
             />
             <div
-              className={`px-3 py-3 bg-gray-900
-              transition ease-in flex flex-col gap-2 items-center duration-600 origin-bottom ${
-                duration != 0 && isControlsShow
-                  ? "opacity-100 h-auto"
-                  : "scale-0 opacity-0 pointer-events-none h-0"
-              }`}
+              className={`px-3 py-3 
+              transition ease-in flex flex-col gap-2 items-center duration-600 origin-bottom ${duration != 0 && isControlsShow
+                  ? "opacity-100"
+                  : "opacity-0 pointer-events-none"
+                }`}
             >
               <div
-                className="w-4/5"
+                className="w-full"
                 onMouseEnter={() =>
                   setState((prev) => ({ ...prev, isHoveringControlItem: true }))
                 }
@@ -1435,11 +1499,10 @@ const VideoPlayer: React.FC<Props> = ({
                   </div>
 
                   <RepeatIcon
-                    className={`size-5 ${
-                      loop
-                        ? "fill-orange-600 scale-120"
-                        : "fill-orange-500 hover:fill-orange-600 hover:scale-120"
-                    } transition `}
+                    className={`size-5 ${loop
+                      ? "fill-orange-600 scale-120"
+                      : "fill-orange-500 hover:fill-orange-600 hover:scale-120"
+                      } transition `}
                     title="loop"
                     onClick={handleToggleLoop}
                     onMouseEnter={() =>
@@ -1478,7 +1541,7 @@ const VideoPlayer: React.FC<Props> = ({
                   <span className="text-orange-500 font-semibold text-xs cursor-default">
                     {formatTime(currentTime)} / {formatTime(duration)}
                   </span>
-                  {episode.tracks && (
+                  {tracks && (
                     <div className="flex flex-col items-center justify-center mt-1">
                       <CaptionIcon
                         title="subtitle(on/off)"
@@ -1498,16 +1561,14 @@ const VideoPlayer: React.FC<Props> = ({
                         className={`size-6 cursor-pointer transition fill-orange-500 hover:scale-120`}
                       />
                       <div
-                        className={`bg-orange-500 rounded-full transition-[width] origin-center h-1 ease-in ${
-                          isCaptionOn ? "w-4/5" : "w-0"
-                        }`}
+                        className={`bg-orange-500 rounded-full transition-[width] origin-center h-1 ease-in ${isCaptionOn ? "w-4/5" : "w-0"
+                          }`}
                       ></div>
                     </div>
                   )}
                   <PipIcon
-                    className={`size-6 cursor-pointer transition fill-orange-500 hover:fill-orange-600 hover:scale-120 ${
-                      isPipDisable || document.fullscreenElement ? "hidden" : ""
-                    }`}
+                    className={`size-6 cursor-pointer transition fill-orange-500 hover:fill-orange-600 hover:scale-120 ${isPipDisable || document.fullscreenElement ? "hidden" : ""
+                      }`}
                     onClick={handleEnterPictureInPicture}
                   />
                   <button
@@ -1525,11 +1586,10 @@ const VideoPlayer: React.FC<Props> = ({
                         isHoveringControlItem: false,
                       }))
                     }
-                    aria-label={`${
-                      document.fullscreenElement
-                        ? "minimize mode"
-                        : "fullscreen mode"
-                    }`}
+                    aria-label={`${document.fullscreenElement
+                      ? "minimize mode"
+                      : "fullscreen mode"
+                      }`}
                   >
                     {document.fullscreenElement ? (
                       <FullSreenExitIcon className="stroke-0 fill-orange-500 size-5 hover:scale-120 hover:fill-orange-600" />

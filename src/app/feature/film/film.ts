@@ -45,7 +45,7 @@ export type Source = {
   | "m3u8";
   publishedAt?: Date;
   tracks?: { [key: string]: Track };
-  sourceUrls: { [key: string]: string };
+  sourceURL: string;
 };
 
 

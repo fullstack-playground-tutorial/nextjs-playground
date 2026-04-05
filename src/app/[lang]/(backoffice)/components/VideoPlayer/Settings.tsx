@@ -1,14 +1,15 @@
 import type { SettingsConf } from "./Settings.type";
-import ArrowBackIcon from "./arrow-back.svg?react";
+import ArrowBackIcon from "./arrow-back.svg";
 import RangeSlider from "../RangeSider";
 
 interface Props {
     settingId: string;
     settingsConf: SettingsConf
-    isSettingsOpen: boolean,
+    isSettingsOpen: boolean;
+    onClose?: () => void;
 }
 
-export default function Settings ({settingId, settingsConf, isSettingsOpen}: Props){
+export default function Settings ({settingId, settingsConf, isSettingsOpen, onClose}: Props){
     const tab = settingsConf[settingId] ?? settingsConf["menu"];
     if (tab) {
       return (
@@ -20,8 +21,8 @@ export default function Settings ({settingId, settingsConf, isSettingsOpen}: Pro
           {tab.parentId != undefined && tab.title != undefined && (
             <div className="relative p-2 w-full flex fex-row text-xs items-center justify-between border-b-1 tracking-tighter gap-4">
               <ArrowBackIcon
-                className="size-4 fill-orange-500"
-                onClick={(e) => {
+                className="size-4 fill-orange-500 cursor-pointer"
+                onClick={(e: React.MouseEvent) => {
                   tab.eventHandle && tab.eventHandle(e, tab.parentId);
                 }}
               />

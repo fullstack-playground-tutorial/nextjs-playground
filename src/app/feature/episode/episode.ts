@@ -12,7 +12,7 @@ export type Episode = {
 
   // tracks?: { [key: string]: Track };
   // sources: Source;
-  // thumbnailUrl?: string;
+  thumbnailUrl?: string;
 };
 
 export type ReorderEpisode = {

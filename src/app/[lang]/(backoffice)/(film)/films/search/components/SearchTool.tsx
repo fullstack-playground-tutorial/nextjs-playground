@@ -135,7 +135,7 @@ export default function SearchTool({ interests, searchParams }: Props) {
             {/* Content Panel */}
             <div className={`grid transition-all duration-700 ease-[cubic-bezier(0.4,0,0.2,1)] ${collapsed ? 'grid-rows-[1fr] opacity-100 mt-6' : 'grid-rows-[0fr] opacity-0 mt-0 pointer-events-none'}`}>
                 <div className="overflow-hidden">
-                    <div className={`p-8 rounded-[2rem] 
+                    <div className={`p-8 rounded-4xl 
                         dark:bg-surface-1/80 dark:border dark:border-white/10 
                         transform-gpu transition-all duration-700 delay-75
                         ${collapsed ? 'translate-y-0 scale-100' : '-translate-y-4 scale-[0.98]'}`}
