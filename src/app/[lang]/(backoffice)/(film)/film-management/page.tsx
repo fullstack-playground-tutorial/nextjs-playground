@@ -40,7 +40,7 @@ export default async function Page(props: {
             Manage your film catalog
           </p>
         </div>
-        <Link href="film-management/create">
+        <Link href="create">
           <button className="bg-accent-0 hover:bg-accent-1 text-white font-semibold py-2 px-4 rounded shadow transition-colors">
             + Create New
           </button>

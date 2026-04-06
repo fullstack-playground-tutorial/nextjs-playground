@@ -142,7 +142,7 @@ function TagManagement({ hasPermission, limit, currentPage, data }: Props) {
             onSearch={(term) => handleSearch(term)}
           />
           <Link
-            href={`/topics/tags/create`}
+            href={`${pathname}/create`}
             hidden={!writeEnable}
             scroll={false}
             className="btn btn-sm dark:border dark:border-accent-0 dark:active:border-accent-1 content-center dark:hover:bg-accent-1 dark:hover:text-primary dark:text-accent-0 transition"
@@ -153,7 +153,6 @@ function TagManagement({ hasPermission, limit, currentPage, data }: Props) {
         <div className={`transition-all ${filterVisible ? "mt-2" : "h-0"}`}>
           <FilterBar visible={filterVisible}>
             <FilterDropdown
-              name={"sort"}
               selectedList={selectedList}
               placeHolder="Sort by"
               onItemSelected={(val) => handleSortSelected(val)}
