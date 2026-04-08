@@ -28,6 +28,7 @@ import { createQuizService, QuizService } from "@/app/feature/quiz";
 import { createFlashcardService, FlashcardService } from "@/app/feature/flashcard";
 import { createQuizAttemptService, QuizAttemptService } from "@/app/feature/quiz-attempt";
 import { createEpisodeService, EpisodeService } from "@/app/feature/episode/service";
+import { createThreadService, ThreadService, createCommentService, CommentService } from "@/app/feature/comment";
 
 
 class ApplicationContext {
@@ -51,6 +52,8 @@ class ApplicationContext {
   private flashcardService?: FlashcardService;
   private quizAttemptService?: QuizAttemptService;
   private episodeService?: EpisodeService;
+  private threadService?: ThreadService;
+  private commentService?: CommentService;
 
   constructor(private httpService: HTTPService) {
     this.getAuthService = this.getAuthService.bind(this);
@@ -68,6 +71,8 @@ class ApplicationContext {
     this.getQuizService = this.getQuizService.bind(this);
     this.getFlashcardService = this.getFlashcardService.bind(this);
     this.getQuizAttemptService = this.getQuizAttemptService.bind(this);
+    this.getThreadService = this.getThreadService.bind(this);
+    this.getCommentService = this.getCommentService.bind(this);
   }
 
   getAuthService(): AuthService {
@@ -226,6 +231,26 @@ class ApplicationContext {
     return this.episodeService;
   };
 
+  getThreadService = () => {
+    if (!this.threadService) {
+      this.threadService = createThreadService(
+        this.httpService,
+        config.thread_url,
+      );
+    }
+    return this.threadService;
+  };
+
+  getCommentService = () => {
+    if (!this.commentService) {
+      this.commentService = createCommentService(
+        this.httpService,
+        config.comment_url,
+      );
+    }
+    return this.commentService;
+  };
+
   // getApiEnglishNoteService = () => {
   //   if (!this.apiEnglishNoteService) {
   //     const englishNoteRepo = new EnglishNoteMongoRepository(
@@ -334,4 +359,6 @@ export const {
   getFlashcardService,
   getQuizAttemptService,
   getEpisodeService,
+  getThreadService,
+  getCommentService,
 } = appContext;

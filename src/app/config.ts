@@ -20,6 +20,8 @@ export const config = {
   quiz_url: backofficeServerHost + "/quizzes",
   quiz_attempt_url: backofficeServerHost + "/quizzes",
   flashcard_url: backofficeServerHost + "/flashcard-sets",
+  thread_url: backofficeServerHost + "/threads",
+  comment_url: backofficeServerHost + "/comments",
   image_url_host:
     "https://res.cloudinary.com/dw9htagir/image/upload/v1769265769",
   ws: {

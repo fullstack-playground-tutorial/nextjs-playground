@@ -16,6 +16,7 @@ import PlayCircleIcon from "@/app/assets/images/icons/play_circle.svg";
 import { Breadcrumb } from "../components/Breadcrumb";
 import WrapperItem from "../components/WrapperItem";
 import { CACHE_TAG } from "@/app/utils/cache/tag";
+import { Thread } from "@/app/feature/comment/components/Thread";
 
 export default async function Page(props: {
     params: Promise<{ slugWithId: string; lang: string }>;
@@ -270,6 +271,14 @@ export default async function Page(props: {
                                 </div>
                             </div>
                         )}
+                        {/* Comments Section */}
+                        <div className="mt-16 border-t dark:border-white/5 pt-16">
+                            <h3 className="text-2xl font-black mb-10 flex items-center gap-3 dark:text-primary">
+                                <span className="w-2 h-8 bg-accent-0 rounded-full shadow-[0_0_15px_rgba(255,183,77,0.5)]"></span>
+                                Bình luận cộng đồng
+                            </h3>
+                            <Thread ownerId={id} ownerType="film" />
+                        </div>
                     </div>
                 </div>
             </div>

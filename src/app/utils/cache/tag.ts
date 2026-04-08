@@ -11,5 +11,7 @@ export const CACHE_TAG = {
     QUIZZES: "quizzes",
     QUIZ: "quiz",
     FLASHCARDS: "flashcards",
-    FLASHCARD: "flashcard"
+    FLASHCARD: "flashcard",
+    THREAD: "thread",
+    COMMENTS: "comments"
 }
