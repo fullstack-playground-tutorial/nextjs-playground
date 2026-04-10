@@ -7,6 +7,12 @@ import { createFlashcardSet, updateFlashcardSet } from "@/app/feature/flashcard/
 import useToast from "@/app/components/Toast";
 import { ActionButtons } from "../../../components/ActionButtons/ActionButtons";
 import { getLocaleService } from "@/app/utils/resource/locales";
+import dynamic from "next/dynamic";
+
+const PdfFlashcardGenerator = dynamic(
+  () => import("./PdfFlashcardGenerator"),
+  { ssr: false }
+);
 
 const FormFieldLabel = ({
     children,
@@ -56,6 +62,21 @@ export default function FlashcardForm({ mode, fetchedSetPromise: setPromise }: P
     const router = useRouter();
     const toast = useToast();
     const [isPending, startTransition] = useTransition();
+    const [showPdfGenerator, setShowPdfGenerator] = useState(false);
+
+    const handleAddGeneratedCards = (newCards: Flashcard[]) => {
+        setState((prev) => ({
+            ...prev,
+            set: {
+                ...prev.set,
+                cards: [
+                    ...(prev.set.cards || []),
+                    ...newCards,
+                ],
+            },
+        }));
+        toast.addToast("success", `Added ${newCards.length} cards from PDF`);
+    };
 
     const handleAddCard = (e: React.MouseEvent) => {
         e.preventDefault();
@@ -139,7 +160,8 @@ export default function FlashcardForm({ mode, fetchedSetPromise: setPromise }: P
     const isViewMode = mode === "view";
 
     return (
-        <form className="flex flex-col gap-6 w-full bg-white dark:bg-surface-1 p-8 rounded-xl border dark:border-border shadow-lg">
+        <>
+            <form className="flex flex-col gap-6 w-full bg-white dark:bg-surface-1 p-8 rounded-xl border dark:border-border shadow-lg">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="flex flex-col gap-2">
                     <FormFieldLabel required>
@@ -318,15 +340,26 @@ export default function FlashcardForm({ mode, fetchedSetPromise: setPromise }: P
                 )}
 
                 {!isViewMode && (
-                    <button
-                        type="button"
-                        onClick={(e) => handleAddCard(e)}
-                        className="w-full py-4 rounded-xl border-2 border-dashed border-border hover:border-accent-0 hover:bg-accent-0/5 transition-all text-secondary hover:text-accent-0 font-bold"
-                    >
-                        + {localize("flashcard_add_card")}
-                    </button>
+                    <div className="flex gap-4">
+                        <button
+                            type="button"
+                            onClick={(e) => handleAddCard(e)}
+                            className="flex-1 py-4 rounded-xl border-2 border-dashed border-border hover:border-accent-0 hover:bg-accent-0/5 transition-all text-secondary hover:text-accent-0 font-bold"
+                        >
+                            + {localize("flashcard_add_card")}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setShowPdfGenerator(true)}
+                            className="flex-none px-6 py-4 rounded-xl border-2 border-dashed border-indigo-500/30 hover:border-indigo-500 hover:bg-indigo-500/5 transition-all text-indigo-500 font-bold flex items-center gap-2"
+                        >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                            {localize("flashcard_ai_generate_from_pdf")}
+                        </button>
+                    </div>
                 )}
             </div>
+
             <ActionButtons
                 mode={mode}
                 mutationPendings={{
@@ -348,5 +381,14 @@ export default function FlashcardForm({ mode, fetchedSetPromise: setPromise }: P
                 }}
             />
         </form>
-    );
+        {showPdfGenerator && (
+            <PdfFlashcardGenerator 
+                existingCards={state.set.cards || []}
+                onAddCards={handleAddGeneratedCards} 
+                onClose={() => setShowPdfGenerator(false)} 
+                localize={localize}
+            />
+        )}
+    </>
+  );
 }

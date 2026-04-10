@@ -83,4 +83,11 @@ export const en: { [key: string]: string } = {
   flashcard_save: "Save Set",
   flashcard_published: "Published",
   flashcard_publishing: "Publishing...",
+  flashcard_ai_generate_from_pdf: "Generate from PDF (AI)",
+  flashcard_ai_modal_title: "AI Flashcard Generator",
+  flashcard_ai_upload_btn: "Upload PDF",
+  flashcard_ai_apply_btn: "Apply {0} cards to Form",
+  flashcard_ai_export_btn: "Export XLSX",
+  flashcard_ai_gemini_key: "Gemini API Key",
+  flashcard_ai_page_content: "Page {0} Content",
 };

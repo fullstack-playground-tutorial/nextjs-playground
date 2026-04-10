@@ -12,7 +12,7 @@ export interface ThreadService {
     ownerType: string,
     next?: NextFetchRequestConfig,
     authSkip?: boolean,
-  ): Promise<Thread>;
+  ): Promise<Thread[]>;
   create(
     data: Thread,
     next?: NextFetchRequestConfig,
@@ -93,7 +93,7 @@ export const createThreadService = (
       return response.body;
     },
     loadByOwner: async (ownerID, ownerType, next, authSkip) => {
-      const response = await httpService.get<Thread>(
+      const response = await httpService.get<Thread[]>(
         `${url}/owner/${ownerType}/${ownerID}`,
         { next, authSkip },
       );

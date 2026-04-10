@@ -104,6 +104,10 @@ export async function loadFlashcardSet(id: string) {
     return await getFlashcardService().load(id);
 }
 
+export async function getFlashcardSets() {
+    return await getFlashcardService().getAll({ tags: [CACHE_TAG.FLASHCARDS] });
+}
+
 export async function getDueCards(setId: string, number: number) {
     return await getFlashcardService().getDueCards(setId, number);
 }

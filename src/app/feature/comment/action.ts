@@ -47,3 +47,13 @@ export async function reactionThread(
     return { errMsg: "An error occurred" };
   }
 }
+export async function getComments(threadId: string) {
+  try {
+    const result = await getCommentService().loadByThread(threadId, {
+      tags: [CACHE_TAG.COMMENTS + "-" + threadId],
+    });
+    return { data: result };
+  } catch (error) {
+    return { errMsg: "An error occurred" };
+  }
+}

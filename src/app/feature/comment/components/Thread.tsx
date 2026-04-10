@@ -11,29 +11,18 @@ interface Props {
 
 export const Thread = async ({ ownerId, ownerType }: Props) => {
   const threadService = getThreadService();
-  const commentService = getCommentService();
   const user = await getUser();
 
-  let thread = await threadService
+  let threads = await threadService
     .loadByOwner(ownerId, ownerType, {
       tags: [CACHE_TAG.THREAD + "-" + ownerId],
     })
-    .catch(() => null);
-  let comments: Comment[] = [];
-
-  if (thread) {
-    comments = await commentService
-      .loadByThread(thread.id, {
-        tags: [CACHE_TAG.COMMENTS + "-" + thread.id],
-      })
-      .catch(() => []);
-  }
+    .catch(() => []);
 
   return (
     <div className="w-full max-w-4xl mx-auto p-4">
       <ThreadClient
-        initialThread={thread}
-        initialComments={comments}
+        initialThreads={threads}
         ownerId={ownerId}
         ownerType={ownerType}
         currentUser={user?.user}

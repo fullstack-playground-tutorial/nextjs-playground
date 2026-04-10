@@ -80,4 +80,11 @@ export const vi: { [key: string]: string } = {
   flashcard_save: "Lưu bộ thẻ",
   flashcard_published: "Đã xuất bản",
   flashcard_publishing: "Đang xuất bản...",
+  flashcard_ai_generate_from_pdf: "Tạo từ PDF (AI)",
+  flashcard_ai_modal_title: "Trình tạo Flashcard AI",
+  flashcard_ai_upload_btn: "Tải lên PDF",
+  flashcard_ai_apply_btn: "Áp dụng {0} thẻ vào Form",
+  flashcard_ai_export_btn: "Xuất Excel",
+  flashcard_ai_gemini_key: "Mã API Gemini",
+  flashcard_ai_page_content: "Nội dung trang {0}",
 };
