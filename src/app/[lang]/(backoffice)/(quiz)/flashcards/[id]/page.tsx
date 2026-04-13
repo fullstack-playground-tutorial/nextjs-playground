@@ -22,22 +22,22 @@ export default async function ViewFlashcardPage(props: Props) {
         <div className="flex flex-col min-h-screen items-start mx-auto w-full max-w-5xl p-6">
             <div className="mt-8 mb-6 flex items-center justify-between w-full">
                 <div className="flex items-center gap-4">
-                    <BackButton lang={lang} />
+                    <BackButton />
                     <h1 className="text-3xl font-bold dark:text-accent-0 tracking-tight">
                         View Flashcard Set
                     </h1>
                 </div>
-                <Link 
+                <Link
                     href={`/${lang}/flashcards/${id}/study`}
                     className="btn btn-md bg-accent-0 text-white font-bold rounded-xl shadow-lg hover:bg-accent-1"
                 >
                     Study Now
                 </Link>
             </div>
-            
-            <FlashcardForm 
-                mode="view" 
-                fetchedSetPromise={flashcardSetPromise} 
+
+            <FlashcardForm
+                mode="view"
+                fetchedSetPromise={flashcardSetPromise}
             />
         </div>
     );

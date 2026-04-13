@@ -20,15 +20,15 @@ export default async function EditFlashcardPage(props: Props) {
     return (
         <div className="flex flex-col min-h-screen items-start mx-auto w-full max-w-5xl p-6">
             <div className="mt-8 mb-6 flex items-center gap-4">
-                <BackButton lang={lang} />
+                <BackButton />
                 <h1 className="text-3xl font-bold dark:text-accent-0 tracking-tight">
                     Edit Flashcard Set
                 </h1>
             </div>
-            
-            <FlashcardForm 
-                mode="edit" 
-                fetchedSetPromise={flashcardSetPromise} 
+
+            <FlashcardForm
+                mode="edit"
+                fetchedSetPromise={flashcardSetPromise}
             />
         </div>
     );
